@@ -181,7 +181,7 @@ def main():
         print("[*] Signing app...")
         # subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         # subprocess.run(f"./ldid -Sapp.entitlements -Upassword -Kresign_taurine/fakeiphonecert/dev_certificate.p12 {tmpfolder}/deb/Applications/{folder}".split(), stdout=subprocess.DEVNULL)
-        subprocess.run(f"security import ./resign_taurine/fakeiphonecert/dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
+        subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
         # subprocess.run(["codesign", "-s", 'Worth Doing Badly iPhone OS Application Signing', "-f", "--entitlements=app.entitlements", f"{tmpfolder}/deb/Applications/{folder}"], stdout=subprocess.DEVNULL)
         os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
             
