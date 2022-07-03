@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 from shutil import rmtree, copy, copytree
 import plistlib
-from pick import pick
-from tqdm import tqdm
 import requests
 from urllib.parse import urlparse
 import zipfile
@@ -94,7 +92,7 @@ def main():
         exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
-    option, index = pick(["External", "Local"], "[?] Would you like to use an IPA stored on the web, or on your system?", indicator='*')
+    option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local]")
     option = option.lower()
     
     with tempfile.TemporaryDirectory() as tmpfolder:
@@ -123,7 +121,7 @@ def main():
             except requests.exceptions.RequestException as err:
                 print(f"[-] URL provided is not reachable. Error: {err}")
                 exit(1)  
-        else:
+        elif option == "local":
             path = input("[?] Paste in the path to an IPA in your file system: ")
             
             if os.path.exists(path):
@@ -131,6 +129,9 @@ def main():
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
+        else:
+            print("[-] That is not a valid option!")
+            exit(1)
         
         # Unzip the IPA file
         print("[*] Unzipping IPA...")
@@ -176,7 +177,7 @@ def main():
         # subprocess.run(f"./ldid -Sapp.entitlements -Upassword -Kresign_taurine/fakeiphonecert/dev_certificate.p12 {tmpfolder}/deb/Applications/{folder}".split(), stdout=subprocess.DEVNULL)
         subprocess.run(f"security import ./resign_taurine/fakeiphonecert/dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
         # subprocess.run(["codesign", "-s", 'Worth Doing Badly iPhone OS Application Signing', "-f", "--entitlements=app.entitlements", f"{tmpfolder}/deb/Applications/{folder}"], stdout=subprocess.DEVNULL)
-        os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' -f --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
+        os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
             
         # Package the deb file
         print("[*] Packaging the deb file...")
@@ -185,11 +186,11 @@ def main():
             os.remove(f"output/{app_name}.deb")
         subprocess.run(f"dpkg-deb --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
         
-        # Done!!!
-        print("")
-        print("[*] We are finished!")
-        print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
-        print("[*] The app will continue to work when rebooted to stock.")
+    # Done!!!
+    print("")
+    print("[*] We are finished!")
+    print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
+    print("[*] The app will continue to work when rebooted to stock.")
         
 if __name__ == '__main__':
     main()
