@@ -16,6 +16,8 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 1. Clone this repository: `git clone https://github.com/itsnebulalol/permasigner`
 2. Install all requirements: `pip install -r requirements.txt`
 3. Edit the app's entitlements in `app.entitlements`
+    - If not sure, keep it how it is, it may work.
+    - Some apps like Dolphin have custom entitlements to use
 4. Install dpkg using brew
 5. Run the script
 6. Install the newly created deb file
