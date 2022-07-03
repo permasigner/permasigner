@@ -1,12 +1,12 @@
-# Permasigner
-🖊 Permanently signs IPAs on jailbroken iDevices (persists on stock).
+<h1 align="center">Permasigner</h1>
+<p align="center">🖊 Permanently signs IPAs on jailbroken iDevices 14.0-14.8.1 (persists on stock).</p>
 
 # How does it work?
 In 14.0-15.4.1, there is a bug where CoreTrust will allow any root certificate. 
 
 # Prerequsites
 1. Mac OS 10.5.0 (?) or higher, personally tested on 13.0
-2. Jailbroken iDevice
+2. Jailbroken iDevice on 14.0-14.8.1
 
 # How to use
 1. Clone this repository: `git clone https://github.com/itsnebulalol/permasigner`

@@ -162,3 +162,5 @@ cython_debug/
 # Project specific stuff
 output/
 ldid
+.DS_Store
+*/.DS_Store
