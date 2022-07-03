@@ -1,5 +1,6 @@
 <h1 align="center">Permasigner</h1>
 <p align="center">🖊 Permanently signs IPAs on jailbroken iDevices 14.0-14.8.1 (persists on stock).</p>
+[Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned/)
 
 # How does it work?
 In 14.0-15.4.1, there is a bug where CoreTrust will allow any root certificate. 
@@ -27,3 +28,6 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 - [Linus Henze](https://github.com/LinusHenze) for the bug
 - [zhuowei](https://github.com/zhuowei) for the original Taurine script
 - [RexSonic](https://github.com/RexSonic) for the fix
+
+# Other Stuff
+[Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
