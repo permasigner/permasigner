@@ -92,7 +92,7 @@ def main():
         exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
-    option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local]")
+    option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
     option = option.lower()
     
     with tempfile.TemporaryDirectory() as tmpfolder:
