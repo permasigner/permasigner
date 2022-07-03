@@ -8,6 +8,8 @@ import zipfile
 import sys
 import subprocess
 import tempfile
+import platform
+import argparse
 
 """ Functions """
 def copy_postinst(file_path, app_name):
@@ -77,7 +79,7 @@ def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_
 
 
 """ Main Function """
-def main():
+def main(args):
     print("IPA Permasigner")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print("")
@@ -86,6 +88,30 @@ def main():
     if not sys.platform == "darwin":
         print("[-] Script must be ran on macOS.")
         exit(1)
+        
+    # Auto download ldid
+    if not os.path.exists("ldid"):
+        print("[*] ldid not found, downloading.")
+        if sys.platform == "linux" and platform.machine() == "x86_64":
+            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"unzip ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"rm ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        elif sys.platform == "linux" and platform.machine() == "aarch64":
+            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"unzip ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"rm ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        elif sys.platform == "darwin" and platform.machine() == "x86_64":
+            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"unzip ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"rm ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        elif sys.platform == "darwin" and platform.machine() == "arm64":
+            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"unzip ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"rm ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         
     # Check if dpkg is installed
     if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
@@ -169,7 +195,7 @@ def main():
                     print("Executable found.")
                 else:
                     app_executable = None
-                    print("No executable found, this IPA probably doesn't have one.")
+                    print("No executable found.")
                 print("Found information about the app!")
         print("")
         
@@ -194,14 +220,13 @@ def main():
         
         # Sign the app
         print("[*] Signing app...")
-        if os.path.exists("ldid"):
-            print("ldid is in the root of the script directory! Signing with ldid...")
-            subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-            os.system(f"./ldid -Sapp.entitlements -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
-        else:
-            print("ldid not found, signing with codesign...")
+        if args.codesign:
+            print("Signing with codesign as it was specified...")
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
             os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
+        else:
+            subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+            os.system(f"./ldid -Sapp.entitlements -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
         print("")
 
         # Package the deb file
@@ -218,4 +243,8 @@ def main():
     print("[*] The app will continue to work when rebooted to stock.")
         
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--codesign', action='store_true', help="uses codesign instead of ldid.")
+    args = parser.parse_args()
+    
+    main(args)

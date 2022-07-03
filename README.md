@@ -10,8 +10,8 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 
 # Prerequsites
 1. Mac OS X 10.5.0 (?) or later, personally tested on macOS 13.0
-    - Both codesign and ldid can be used. If you prefer ldid, download a binary from [here](https://github.com/ProcursusTeam/ldid/actions) and place it in the directory where the script is. A GitHub account is required.
-    - Linux support may be possible, if someone edits the script and tries it with ldid, please tell me!
+    - Both codesign and ldid can be used.
+    - Linux should work but it hasn't been tested
 2. Jailbroken iDevice on 14.0-14.8.1
 
 # How to use
@@ -22,6 +22,7 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
     - Some apps like Dolphin have custom entitlements to use.
 4. Install dpkg using brew
 5. Run the script
+    - If you'd like the script to use codesign instead, pass `-c` or `--codesign`
 6. Install the newly created deb file
 7. Reboot to stock, the app will still work!
 8. ??
@@ -39,4 +40,4 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 - [RexSonic](https://github.com/RexSonic) for the fix
 
 # Other Stuff
-[Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
+- [Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
