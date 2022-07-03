@@ -9,7 +9,7 @@ import sys
 import subprocess
 import tempfile
 
-# Functions
+""" Functions """
 def copy_postinst(file_path, app_name):
     """Copy postinst file.
 
@@ -76,6 +76,7 @@ def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_
         file.write(filedata)
 
 
+""" Main Function """
 def main():
     print("IPA Permasigner")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
@@ -88,7 +89,7 @@ def main():
         
     # Check if dpkg is installed
     if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
-        print("[-] dpkg is not installed. Install it though brew to continue.")
+        print("[-] dpkg is not installed. Install it though brew or Procursus to continue.")
         exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
@@ -97,6 +98,7 @@ def main():
     
     with tempfile.TemporaryDirectory() as tmpfolder:
         print("[*] Created temporary directory.")
+        print("")
         
         # If the user's choice is external, download an IPA
         # Otherwise, copy the IPA to the temporary directory
@@ -125,19 +127,21 @@ def main():
             path = input("[?] Paste in the path to an IPA in your file system: ")
             
             if os.path.exists(path):
-                shutil.copy(path, f"{tmpfolder}/app.ipa")
+                copy(path, f"{tmpfolder}/app.ipa")
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
         else:
             print("[-] That is not a valid option!")
             exit(1)
+        print("")
         
         # Unzip the IPA file
         print("[*] Unzipping IPA...")
         with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
             os.makedirs(f"{tmpfolder}/app", exist_ok=False)
             f.extractall(f"{tmpfolder}/app")
+        print("")
             
         # Read data from the plist
         print("[*] Reading plist...")
@@ -147,6 +151,7 @@ def main():
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
                 if fname.endswith(".app"):
                     folder = fname
+            print("Found plist!")
         else:
             print("[-] IPA is not valid!")
             exit(1)
@@ -161,30 +166,44 @@ def main():
                 app_author = app_bundle.split(".")[1]
                 if info["CFBundleExecutable"]:
                     app_executable = info["CFBundleExecutable"]
+                    print("Executable found.")
                 else:
                     app_executable = None
+                    print("No executable found, this IPA probably doesn't have one.")
+                print("Found information about the app!")
+        print("")
         
         # Get the deb file ready
         print("[*] Preparing deb file...")
+        print("Making directories...")
         os.makedirs(f"{tmpfolder}/deb/Applications", exist_ok=False)
         os.makedirs(f"{tmpfolder}/deb/DEBIAN", exist_ok=False)
+        print("Copying deb file scripts and control...")
         copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name)
         copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name)
         copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name, app_bundle, app_version, app_min_ios, app_author)
+        print("Copying app files...")
         copytree(f"{tmpfolder}/app/Payload/{folder}", f"{tmpfolder}/deb/Applications/{folder}", dirs_exist_ok=False)
+        print("Changing deb file scripts permissions...")
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(), stdout=subprocess.DEVNULL)
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=subprocess.DEVNULL)
         if app_executable is not None:
+            print("Changing app executable permissions...")
             subprocess.run(f"chmod 0755 {tmpfolder}/deb/Applications/{folder}/{app_executable}".split(), stdout=subprocess.DEVNULL)
+        print("")
         
         # Sign the app
         print("[*] Signing app...")
-        # subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        # subprocess.run(f"./ldid -Sapp.entitlements -Upassword -Kresign_taurine/fakeiphonecert/dev_certificate.p12 {tmpfolder}/deb/Applications/{folder}".split(), stdout=subprocess.DEVNULL)
-        subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
-        # subprocess.run(["codesign", "-s", 'Worth Doing Badly iPhone OS Application Signing', "-f", "--entitlements=app.entitlements", f"{tmpfolder}/deb/Applications/{folder}"], stdout=subprocess.DEVNULL)
-        os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
-            
+        if os.path.exists("ldid"):
+            print("ldid is in the root of the script directory! Signing with ldid...")
+            subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+            os.system(f"./ldid -Sapp.entitlements -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
+        else:
+            print("ldid not found, signing with codesign...")
+            subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
+            os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
+        print("")
+
         # Package the deb file
         print("[*] Packaging the deb file...")
         os.makedirs("output", exist_ok=True)
