@@ -1,0 +1,2 @@
+#!/bin/sh
+uicache -p /Applications/{APP_NAME}.app

@@ -1,0 +1,4 @@
+[submodule "resign_taurine"]
+	path = resign_taurine
+	url = https://github.com/zhuowei/CoreTrustDemo
+	branch = resign_taurine

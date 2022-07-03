@@ -1,0 +1,10 @@
+Package: {APP_BUNDLE}
+Version: {APP_VERSION}
+Section: Applications
+Architecture: iphoneos-arm
+Depends: firmware (>={APP_MIN_IOS})
+Description: App resigned with Linus Henze's CoreTrust bypass so it doesn't expire.
+Name: {APP_NAME}
+Author: {APP_AUTHOR}
+Maintainer: {APP_AUTHOR}
+Tags: compatible_min::ios{APP_MIN_IOS}
