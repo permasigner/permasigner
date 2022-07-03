@@ -6,9 +6,35 @@ import requests
 from urllib.parse import urlparse
 import zipfile
 import sys
+from sys import platform
 import subprocess
 import tempfile
 
+if os.path.exists("ldid"):
+      print()
+else:
+     print("ldid not found, Downloading.")
+     if platform == "linux" and platform.machine == "x86_64":
+            os.system(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_x86_64.zip")
+            subprocess.run(f"unzip ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            os.system(f"rm ldid_linux_x86_64.zip")
+            os.system(f"chmod +x ldid")
+     elif platform == "linux" and platform.machine == "aarch64":
+            os.system(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_aarch64.zip")
+            subprocess.run(f"unzip ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
+            os.system(f"rm ldid_linux_aarch64.zip")
+            os.system(f"chmod +x ldid")
+     elif platform == "darwin" and platform.machine == "x86_64":
+            os.system(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_x86_64.zip")
+            subprocess.run(f"unzip ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            os.system(f"rm ldid_macos_x86_64.zip")
+            os.system(f"chmod +x ldid")
+     elif platform == "darwin" and platform.machine == "arm64":
+            os.system(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_arm64.zip")
+            subprocess.run(f"unzip ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
+            os.system(f"rm ldid_macos_arm64.zip")
+            os.system(f"chmod +x ldid")
+     
 """ Functions """
 def copy_postinst(file_path, app_name):
     """Copy postinst file.
@@ -194,14 +220,7 @@ def main():
         
         # Sign the app
         print("[*] Signing app...")
-        if os.path.exists("ldid"):
-            print("ldid is in the root of the script directory! Signing with ldid...")
-            subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-            os.system(f"./ldid -Sapp.entitlements -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
-        else:
-            print("ldid not found, signing with codesign...")
-            subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
-            os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
+        os.system(f"./ldid -Sapp.entitlements -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
         print("")
 
         # Package the deb file
