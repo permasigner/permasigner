@@ -29,6 +29,8 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 9. Profit?
 
 # In Progress
+- [ ] Pull entitlements from binary
+    - Only works on signed binaries...
 - [ ] Ask to install automatically on connected device
     - Would require using something like iProxy
 - [x] Switch to ldid for possible Linux support
