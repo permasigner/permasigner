@@ -141,7 +141,7 @@ def main():
             
         # Read data from the plist
         print("[*] Reading plist...")
-        global folder, app_name, app_bundle, app_version, app_min_ios, app_author
+        global folder, app_name, app_bundle, app_version, app_min_ios, app_author, app_executable
         
         if os.path.exists(f"{tmpfolder}/app/Payload"):
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
@@ -159,6 +159,10 @@ def main():
                 app_version = info["CFBundleShortVersionString"]
                 app_min_ios = info["MinimumOSVersion"]
                 app_author = app_bundle.split(".")[1]
+                if info["CFBundleExecutable"]:
+                    app_executable = info["CFBundleExecutable"]
+                else:
+                    app_executable = None
         
         # Get the deb file ready
         print("[*] Preparing deb file...")
@@ -170,6 +174,8 @@ def main():
         copytree(f"{tmpfolder}/app/Payload/{folder}", f"{tmpfolder}/deb/Applications/{folder}", dirs_exist_ok=False)
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(), stdout=subprocess.DEVNULL)
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=subprocess.DEVNULL)
+        if app_executable is not None:
+            subprocess.run(f"chmod 0755 {tmpfolder}/deb/Applications/{folder}/{app_executable}".split(), stdout=subprocess.DEVNULL)
         
         # Sign the app
         print("[*] Signing app...")
