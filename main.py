@@ -125,7 +125,7 @@ def main():
             path = input("[?] Paste in the path to an IPA in your file system: ")
             
             if os.path.exists(path):
-                shutil.copy(path, f"{tmpfolder}/app.ipa")
+                copy(path, f"{tmpfolder}/app.ipa")
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
