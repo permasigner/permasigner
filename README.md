@@ -4,7 +4,9 @@
 # How does it work?
 In 14.0-15.4.1, there is a bug where CoreTrust will allow any root certificate. 
 
-This script makes a deb file for you based on any IPA. Tested with Taurine and Odyssey.
+This script makes a deb file for you based on an IPA. Tested with Taurine and Odyssey, but should work with many others.
+
+This is especially useful for 14.0-14.2.1 users who don't have a permanently signed jailbreak (eg. unc0ver + Fugu14).
 
 # Prerequsites
 1. Mac OS 10.5.0 (?) or higher, personally tested on 13.0
