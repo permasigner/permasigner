@@ -80,7 +80,7 @@ def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_
 
 """ Main Function """
 def main(args):
-    print(f"IPA Permasigner - Version {subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}")
+    print(f"IPA Permasigner | Version {subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print("")
     
