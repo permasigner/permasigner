@@ -84,9 +84,9 @@ def main(args):
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print("")
     
-    # Check if script is running on macOS
-    if not sys.platform == "darwin":
-        print("[-] Script must be ran on macOS.")
+    # Check if script is running on Windows, if so, fail
+    if sys.platform == "windows":
+        print("[-] Script must be ran on macOS or Linux.")
         exit(1)
         
     # Auto download ldid
