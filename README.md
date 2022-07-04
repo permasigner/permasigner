@@ -4,7 +4,7 @@
 # How does it work?
 In 14.0-15.4.1, there is a bug where CoreTrust will allow any root certificate. 
 
-This script makes a deb file for you based on an IPA. Tested with Taurine and Odyssey, but should work with many others.
+This script makes a deb file for you based on an IPA. Tested only with Taurine, but should work with many others.
 
 This is especially useful for 14.0-14.2.1 users who don't have a permanently signed jailbreak (eg. unc0ver + Fugu14).
 
@@ -16,12 +16,12 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 
 # How to use
 1. Clone this repository: `git clone https://github.com/itsnebulalol/permasigner`
-2. Install all requirements: `pip install -r requirements.txt`
+2. Install all requirements: `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
 3. Edit the app's entitlements in `app.entitlements`
     - If not sure, keep it how it is, it may work.
     - Some apps like Dolphin have custom entitlements to use.
 4. Install dpkg using brew
-5. Run the script
+5. Run the script: `python3 main.py`
     - If you'd like the script to use codesign instead, pass `-c` or `--codesign`
 6. Install the newly created deb file
 7. Reboot to stock, the app will still work!
