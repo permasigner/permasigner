@@ -22,7 +22,7 @@ This script makes a deb file for you based on an IPA. Tested only with Taurine, 
 1. Open a terminal
     - Terminal in the Utilities folder/spotlight on macOS if not sure.
     - Ctrl + Shift + T to open up a terminal on most Linux distros.
-2. Clone this repository: `git clone https://github.com/itsnebulalol/permasigner`
+2. Clone this repository: `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
     - If this fails, install git with Xcode dev tools on macOS; install it with your favorite package manager on Linux (`sudo apt install git`).
 3. Install all requirements: `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
 4. [OPTIONAL] If you have extra entitlements, add them in `app.entitlements`
