@@ -218,15 +218,36 @@ def main(args):
             subprocess.run(f"chmod 0755 {tmpfolder}/deb/Applications/{folder}/{app_executable}".split(), stdout=subprocess.DEVNULL)
         print("")
         
+        # Dump the entitlements
+        """print("[*] Preparing entitlements...")
+        if os.path.isfile(f"{tmpfolder}/app/Payload/{folder}/{app_executable}"):
+            entitlements = subprocess.run(f"./ldid -e {tmpfolder}/app/Payload/{folder}/{app_executable}".split(), capture_output=True, text=True).stdout
+            if (entitlements == "") or ("ldid: -e, -q, -s, and -h requre a signed binary" in entitlements):
+                print("Failed to grab entitlements, using default...")
+                no_entitlements = True
+            else:
+                with open(f"{tmpfolder}/app.entitlements", 'w+') as f:
+                    f.write(entitlements)
+                    
+                    info = plistlib.load(f)
+                    info["platform-application"] = True
+                    info["com.apple.security.iokit-user-client-class"] = ["IOUserClient"]
+                    
+                    f.write(info)
+                    print("Entitlements dumped and written.")
+                    no_entitlements = False
+        print("")"""
+        
         # Sign the app
         print("[*] Signing app...")
         if args.codesign:
             print("Signing with codesign as it was specified...")
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
-            os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
+            os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
         else:
+            print("Signing with ldid...")
             subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-            os.system(f"./ldid -Sapp.entitlements -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
+            os.system(f"./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
         print("")
 
         # Package the deb file
@@ -234,7 +255,7 @@ def main(args):
         os.makedirs("output", exist_ok=True)
         if os.path.exists(f"output/{app_name}.deb"):
             os.remove(f"output/{app_name}.deb")
-        subprocess.run(f"dpkg-deb -Z xz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
+        subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
         
     # Done!!!
     print("")

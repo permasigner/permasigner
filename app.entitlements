@@ -7,7 +7,7 @@
     <string>IOUserClient</string>
   </array>
   <key>platform-application</key>
-  <false/>
+  <true/>
   <key>com.worthdoingbadly.entitlement.dummy1</key>
   <false/>
 </dict>
