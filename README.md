@@ -16,7 +16,7 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 
 # How to use
 1. Clone this repository: `git clone https://github.com/itsnebulalol/permasigner`
-2. Install all requirements: `pip install -r requirements.txt`
+2. Install all requirements: `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
 3. Edit the app's entitlements in `app.entitlements`
     - If not sure, keep it how it is, it may work.
     - Some apps like Dolphin have custom entitlements to use.
