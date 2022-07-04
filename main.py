@@ -234,7 +234,7 @@ def main(args):
         os.makedirs("output", exist_ok=True)
         if os.path.exists(f"output/{app_name}.deb"):
             os.remove(f"output/{app_name}.deb")
-        subprocess.run(f"dpkg-deb --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
+        subprocess.run(f"dpkg-deb -Z xz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
         
     # Done!!!
     print("")
