@@ -8,7 +8,5 @@
   </array>
   <key>platform-application</key>
   <true/>
-  <key>com.worthdoingbadly.entitlement.dummy1</key>
-  <false/>
 </dict>
 </plist>
