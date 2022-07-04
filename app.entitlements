@@ -8,7 +8,7 @@
   </array>
   <key>platform-application</key>
   <true/>
-  <key>com.worthdoingbadly.entitlement.dummy1</key>
-  <false/>
+  <key>get-task-allow</key>
+  <true/>
 </dict>
 </plist>
