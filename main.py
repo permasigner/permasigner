@@ -80,7 +80,7 @@ def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_
 
 """ Main Function """
 def main(args):
-    print("IPA Permasigner")
+    print(f"IPA Permasigner - Version {subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print("")
     
@@ -217,26 +217,6 @@ def main(args):
             print("Changing app executable permissions...")
             subprocess.run(f"chmod 0755 {tmpfolder}/deb/Applications/{folder}/{app_executable}".split(), stdout=subprocess.DEVNULL)
         print("")
-        
-        # Dump the entitlements
-        """print("[*] Preparing entitlements...")
-        if os.path.isfile(f"{tmpfolder}/app/Payload/{folder}/{app_executable}"):
-            entitlements = subprocess.run(f"./ldid -e {tmpfolder}/app/Payload/{folder}/{app_executable}".split(), capture_output=True, text=True).stdout
-            if (entitlements == "") or ("ldid: -e, -q, -s, and -h requre a signed binary" in entitlements):
-                print("Failed to grab entitlements, using default...")
-                no_entitlements = True
-            else:
-                with open(f"{tmpfolder}/app.entitlements", 'w+') as f:
-                    f.write(entitlements)
-                    
-                    info = plistlib.load(f)
-                    info["platform-application"] = True
-                    info["com.apple.security.iokit-user-client-class"] = ["IOUserClient"]
-                    
-                    f.write(info)
-                    print("Entitlements dumped and written.")
-                    no_entitlements = False
-        print("")"""
         
         # Sign the app
         print("[*] Signing app...")
