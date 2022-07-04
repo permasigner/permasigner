@@ -215,7 +215,8 @@ def main(args):
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=subprocess.DEVNULL)
         if app_executable is not None:
             print("Changing app executable permissions...")
-            subprocess.run(f"chmod 0755 {tmpfolder}/deb/Applications/{folder}/{app_executable}".split(), stdout=subprocess.DEVNULL)
+            full_path = "'" + tmpfolder + "/deb/Applications/" + folder + "/" + app_executable + "'"
+            os.system("chmod 0755 " + full_path)
         print("")
         
         # Sign the app
@@ -227,7 +228,8 @@ def main(args):
         else:
             print("Signing with ldid...")
             subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-            os.system(f"./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 {tmpfolder}/deb/Applications/{folder}")
+            full_path = "'" + tmpfolder + "/deb/Applications/" + folder + "'"
+            os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + full_path)
         print("")
 
         # Package the deb file
