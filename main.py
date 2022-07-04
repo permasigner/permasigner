@@ -83,6 +83,11 @@ def main(args):
     print("IPA Permasigner")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print("")
+    
+    # Check if script is running on Windows, if so, fail
+    if sys.platform == "windows":
+        print("[-] Script must be ran on macOS or Linux.")
+        exit(1)
         
     # Auto download ldid
     if not os.path.exists("ldid"):
