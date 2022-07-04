@@ -9,9 +9,9 @@ This script makes a deb file for you based on an IPA. Tested with Taurine and Od
 This is especially useful for 14.0-14.2.1 users who don't have a permanently signed jailbreak (eg. unc0ver + Fugu14).
 
 # Prerequsites
-1. Mac OS X 10.5.0 (?) or later, personally tested on macOS 13.0
-    - Both codesign and ldid can be used.
-    - Linux should work but it hasn't been tested
+1. Mac OS X 10.5.0 (?) or later, personally tested on macOS 13.0 OR Debian based Linux
+    - Both codesign and ldid can be used on macOS.
+    - Arch based Linux won't work (yet) since it doesn't have dpkg
 2. Jailbroken iDevice on 14.0-14.8.1
 
 # How to use
@@ -31,6 +31,7 @@ This is especially useful for 14.0-14.2.1 users who don't have a permanently sig
 # In Progress
 - [ ] Pull entitlements from binary
     - Only works on signed binaries...
+- [ ] Download dpkg-deb like how we did with ldid so it works with other Linux distros
 - [ ] Ask to install automatically on connected device
     - Would require using something like iProxy
 - [x] Switch to ldid for possible Linux support
