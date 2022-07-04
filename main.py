@@ -292,7 +292,8 @@ def main(args):
         if args.codesign:
             print("Signing with codesign as it was specified...")
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
-            os.system(f"codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements --entitlements=app.entitlements {tmpfolder}/deb/Applications/{folder}")
+            full_path = "'" + tmpfolder + "/deb/Applications/" + folder + "'"
+            os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements --entitlements=app.entitlements " + full_path)
         else:
             print("Signing with ldid...")
             subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
