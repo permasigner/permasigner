@@ -155,7 +155,7 @@ def main(args):
             subprocess.run("curl -sLO https://cameronkatri.com/zstd".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x zstd".split(), stdout=subprocess.DEVNULL)
             print("Unzipping...")
-            subprocess.run(f"ar x dpkg_1.21.8_darwin-arm64.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"ar x dpkg_1.21.8_darwin-amd64.deb".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"./zstd -d data.tar.zst".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"tar -xf data.tar".split(), stdout=subprocess.DEVNULL)
             copy("opt/procursus/bin/dpkg-deb", "dpkg-deb")
@@ -164,7 +164,7 @@ def main(args):
             os.remove("data.tar")
             os.remove("control.tar.zst")
             os.remove("debian-binary")
-            os.remove("dpkg_1.21.8_darwin-arm64.deb")
+            os.remove("dpkg_1.21.8_darwin-amd64.deb")
             os.remove("zstd")
             rmtree("opt")
         elif sys.platform == "darwin" and platform.machine() == "arm64":
