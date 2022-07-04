@@ -162,5 +162,7 @@ cython_debug/
 # Project specific stuff
 output/
 ldid
+dpkg*
+dpkg/
 .DS_Store
 */.DS_Store

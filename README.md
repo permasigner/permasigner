@@ -11,9 +11,8 @@ This script makes a deb file for you based on an IPA. Tested only with Taurine, 
 **Note:** unc0ver will probably fail to jailbreak. It works for some people but not everyone.
 
 # Prerequsites
-1. Mac OS X 10.5.0 (?) or later, or Debian based Linux
+1. Mac OS X 10.5.0 (?) or later, or Linux
     - Both codesign and ldid can be used on macOS.
-    - Arch based Linux won't work (yet) since it doesn't have dpkg.
 2. Jailbroken iDevice on 14.0-14.8.1
     - The device needs to be jailbroken at first to place the app in the /Applications folder. After installing it'll continue working on stock.
 3. Python 3 installed on the PC
@@ -28,20 +27,19 @@ This script makes a deb file for you based on an IPA. Tested only with Taurine, 
 3. Install all requirements: `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
 4. [OPTIONAL] If you have extra entitlements, add them in `app.entitlements`
     - If not sure, keep it how it is.
-5. Install dpkg using brew
-6. Run the script: `python main.py` or `python3 main.py`
+5. Run the script: `python main.py` or `python3 main.py`
     - [macOS only] If you'd like the script to use codesign instead, pass `-c` or `--codesign`.
     - [Linux only] If you get an error that curl isn't found, install it using your favorite package manager. Ex. `sudo apt install curl`.
-7. Install the newly created deb file
+6. Install the newly created deb file
     - macOS users, airdropping the file is probably the easiest.
     - Linux users can use something like Dropbox or Mega; Advanced users can use `openssh-sftp-server` from Procursus.
-8. Reboot to stock, the app will still work!
+7. Reboot to stock, the app will still work!
 
 # In Progress
 - [x] Pull entitlements from binary
     - Only works on signed binaries...
     - EDIT: Merging entitlements instead... seems like a better idea
-- [ ] Download dpkg-deb like how we did with ldid so it works with other Linux distros
+- [x] Download dpkg-deb like how we did with ldid so it works with other Linux distros
 - [ ] Ask to install automatically on connected device
     - Would require using something like iProxy
 - [x] Switch to ldid for possible Linux support

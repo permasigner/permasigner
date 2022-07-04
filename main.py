@@ -80,7 +80,7 @@ def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_
 
 """ Main Function """
 def main(args):
-    print(f"IPA Permasigner - Version {subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}")
+    print(f"IPA Permasigner | Version {subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print("")
     
@@ -94,29 +94,97 @@ def main(args):
         print("[*] ldid not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
             subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
             subprocess.run(f"unzip ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"rm ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         elif sys.platform == "linux" and platform.machine() == "aarch64":
             subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
             subprocess.run(f"unzip ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"rm ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         elif sys.platform == "darwin" and platform.machine() == "x86_64":
             subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
             subprocess.run(f"unzip ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"rm ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         elif sys.platform == "darwin" and platform.machine() == "arm64":
             subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
             subprocess.run(f"unzip ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"rm ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        
-    # Check if dpkg is installed
-    if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
-        print("[-] dpkg is not installed. Install it though brew or Procursus to continue.")
-        exit(1)
+            
+    # Auto download dpkg-deb
+    if not os.path.exists("dpkg-deb"):
+        print("[*] dpkg-deb not found, downloading.")
+        if sys.platform == "linux" and platform.machine() == "x86_64":
+            subprocess.run(f"curl -sLO http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_amd64.deb".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
+            subprocess.run(f"ar x dpkg_1.20.9_amd64.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"tar -xf data.tar.xz".split(), stdout=subprocess.DEVNULL)
+            copy("usr/bin/dpkg-deb", "dpkg-deb")
+            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
+            os.remove("data.tar.xz")
+            os.remove("control.tar.xz")
+            os.remove("debian-binary")
+            os.remove("dpkg_1.20.9_amd64.deb")
+            rmtree("etc")
+            rmtree("sbin")
+            rmtree("usr")
+            rmtree("var")
+        elif sys.platform == "linux" and platform.machine() == "aarch64":
+            subprocess.run(f"curl -sLO http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_arm64.deb".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
+            subprocess.run(f"ar x dpkg_1.20.9_arm64.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"tar -xf data.tar.xz".split(), stdout=subprocess.DEVNULL)
+            copy("usr/bin/dpkg-deb", "dpkg-deb")
+            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
+            os.remove("data.tar.xz")
+            os.remove("control.tar.xz")
+            os.remove("debian-binary")
+            os.remove("dpkg_1.20.9_arm64.deb")
+            rmtree("etc")
+            rmtree("sbin")
+            rmtree("usr")
+            rmtree("var")
+        elif sys.platform == "darwin" and platform.machine() == "x86_64":
+            subprocess.run(f"curl -sLO https://procursus.itsnebula.net/pool/main/big_sur/dpkg_1.21.8_darwin-amd64.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run("curl -sLO https://cameronkatri.com/zstd".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"chmod +x zstd".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
+            subprocess.run(f"ar x dpkg_1.21.8_darwin-arm64.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"./zstd -d data.tar.zst".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"tar -xf data.tar".split(), stdout=subprocess.DEVNULL)
+            copy("opt/procursus/bin/dpkg-deb", "dpkg-deb")
+            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
+            os.remove("data.tar.zst")
+            os.remove("data.tar")
+            os.remove("control.tar.zst")
+            os.remove("debian-binary")
+            os.remove("dpkg_1.21.8_darwin-arm64.deb")
+            os.remove("zstd")
+            rmtree("opt")
+        elif sys.platform == "darwin" and platform.machine() == "arm64":
+            subprocess.run(f"curl -sLO https://procursus.itsnebula.net/pool/main/big_sur/dpkg_1.21.8_darwin-arm64.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run("curl -sLO https://cameronkatri.com/zstd".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"chmod +x zstd".split(), stdout=subprocess.DEVNULL)
+            print("Unzipping...")
+            subprocess.run(f"ar x dpkg_1.21.8_darwin-arm64.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"./zstd -d data.tar.zst".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"tar -xf data.tar".split(), stdout=subprocess.DEVNULL)
+            copy("opt/procursus/bin/dpkg-deb", "dpkg-deb")
+            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
+            os.remove("data.tar.zst")
+            os.remove("data.tar")
+            os.remove("control.tar.zst")
+            os.remove("debian-binary")
+            os.remove("dpkg_1.21.8_darwin-arm64.deb")
+            os.remove("zstd")
+            rmtree("opt")
+        print()
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
     option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
@@ -237,7 +305,7 @@ def main(args):
         os.makedirs("output", exist_ok=True)
         if os.path.exists(f"output/{app_name}.deb"):
             os.remove(f"output/{app_name}.deb")
-        subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
+        subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
         
     # Done!!!
     print("")
