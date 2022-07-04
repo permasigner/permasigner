@@ -52,6 +52,7 @@ This script makes a deb file for you based on an IPA. Tested only with Taurine, 
 - [zhuowei](https://github.com/zhuowei) for the original Taurine script
 - [RexSonic](https://github.com/RexSonic) for the fix and a lot of help
 - [verygenericname](https://github.com/verygenericname) for the ldid downloader
++ anyone who sent a pull request or issue! Your contribution helps a lot!
 
 # Other Stuff
 - [Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
