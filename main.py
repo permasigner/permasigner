@@ -316,8 +316,11 @@ def main(args):
         os.makedirs("output", exist_ok=True)
         if os.path.exists(f"output/{app_name}.deb"):
             os.remove(f"output/{app_name}.deb")
-        subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
-        
+        if sys.platform == "darwin":
+            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
+        else:
+            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
+
     # Done!!!
     print("")
     print("[*] We are finished!")
