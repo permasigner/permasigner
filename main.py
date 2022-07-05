@@ -118,7 +118,7 @@ def main(args):
             subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
             
     # Auto download dpkg-deb on Linux
-    if not os.path.exists("dpkg-deb"):
+    if (not os.path.exists("dpkg-deb")) or ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
         print("[*] dpkg-deb not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
             subprocess.run(f"curl -sLO http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_amd64.deb".split(), stdout=subprocess.DEVNULL)
