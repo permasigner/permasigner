@@ -3,10 +3,14 @@
 
 # How does it work?
 In iOS 14.0-14.8.1, there is a bug where CoreTrust will allow any root certificate. 
+    
     - Although the bug exists on iOS 15.0-15.4.1, it can not be abused since you need to be jailbroken at first to place the app in the /Applications folder. 
+    
     - This bug does not exist on anything older than iOS 14.
 
 This script makes a deb file for you based on an IPA. Tested only with Taurine, but should work with many others.
+
+Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei/CoreTrustDemo/tree/resign_taurine), please note that certificates are not copyrightable.
 
 **Note:** unc0ver will probably fail to jailbreak. It works for some people but not everyone.
 
