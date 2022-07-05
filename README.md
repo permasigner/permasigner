@@ -2,7 +2,7 @@
 <p align="center">🖊 Permanently signs IPAs on jailbroken iDevices 14.0-14.8.1 (persists on stock).</p>
 
 # How does it work?
-In iOS 14.0-14.8.1, there is a bug where CoreTrust will allow any root certificate. Although the bug exists on iOS 15.0-15.4.1, it can not be abused since you need to be jailbroken at first to place the app in the /Applications folder. This bug does not exist on anything older than iOS 14.
+In iOS 14.0-14.8.1, there is a bug where CoreTrust will allow any root certificate. Although the bug exists on iOS 15.0-15.4.1, it can not be abused (yet) since you need to be jailbroken at first to place the app in the /Applications folder. This bug does not exist on anything older than iOS 14.
 
 This script makes a deb file for you based on an IPA. Tested only with Taurine, but should work with many others.
 
@@ -17,7 +17,7 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
 2. Jailbroken iDevice on 14.0-14.8.1
     - The device needs to be jailbroken at first to place the app in the /Applications folder. After installing it'll continue working on stock.
 3. Python 3 installed on the PC
-    - This can be installed with brew on macOS (`brew install python3`), and your favorite package manager on Linux (`sudo apt install python3`).
+    - This can be installed with brew on macOS (`brew install python3`), or your favorite package manager on Linux (`sudo apt install python3`).
 
 # How to use
 1. Open a terminal
