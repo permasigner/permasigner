@@ -13,6 +13,7 @@ This script makes a deb file for you based on an IPA. Tested only with Taurine, 
 # Prerequsites
 1. Mac OS X 10.5.0 (?) or later, or Linux
     - Both codesign and ldid can be used on macOS.
+    - On macOS, [brew](https://brew.sh) is required
 2. Jailbroken iDevice on 14.0-14.8.1
     - The device needs to be jailbroken at first to place the app in the /Applications folder. After installing it'll continue working on stock.
 3. Python 3 installed on the PC
@@ -24,16 +25,17 @@ This script makes a deb file for you based on an IPA. Tested only with Taurine, 
     - Ctrl + Shift + T to open up a terminal on most Linux distros.
 2. Clone this repository: `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
     - If this fails, install git with Xcode dev tools on macOS. On Linux, install it with your favorite package manager; ex. (`sudo apt install git`).
-3. Install all requirements: `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
-4. [OPTIONAL] If you have extra entitlements, add them in `app.entitlements`
+3. [macOS only] Install dpkg using [brew](https://brew.sh): `brew install dpkg`
+4. Install all requirements: `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
+5. [OPTIONAL] If you have extra entitlements, add them in `app.entitlements`
     - If not sure, keep it how it is.
-5. Run the script: `python main.py` or `python3 main.py`
+6. Run the script: `python main.py` or `python3 main.py`
     - [macOS only] If you'd like the script to use codesign instead, pass `-c` or `--codesign`.
     - [Linux only] If you get an error that curl isn't found, install it using your favorite package manage; ex. `sudo apt install curl`.
-6. Install the newly created deb file
+7. Install the newly created deb file on your iDevice
     - macOS users, airdropping the file is probably the easiest.
     - Linux users can use something like Dropbox or Mega; advanced users can use `openssh-sftp-server` from Procursus.
-7. Reboot to stock, the app will still work!
+8. Reboot to stock, the app will still work!
 
 # In Progress
 - [x] Pull entitlements from binary

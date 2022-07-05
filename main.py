@@ -117,7 +117,7 @@ def main(args):
             subprocess.run(f"rm ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
             
-    # Auto download dpkg-deb
+    # Auto download dpkg-deb on Linux
     if not os.path.exists("dpkg-deb"):
         print("[*] dpkg-deb not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
@@ -151,6 +151,7 @@ def main(args):
             rmtree("usr")
             rmtree("var")
         elif sys.platform == "darwin" and platform.machine() == "x86_64":
+            """ This requires procursus, i'd rather use the brew version
             subprocess.run(f"curl -sLO https://procursus.itsnebula.net/pool/main/big_sur/dpkg_1.21.8_darwin-amd64.deb".split(), stdout=subprocess.DEVNULL)
             subprocess.run("curl -sLO https://cameronkatri.com/zstd".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x zstd".split(), stdout=subprocess.DEVNULL)
@@ -167,7 +168,12 @@ def main(args):
             os.remove("dpkg_1.21.8_darwin-amd64.deb")
             os.remove("zstd")
             rmtree("opt")
+            """
+            if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
+                print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+                exit(1)
         elif sys.platform == "darwin" and platform.machine() == "arm64":
+            """ This requires procursus, i'd rather use the brew version
             subprocess.run(f"curl -sLO https://procursus.itsnebula.net/pool/main/big_sur/dpkg_1.21.8_darwin-arm64.deb".split(), stdout=subprocess.DEVNULL)
             subprocess.run("curl -sLO https://cameronkatri.com/zstd".split(), stdout=subprocess.DEVNULL)
             subprocess.run(f"chmod +x zstd".split(), stdout=subprocess.DEVNULL)
@@ -184,6 +190,10 @@ def main(args):
             os.remove("dpkg_1.21.8_darwin-arm64.deb")
             os.remove("zstd")
             rmtree("opt")
+            """
+            if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
+                print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+                exit(1)
         print()
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
