@@ -236,6 +236,9 @@ def main(args):
         elif option == "local":
             path = input("[?] Paste in the path to an IPA in your file system: ")
             
+            if path.strip()[-1] == " ":
+                path = path.strip()[:-1]
+            
             if os.path.isfile(path):
                 copy(path, f"{tmpfolder}/app.ipa")
             else:
