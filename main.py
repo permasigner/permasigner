@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import rmtree, copy, copytree
+from shutil import rmtree, copy, copytree, which
 import plistlib
 import requests
 from urllib.parse import urlparse
@@ -14,6 +14,10 @@ import argparse
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
 from utils.hash import Hash, LdidHash
+
+""" Functions """
+def cmd_in_path(cmd):
+    return which(cmd) is not None
 
 """ Main Function """
 def main(args):
@@ -33,56 +37,58 @@ def main(args):
             exit(1)
         
     # Auto download ldid
-    if Path(f"{os.getcwd()}/ldid").exists():
-        if sys.platform == "linux" and platform.machine() == "x86_64":
-            if not LdidHash.check_linux_64():
-                print("[*] ldid is outdated or malformed, downloading latest version...")
-                os.remove(f"{os.getcwd()}/ldid")
+    if not cmd_in_path("ldid"):
+        if Path(f"{os.getcwd()}/ldid").exists():
+            if sys.platform == "linux" and platform.machine() == "x86_64":
+                if not LdidHash.check_linux_64():
+                    print("[*] ldid is outdated or malformed, downloading latest version...")
+                    os.remove(f"{os.getcwd()}/ldid")
+                    Ldid.download_linux_64()
+            elif sys.platform == "linux" and platform.machine() == "aarch64":
+                if not LdidHash.check_linux_arm64():
+                    print("[*] ldid is outdated or malformed, downloading latest version...")
+                    os.remove(f"{os.getcwd()}/ldid")
+                    Ldid.download_linux_arm64()
+            elif sys.platform == "darwin" and platform.machine() == "x86_64":
+                if not LdidHash.check_macos_64():
+                    print("[*] ldid is outdated or malformed, downloading latest version...")
+                    os.remove(f"{os.getcwd()}/ldid")
+                    Ldid.download_macos_64()
+            elif sys.platform == "darwin" and platform.machine() == "arm64":
+                if not LdidHash.check_macos_arm64():
+                    print("[*] ldid is outdated or malformed, downloading latest version...")
+                    os.remove(f"{os.getcwd()}/ldid")
+                    Ldid.download_macos_arm64()
+        else:
+            print("[*] ldid not found, downloading.")
+            if sys.platform == "linux" and platform.machine() == "x86_64":
                 Ldid.download_linux_64()
-        elif sys.platform == "linux" and platform.machine() == "aarch64":
-            if not LdidHash.check_linux_arm64():
-                print("[*] ldid is outdated or malformed, downloading latest version...")
-                os.remove(f"{os.getcwd()}/ldid")
+            elif sys.platform == "linux" and platform.machine() == "aarch64":
                 Ldid.download_linux_arm64()
-        elif sys.platform == "darwin" and platform.machine() == "x86_64":
-            if not LdidHash.check_macos_64():
-                print("[*] ldid is outdated or malformed, downloading latest version...")
-                os.remove(f"{os.getcwd()}/ldid")
+            elif sys.platform == "darwin" and platform.machine() == "x86_64":
                 Ldid.download_macos_64()
-        elif sys.platform == "darwin" and platform.machine() == "arm64":
-            if not LdidHash.check_macos_arm64():
-                print("[*] ldid is outdated or malformed, downloading latest version...")
-                os.remove(f"{os.getcwd()}/ldid")
+            elif sys.platform == "darwin" and platform.machine() == "arm64":
                 Ldid.download_macos_arm64()
-    else:
-        print("[*] ldid not found, downloading.")
-        if sys.platform == "linux" and platform.machine() == "x86_64":
-            Ldid.download_linux_64()
-        elif sys.platform == "linux" and platform.machine() == "aarch64":
-            Ldid.download_linux_arm64()
-        elif sys.platform == "darwin" and platform.machine() == "x86_64":
-            Ldid.download_macos_64()
-        elif sys.platform == "darwin" and platform.machine() == "arm64":
-            Ldid.download_macos_arm64()
             
     # Auto download dpkg-deb on Linux
-    if not Path(f"{os.getcwd()}/dpkg-deb").exists():
-        if sys.platform == "linux" and platform.machine() == "x86_64":
-            print("[*] dpkg-deb not found, downloading.")
-            DpkgDeb.download_linux_64()
-            print()
-        elif sys.platform == "linux" and platform.machine() == "aarch64":
-            print("[*] dpkg-deb not found, downloading.")
-            DpkgDeb.download_linux_arm64()
-            print()
-        elif sys.platform == "darwin" and platform.machine() == "x86_64":
-            if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
-                print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
-                exit(1)
-        elif sys.platform == "darwin" and platform.machine() == "arm64":
-            if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
-                print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
-                exit(1)
+    if not cmd_in_path("dpkg-deb"):
+        if not Path(f"{os.getcwd()}/dpkg-deb").exists():
+            if sys.platform == "linux" and platform.machine() == "x86_64":
+                print("[*] dpkg-deb not found, downloading.")
+                DpkgDeb.download_linux_64()
+                print()
+            elif sys.platform == "linux" and platform.machine() == "aarch64":
+                print("[*] dpkg-deb not found, downloading.")
+                DpkgDeb.download_linux_arm64()
+                print()
+            elif sys.platform == "darwin" and platform.machine() == "x86_64":
+                if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
+                    print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+                    exit(1)
+            elif sys.platform == "darwin" and platform.machine() == "arm64":
+                if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
+                    print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+                    exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
     option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
@@ -215,15 +221,21 @@ def main(args):
                             os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
         else:
             print("Signing with ldid...")
-            subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
-            os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
+            if cmd_in_path("ldid"):
+                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
+            else:
+                subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
             
             if Path(frameworks_path).exists():
                 for path in Path(frameworks_path).rglob('*.dylib'):
                     print(f"Signing framework {path.name.split('.')[0]}...")
-                    os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
+                    if cmd_in_path("ldid"):
+                        os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
+                    else:
+                        os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
                     
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
@@ -234,7 +246,10 @@ def main(args):
                     dirs = os.listdir(folder)
                     for path in dirs:
                         if "." not in path:
-                            os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
+                            if cmd_in_path("ldid"):
+                                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
+                            else:
+                                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
                             os.system(f"chmod 0755 {path}")
         print()
 
@@ -243,10 +258,11 @@ def main(args):
         os.makedirs("output", exist_ok=True)
         if Path(f"output/{app_name}.deb").exists():
             os.remove(f"output/{app_name}.deb")
+            
         if args.debug:
             print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
             
-        if sys.platform == "darwin":
+        if cmd_in_path("dpkg-deb"):
             subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
         else:
             subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
