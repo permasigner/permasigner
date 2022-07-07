@@ -30,7 +30,7 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
 5. [OPTIONAL] If you have extra entitlements, add them in `app.entitlements`
     - If not sure, keep it how it is.
 6. Run the script: `python main.py` or `python3 main.py`
-    - [macOS only] If you'd like the script to use codesign instead, pass `-c` or `--codesign`.
+    - [Advanced macOS Users] If you'd like the script to use codesign instead, pass `-c` or `--codesign`.
     - [Linux only] If you get an error that curl isn't found, install it using your favorite package manage; ex. `sudo apt install curl`.
 7. Install the newly created deb file on your iDevice
     - macOS users, airdropping the file is probably the easiest.
@@ -38,8 +38,9 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
 8. Reboot to stock, the app will still work!
 
 # In Progress
+- [x] Sign frameworks aswell
 - [x] Pull entitlements from binary
-    - ~~Only works on signed binaries...~~ Merging entitlements instead... seems like a better idea
+    - Merging entitlements instead... seems like a better idea
 - [x] Download dpkg-deb like how we did with ldid so it works with other Linux distros
 - [ ] Ask to install automatically on connected device
     - Would require using something like iProxy
