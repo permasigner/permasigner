@@ -234,6 +234,9 @@ def main(args):
         os.makedirs("output", exist_ok=True)
         if Path(f"output/{app_name}.deb").exists():
             os.remove(f"output/{app_name}.deb")
+        if args.debug:
+            print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb 'output/{app_name}.deb'")
+            
         if sys.platform == "darwin":
             subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb 'output/{app_name}.deb'".split(), stdout=subprocess.DEVNULL)
         else:
@@ -248,6 +251,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--codesign', action='store_true', help="uses codesign instead of ldid.")
+    parser.add_argument('-d', '--debug', action='store_true', help="shows some debug info, only useful for testing.")
     args = parser.parse_args()
     
     main(args)
