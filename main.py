@@ -257,7 +257,7 @@ def main(args):
         print("[*] Reading plist...")
         global folder, app_name, app_bundle, app_version, app_min_ios, app_author, app_executable
         
-        if os.path.isfile(f"{tmpfolder}/app/Payload"):
+        if os.path.isdir(f"{tmpfolder}/app/Payload"):
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
                 if fname.endswith(".app"):
                     folder = fname
@@ -312,7 +312,7 @@ def main(args):
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
             os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + full_path)
             
-            if os.path.isfile(frameworks_path):
+            if os.path.isdir(frameworks_path):
                 for path in Path(frameworks_path).rglob('*.dylib'):
                     print(f"Signing framework {path.name.split('.')[0]}...")
                     os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
@@ -334,7 +334,7 @@ def main(args):
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
             os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + full_path)
             
-            if os.path.isfile(frameworks_path):
+            if os.path.isdir(frameworks_path):
                 for path in Path(frameworks_path).rglob('*.dylib'):
                     print(f"Signing framework {path.name.split('.')[0]}...")
                     os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + path)
