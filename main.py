@@ -10,73 +10,8 @@ import subprocess
 import tempfile
 import platform
 import argparse
-
-""" Functions """
-def copy_postinst(file_path, app_name):
-    """Copy postinst file.
-
-    Args:
-        file_path (String): Path of the copy destination.
-        app_name (String): Name of the app being processed.
-    """
-    
-    # Read the file
-    with open("postinst", 'r') as file:
-        filedata = file.read()
-
-    # Replace the target string
-    filedata = filedata.replace("{APP_NAME}", app_name)
-
-    # Write the file out again
-    with open(file_path, 'w') as file:
-        file.write(filedata)
-        
-def copy_postrm(file_path, app_name):
-    """Copy postrm file.
-
-    Args:
-        file_path (String): Path of the copy destination.
-        app_name (String): Name of the app being processed.
-    """
-    
-    # Read the file
-    with open('postrm', 'r') as file:
-        filedata = file.read()
-
-    # Replace the target string
-    filedata = filedata.replace("{APP_NAME}", app_name)
-
-    # Write the file out again
-    with open(file_path, 'w') as file:
-        file.write(filedata)
-        
-def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_author):
-    """Copy control file.
-
-    Args:
-        file_path (String): Path of the copy destination.
-        app_name (String): Name of the app being processed.
-        app_bundle (String): Bundle ID of the app being processed.
-        app_version (String): Version of the app being processed.
-        app_min_ios (String): Minimum iOS version required by the app being processed.
-        app_author (String): Author of the app being processed.
-    """
-    
-    # Read the file
-    with open('control', 'r') as file:
-        filedata = file.read()
-
-    # Replace the target strings
-    filedata = filedata.replace("{APP_NAME}", app_name)
-    filedata = filedata.replace("{APP_BUNDLE}", app_bundle)
-    filedata = filedata.replace("{APP_VERSION}", app_version)
-    filedata = filedata.replace("{APP_MIN_IOS}", app_min_ios)
-    filedata = filedata.replace("{APP_AUTHOR}", app_author)
-
-    # Write the file out again
-    with open(file_path, 'w') as file:
-        file.write(filedata)
-
+from utils.copy import Copy
+from utils.downloader import DpkgDeb
 
 """ Main Function """
 def main(args):
@@ -127,76 +62,14 @@ def main(args):
     if not Path(f"{os.getcwd()}/dpkg-deb").exists():
         print("[*] dpkg-deb not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
-            subprocess.run(f"curl -sLO http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_amd64.deb".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"ar x dpkg_1.20.9_amd64.deb".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"tar -xf data.tar.xz".split(), stdout=subprocess.DEVNULL)
-            copy("usr/bin/dpkg-deb", "dpkg-deb")
-            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
-            os.remove("data.tar.xz")
-            os.remove("control.tar.xz")
-            os.remove("debian-binary")
-            os.remove("dpkg_1.20.9_amd64.deb")
-            rmtree("etc")
-            rmtree("sbin")
-            rmtree("usr")
-            rmtree("var")
+            DpkgDeb.download_linux_64()
         elif sys.platform == "linux" and platform.machine() == "aarch64":
-            subprocess.run(f"curl -sLO http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_arm64.deb".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"ar x dpkg_1.20.9_arm64.deb".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"tar -xf data.tar.xz".split(), stdout=subprocess.DEVNULL)
-            copy("usr/bin/dpkg-deb", "dpkg-deb")
-            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
-            os.remove("data.tar.xz")
-            os.remove("control.tar.xz")
-            os.remove("debian-binary")
-            os.remove("dpkg_1.20.9_arm64.deb")
-            rmtree("etc")
-            rmtree("sbin")
-            rmtree("usr")
-            rmtree("var")
+            DpkgDeb.download_linux_arm64()
         elif sys.platform == "darwin" and platform.machine() == "x86_64":
-            """ This requires procursus, i'd rather use the brew version
-            subprocess.run(f"curl -sLO https://procursus.itsnebula.net/pool/main/big_sur/dpkg_1.21.8_darwin-amd64.deb".split(), stdout=subprocess.DEVNULL)
-            subprocess.run("curl -sLO https://cameronkatri.com/zstd".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"chmod +x zstd".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"ar x dpkg_1.21.8_darwin-amd64.deb".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"./zstd -d data.tar.zst".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"tar -xf data.tar".split(), stdout=subprocess.DEVNULL)
-            copy("opt/procursus/bin/dpkg-deb", "dpkg-deb")
-            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
-            os.remove("data.tar.zst")
-            os.remove("data.tar")
-            os.remove("control.tar.zst")
-            os.remove("debian-binary")
-            os.remove("dpkg_1.21.8_darwin-amd64.deb")
-            os.remove("zstd")
-            rmtree("opt")
-            """
             if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
                 print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
         elif sys.platform == "darwin" and platform.machine() == "arm64":
-            """ This requires procursus, i'd rather use the brew version
-            subprocess.run(f"curl -sLO https://procursus.itsnebula.net/pool/main/big_sur/dpkg_1.21.8_darwin-arm64.deb".split(), stdout=subprocess.DEVNULL)
-            subprocess.run("curl -sLO https://cameronkatri.com/zstd".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"chmod +x zstd".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"ar x dpkg_1.21.8_darwin-arm64.deb".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"./zstd -d data.tar.zst".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"tar -xf data.tar".split(), stdout=subprocess.DEVNULL)
-            copy("opt/procursus/bin/dpkg-deb", "dpkg-deb")
-            subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
-            os.remove("data.tar.zst")
-            os.remove("data.tar")
-            os.remove("control.tar.zst")
-            os.remove("debian-binary")
-            os.remove("dpkg_1.21.8_darwin-arm64.deb")
-            os.remove("zstd")
-            rmtree("opt")
-            """
             if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
                 print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
@@ -292,9 +165,9 @@ def main(args):
         os.makedirs(f"{tmpfolder}/deb/Applications", exist_ok=False)
         os.makedirs(f"{tmpfolder}/deb/DEBIAN", exist_ok=False)
         print("Copying deb file scripts and control...")
-        copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name)
-        copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name)
-        copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name, app_bundle, app_version, app_min_ios, app_author)
+        Copy.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name)
+        Copy.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name)
+        Copy.copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name, app_bundle, app_version, app_min_ios, app_author)
         print("Copying app files...")
         copytree(f"{tmpfolder}/app/Payload/{folder}", f"{tmpfolder}/deb/Applications/{folder}", dirs_exist_ok=False)
         print("Changing deb file scripts permissions...")
@@ -308,6 +181,7 @@ def main(args):
         
         # Sign the app
         print("[*] Signing app...")
+        Copy.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle)
         if args.codesign:
             print("Signing with codesign as it was specified...")
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
@@ -335,12 +209,12 @@ def main(args):
             subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
-            os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + full_path)
+            os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
             
             if Path(frameworks_path).exists():
                 for path in Path(frameworks_path).rglob('*.dylib'):
                     print(f"Signing framework {path.name.split('.')[0]}...")
-                    os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + path)
+                    os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
                     
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
@@ -351,7 +225,7 @@ def main(args):
                     dirs = os.listdir(folder)
                     for path in dirs:
                         if "." not in path:
-                            os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + path)
+                            os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
                             os.system(f"chmod 0755 {path}")
         print("")
 
