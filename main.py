@@ -89,6 +89,12 @@ def main(args):
         print("[-] Script must be ran on macOS or Linux.")
         exit(1)
         
+    # Check if codesign is added on Linux
+    if args.codesign:
+        if sys.platform == "linux":
+            print("[-] You cannot use codesign on Linux, remove the argument and it'll use ldid instead.")
+            exit(1)
+        
     # Auto download ldid
     if not os.path.exists("ldid"):
         print("[*] ldid not found, downloading.")
@@ -293,7 +299,7 @@ def main(args):
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=subprocess.DEVNULL)
         if app_executable is not None:
             print("Changing app executable permissions...")
-            full_path = "'" + tmpfolder + "/deb/Applications/" + folder + "/" + app_executable + "'"
+            full_path = f"'{tmpfolder}/deb/Applications/{folder}/{app_executable}'"
             os.system("chmod 0755 " + full_path)
         print("")
         
@@ -302,13 +308,48 @@ def main(args):
         if args.codesign:
             print("Signing with codesign as it was specified...")
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
-            full_path = "'" + tmpfolder + "/deb/Applications/" + folder + "'"
-            os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements --entitlements=app.entitlements " + full_path)
+            full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
+            frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
+            os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + full_path)
+            
+            if os.path.exists(frameworks_path):
+                for path in Path(frameworks_path).rglob('*.dylib'):
+                    print(f"Signing framework {path.name.split('.')[0]}...")
+                    os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
+                    
+                frameworks = []
+                for fname in os.listdir(path=frameworks_path):
+                    if fname.endswith(".framework"):
+                        frameworks.append(fname)
+                
+                for folder in frameworks:
+                    dirs = os.listdir(folder)
+                    for path in dirs:
+                        if "." not in path:
+                            os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
         else:
             print("Signing with ldid...")
             subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-            full_path = "'" + tmpfolder + "/deb/Applications/" + folder + "'"
+            full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
+            frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
             os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + full_path)
+            
+            if os.path.exists(frameworks_path):
+                for path in Path(frameworks_path).rglob('*.dylib'):
+                    print(f"Signing framework {path.name.split('.')[0]}...")
+                    os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + path)
+                    
+                frameworks = []
+                for fname in os.listdir(path=frameworks_path):
+                    if fname.endswith(".framework"):
+                        frameworks.append(fname)
+                
+                for folder in frameworks:
+                    dirs = os.listdir(folder)
+                    for path in dirs:
+                        if "." not in path:
+                            os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + path)
+                            os.system(f"chmod 0755 {path}")
         print("")
 
         # Package the deb file
