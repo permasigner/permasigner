@@ -235,9 +235,9 @@ def main(args):
         if Path(f"output/{app_name}.deb").exists():
             os.remove(f"output/{app_name}.deb")
         if sys.platform == "darwin":
-            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb 'output/{app_name}.deb'".split(), stdout=subprocess.DEVNULL)
         else:
-            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb 'output/{app_name}.deb'".split(), stdout=subprocess.DEVNULL)
 
     # Done!!!
     print("")
