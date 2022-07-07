@@ -96,7 +96,7 @@ def main(args):
             exit(1)
         
     # Auto download ldid
-    if not os.path.isfile("ldid"):
+    if not Path(f"{os.getcwd()}/ldid").exists():
         print("[*] ldid not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
             subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
@@ -124,7 +124,7 @@ def main(args):
             subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
             
     # Auto download dpkg-deb on Linux
-    if (not os.path.isfile("dpkg-deb")) or ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
+    if not Path(f"{os.getcwd()}/dpkg-deb").exists():
         print("[*] dpkg-deb not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
             subprocess.run(f"curl -sLO http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_amd64.deb".split(), stdout=subprocess.DEVNULL)
@@ -239,7 +239,7 @@ def main(args):
             if path.strip()[-1] == " ":
                 path = path.strip()[:-1]
             
-            if os.path.isfile(path):
+            if Path(path).exists():
                 copy(path, f"{tmpfolder}/app.ipa")
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
@@ -260,7 +260,7 @@ def main(args):
         print("[*] Reading plist...")
         global folder, app_name, app_bundle, app_version, app_min_ios, app_author, app_executable
         
-        if os.path.isdir(f"{tmpfolder}/app/Payload"):
+        if Path(f"{tmpfolder}/app/Payload").exists():
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
                 if fname.endswith(".app"):
                     folder = fname
@@ -269,7 +269,7 @@ def main(args):
             print("[-] IPA is not valid!")
             exit(1)
             
-        if os.path.isfile(f"{tmpfolder}/app/Payload/{folder}/Info.plist"):
+        if Path(f"{tmpfolder}/app/Payload/{folder}/Info.plist").exists():
             with open(f"{tmpfolder}/app/Payload/{folder}/Info.plist", 'rb') as f:
                 info = plistlib.load(f)
                 app_name = info["CFBundleName"]
@@ -315,7 +315,7 @@ def main(args):
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
             os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + full_path)
             
-            if os.path.isdir(frameworks_path):
+            if Path(frameworks_path).exists():
                 for path in Path(frameworks_path).rglob('*.dylib'):
                     print(f"Signing framework {path.name.split('.')[0]}...")
                     os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
@@ -337,7 +337,7 @@ def main(args):
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
             os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + full_path)
             
-            if os.path.isdir(frameworks_path):
+            if Path(frameworks_path).exists():
                 for path in Path(frameworks_path).rglob('*.dylib'):
                     print(f"Signing framework {path.name.split('.')[0]}...")
                     os.system("./ldid -Sapp.entitlements -M -Upassword -Kdev_certificate.p12 " + path)
@@ -358,7 +358,7 @@ def main(args):
         # Package the deb file
         print("[*] Packaging the deb file...")
         os.makedirs("output", exist_ok=True)
-        if os.path.isfile(f"output/{app_name}.deb"):
+        if Path(f"output/{app_name}.deb").exists():
             os.remove(f"output/{app_name}.deb")
         if sys.platform == "darwin":
             subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name}.deb".split(), stdout=subprocess.DEVNULL)
