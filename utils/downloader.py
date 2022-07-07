@@ -1,4 +1,5 @@
 import requests
+import subprocess
 
 class DpkgDeb:
     def download_linux_64():
@@ -52,3 +53,70 @@ class DpkgDeb:
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
+       
+        
+class Ldid:
+    linux_64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_linux_x86_64"
+    linux_arm64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_linux_aarch64"
+    macos_64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macos_x86_64"
+    macos_arm64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macos_arm64"
+    
+    def download_linux_64():
+        res = requests.get(Ldid.linux_64_url, stream=True)
+        try:
+            if res.status_code == 200:
+                with open(f"ldid", "wb") as f:
+                    f.write(res.content)
+            else:
+                print(f"[-] ldid download URL is not reachable. Status code: {res.status_code}")
+                exit(1)
+        except requests.exceptions.RequestException as err:
+            print(f"[-] ldid download URL is not reachable. Error: {err}")
+            exit(1)
+            
+        subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        
+    def download_linux_arm64():
+        res = requests.get(Ldid.linux_arm64_url, stream=True)
+        try:
+            if res.status_code == 200:
+                with open(f"ldid", "wb") as f:
+                    f.write(res.content)
+            else:
+                print(f"[-] ldid download URL is not reachable. Status code: {res.status_code}")
+                exit(1)
+        except requests.exceptions.RequestException as err:
+            print(f"[-] ldid download URL is not reachable. Error: {err}")
+            exit(1)
+            
+        subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        
+    def download_macos_64():
+        res = requests.get(Ldid.macos_64_url, stream=True)
+        try:
+            if res.status_code == 200:
+                with open(f"ldid", "wb") as f:
+                    f.write(res.content)
+            else:
+                print(f"[-] ldid download URL is not reachable. Status code: {res.status_code}")
+                exit(1)
+        except requests.exceptions.RequestException as err:
+            print(f"[-] ldid download URL is not reachable. Error: {err}")
+            exit(1)
+            
+        subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        
+    def download_macos_arm64():
+        res = requests.get(Ldid.macos_arm64_url, stream=True)
+        try:
+            if res.status_code == 200:
+                with open(f"ldid", "wb") as f:
+                    f.write(res.content)
+            else:
+                print(f"[-] ldid download URL is not reachable. Status code: {res.status_code}")
+                exit(1)
+        except requests.exceptions.RequestException as err:
+            print(f"[-] ldid download URL is not reachable. Error: {err}")
+            exit(1)
+            
+        subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)

@@ -10,14 +10,16 @@ import subprocess
 import tempfile
 import platform
 import argparse
+
 from utils.copy import Copy
-from utils.downloader import DpkgDeb
+from utils.downloader import DpkgDeb, Ldid
+from utils.hash import Hash, LdidHash
 
 """ Main Function """
 def main(args):
     print(f"IPA Permasigner | Version {subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
-    print("")
+    print()
     
     # Check if script is running on Windows, if so, fail
     if sys.platform == "windows":
@@ -31,40 +33,48 @@ def main(args):
             exit(1)
         
     # Auto download ldid
-    if not Path(f"{os.getcwd()}/ldid").exists():
+    if Path(f"{os.getcwd()}/ldid").exists():
+        if sys.platform == "linux" and platform.machine() == "x86_64":
+            if not LdidHash.check_linux_64():
+                print("[*] ldid is outdated or malformed, downloading latest version...")
+                os.remove(f"{os.getcwd()}/ldid")
+                Ldid.download_linux_64()
+        elif sys.platform == "linux" and platform.machine() == "aarch64":
+            if not LdidHash.check_linux_arm64():
+                print("[*] ldid is outdated or malformed, downloading latest version...")
+                os.remove(f"{os.getcwd()}/ldid")
+                Ldid.download_linux_arm64()
+        elif sys.platform == "darwin" and platform.machine() == "x86_64":
+            if not LdidHash.check_macos_64():
+                print("[*] ldid is outdated or malformed, downloading latest version...")
+                os.remove(f"{os.getcwd()}/ldid")
+                Ldid.download_macos_64()
+        elif sys.platform == "darwin" and platform.machine() == "arm64":
+            if not LdidHash.check_macos_arm64():
+                print("[*] ldid is outdated or malformed, downloading latest version...")
+                os.remove(f"{os.getcwd()}/ldid")
+                Ldid.download_macos_arm64()
+    else:
         print("[*] ldid not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
-            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"unzip ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"rm ldid_linux_x86_64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+            Ldid.download_linux_64()
         elif sys.platform == "linux" and platform.machine() == "aarch64":
-            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"unzip ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"rm ldid_linux_aarch64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+            Ldid.download_linux_arm64()
         elif sys.platform == "darwin" and platform.machine() == "x86_64":
-            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"unzip ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"rm ldid_macos_x86_64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+            Ldid.download_macos_64()
         elif sys.platform == "darwin" and platform.machine() == "arm64":
-            subprocess.run(f"curl -sLO https://nightly.link/ProcursusTeam/ldid/workflows/build/master/ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
-            print("Unzipping...")
-            subprocess.run(f"unzip ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"rm ldid_macos_arm64.zip".split(), stdout=subprocess.DEVNULL)
-            subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+            Ldid.download_macos_arm64()
             
     # Auto download dpkg-deb on Linux
     if not Path(f"{os.getcwd()}/dpkg-deb").exists():
-        print("[*] dpkg-deb not found, downloading.")
         if sys.platform == "linux" and platform.machine() == "x86_64":
+            print("[*] dpkg-deb not found, downloading.")
             DpkgDeb.download_linux_64()
+            print()
         elif sys.platform == "linux" and platform.machine() == "aarch64":
+            print("[*] dpkg-deb not found, downloading.")
             DpkgDeb.download_linux_arm64()
+            print()
         elif sys.platform == "darwin" and platform.machine() == "x86_64":
             if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
                 print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
@@ -73,7 +83,6 @@ def main(args):
             if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
                 print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
-        print()
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
     option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
@@ -81,7 +90,7 @@ def main(args):
     
     with tempfile.TemporaryDirectory() as tmpfolder:
         print("[*] Created temporary directory.")
-        print("")
+        print()
         
         # If the user's choice is external, download an IPA
         # Otherwise, copy the IPA to the temporary directory
@@ -120,14 +129,14 @@ def main(args):
         else:
             print("[-] That is not a valid option!")
             exit(1)
-        print("")
+        print()
         
         # Unzip the IPA file
         print("[*] Unzipping IPA...")
         with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
             os.makedirs(f"{tmpfolder}/app", exist_ok=False)
             f.extractall(f"{tmpfolder}/app")
-        print("")
+        print()
             
         # Read data from the plist
         print("[*] Reading plist...")
@@ -157,7 +166,7 @@ def main(args):
                     app_executable = None
                     print("No executable found.")
                 print("Found information about the app!")
-        print("")
+        print()
         
         # Get the deb file ready
         print("[*] Preparing deb file...")
@@ -177,7 +186,7 @@ def main(args):
             print("Changing app executable permissions...")
             full_path = f"'{tmpfolder}/deb/Applications/{folder}/{app_executable}'"
             os.system("chmod 0755 " + full_path)
-        print("")
+        print()
         
         # Sign the app
         print("[*] Signing app...")
@@ -227,7 +236,7 @@ def main(args):
                         if "." not in path:
                             os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
                             os.system(f"chmod 0755 {path}")
-        print("")
+        print()
 
         # Package the deb file
         print("[*] Packaging the deb file...")
@@ -243,7 +252,7 @@ def main(args):
             subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
 
     # Done!!!
-    print("")
+    print()
     print("[*] We are finished!")
     print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
     print("[*] The app will continue to work when rebooted to stock.")
