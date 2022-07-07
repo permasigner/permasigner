@@ -238,9 +238,9 @@ def main(args):
             print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
             
         if sys.platform == "darwin":
-            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb 'output/{app_name.replace(' ', '')}.deb'".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
         else:
-            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb 'output/{app_name.replace(' ', '')}.deb'".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
 
     # Done!!!
     print("")
