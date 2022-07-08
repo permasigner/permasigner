@@ -17,11 +17,11 @@ from utils.hash import Hash, LdidHash
 
 """ Functions """
 def cmd_in_path(cmd):
-    try:
-        if (cmd == "ldid") and (not "-procursus" in subprocess.run("ldid".split(), capture_output=True, text=True).stdout):
-            return False
-    except:
-        return False
+    #try:
+        #if (cmd == "ldid") and (not "-procursus" in subprocess.run("ldid".split(), capture_output=True, text=True).stdout):
+        #    return False
+    #except:
+    #    return False
         
     return which(cmd) is not None
 
@@ -236,13 +236,6 @@ def main(args):
                 os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
             
             if Path(frameworks_path).exists():
-                for path in Path(frameworks_path).rglob('*.dylib'):
-                    print(f"Signing framework {path.name.split('.')[0]}...")
-                    if cmd_in_path("ldid"):
-                        os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
-                    else:
-                        os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
-                    
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
                     if fname.endswith(".framework"):
@@ -252,6 +245,7 @@ def main(args):
                     dirs = os.listdir(folder)
                     for path in dirs:
                         if "." not in path:
+                            print(f"Signing framework...")
                             if cmd_in_path("ldid"):
                                 os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
                             else:
