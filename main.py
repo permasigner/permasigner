@@ -16,7 +16,7 @@ from utils.downloader import DpkgDeb, Ldid
 from utils.hash import Hash, LdidHash
 
 """ Functions """
-def cmd_in_path(cmd):
+def cmd_in_path(args, cmd):
     if args.debug:
         print(f"[DEBUG] Checking if command {cmd} is in PATH...")
         
@@ -52,13 +52,13 @@ def main(args):
             exit(1)
         
     # Auto download ldid
-    if not cmd_in_path("ldid"):
+    if not cmd_in_path(args, "ldid"):
         if Path(f"{os.getcwd()}/ldid").exists():
             if sys.platform == "linux" and platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On Linux x86_64, ldid not found...")
                     
-                if not LdidHash.check_linux_64():
+                if not LdidHash.check_linux_64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_64()
@@ -66,7 +66,7 @@ def main(args):
                 if args.debug:
                     print(f"[DEBUG] On Linux aarch64, ldid not found...")
                     
-                if not LdidHash.check_linux_arm64():
+                if not LdidHash.check_linux_arm64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_arm64()
@@ -74,7 +74,7 @@ def main(args):
                 if args.debug:
                     print(f"[DEBUG] On macOS x86_64, ldid not found...")
                     
-                if not LdidHash.check_macos_64():
+                if not LdidHash.check_macos_64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_macos_64()
@@ -82,37 +82,37 @@ def main(args):
                 if args.debug:
                     print(f"[DEBUG] On macOS arm64, ldid not found...")
                     
-                if not LdidHash.check_macos_arm64():
+                if not LdidHash.check_macos_arm64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_macos_arm64()
         else:
             print("[*] ldid not found, downloading.")
             if sys.platform == "linux" and platform.machine() == "x86_64":
-                Ldid.download_linux_64()
+                Ldid.download_linux_64(args)
             elif sys.platform == "linux" and platform.machine() == "aarch64":
-                Ldid.download_linux_arm64()
+                Ldid.download_linux_arm64(args)
             elif sys.platform == "darwin" and platform.machine() == "x86_64":
-                Ldid.download_macos_64()
+                Ldid.download_macos_64(args)
             elif sys.platform == "darwin" and platform.machine() == "arm64":
-                Ldid.download_macos_arm64()
+                Ldid.download_macos_arm64(args)
             
     # Auto download dpkg-deb on Linux
-    if not cmd_in_path("dpkg-deb"):
+    if not cmd_in_path(args, "dpkg-deb"):
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
             if sys.platform == "linux" and platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On Linux x86_64, dpkg-deb not found...")
                     
                 print("[*] dpkg-deb not found, downloading.")
-                DpkgDeb.download_linux_64()
+                DpkgDeb.download_linux_64(args)
                 print()
             elif sys.platform == "linux" and platform.machine() == "aarch64":
                 if args.debug:
                     print(f"[DEBUG] On Linux aarch64, dpkg-deb not found...")
                     
                 print("[*] dpkg-deb not found, downloading.")
-                DpkgDeb.download_linux_arm64()
+                DpkgDeb.download_linux_arm64(args)
                 print()
             elif sys.platform == "darwin" and platform.machine() == "x86_64":
                 if args.debug:
@@ -258,7 +258,7 @@ def main(args):
             print("Signing with ldid...")
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
-            if cmd_in_path("ldid"):
+            if cmd_in_path(args, "ldid"):
                 os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
             else:
                 subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
@@ -275,7 +275,7 @@ def main(args):
                     for path in dirs:
                         if "." not in path:
                             print(f"Signing framework...")
-                            if cmd_in_path("ldid"):
+                            if cmd_in_path(args, "ldid"):
                                 os.system(f"ldid -Upassword -Kdev_certificate.p12 " + path)
                             else:
                                 os.system(f"./ldid -Upassword -Kdev_certificate.p12 " + path)
@@ -291,7 +291,7 @@ def main(args):
         if args.debug:
             print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
             
-        if cmd_in_path("dpkg-deb"):
+        if cmd_in_path(args, "dpkg-deb"):
             subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
         else:
             subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)

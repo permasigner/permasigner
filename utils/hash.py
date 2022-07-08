@@ -22,7 +22,7 @@ class Hash:
             return m.hexdigest()
     
 class LdidHash:
-    def check_linux_64():
+    def check_linux_64(args):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
                     
@@ -40,7 +40,7 @@ class LdidHash:
                 
             return False
         
-    def check_linux_arm64():
+    def check_linux_arm64(args):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
             
@@ -58,7 +58,7 @@ class LdidHash:
                 
             return False
         
-    def check_macos_64():
+    def check_macos_64(args):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
             
@@ -76,7 +76,7 @@ class LdidHash:
                 
             return False
         
-    def check_macos_arm64():
+    def check_macos_arm64(args):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
             

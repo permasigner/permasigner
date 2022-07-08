@@ -2,7 +2,7 @@ import requests
 import subprocess
 
 class DpkgDeb:
-    def download_linux_64():
+    def download_linux_64(args):
         if args.debug:
             print(f"[DEBUG] Downloading dpkg-deb on Linux x86_64.")
             
@@ -41,7 +41,7 @@ class DpkgDeb:
         if args.debug:
             print(f"[DEBUG] Cleaned up.")
         
-    def download_linux_arm64():
+    def download_linux_arm64(args):
         if args.debug:
             print(f"[DEBUG] Downloading dpkg-deb on Linux aarch64.")
             
@@ -87,7 +87,7 @@ class Ldid:
     macos_64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macos_x86_64"
     macos_arm64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macos_arm64"
     
-    def download_linux_64():
+    def download_linux_64(args):
         if args.debug:
             print(f"[DEBUG] Downloading ldid on Linux x86_64.")
             
@@ -107,7 +107,7 @@ class Ldid:
             
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         
-    def download_linux_arm64():
+    def download_linux_arm64(args):
         if args.debug:
             print(f"[DEBUG] Downloading ldid on Linux aarch64.")
             
@@ -127,7 +127,7 @@ class Ldid:
             
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         
-    def download_macos_64():
+    def download_macos_64(args):
         if args.debug:
             print(f"[DEBUG] Downloading ldid on macOS x86_64.")
             
@@ -147,7 +147,7 @@ class Ldid:
             
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         
-    def download_macos_arm64():
+    def download_macos_arm64(args):
         if args.debug:
             print(f"[DEBUG] Downloading ldid on macOS arm64.")
             
