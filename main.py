@@ -17,11 +17,20 @@ from utils.hash import Hash, LdidHash
 
 """ Functions """
 def cmd_in_path(cmd):
-    #try:
-        #if (cmd == "ldid") and (not "-procursus" in subprocess.run("ldid".split(), capture_output=True, text=True).stdout):
-        #    return False
-    #except:
-    #    return False
+    if args.debug:
+        print(f"[DEBUG] Checking if command {cmd} is in PATH...")
+        
+    try:
+        if (cmd == "ldid") and (not "-procursus" in subprocess.run("ldid".split(), capture_output=True, text=True).stdout):
+            return False
+        
+            if args.debug:
+                print(f"[DEBUG] ldid installed is not from Procursus... skipping.")
+    except:
+        return False
+    
+        if args.debug:
+            print(f"[DEBUG] ldid is not in PATH... skipping.")
         
     return which(cmd) is not None
 
@@ -46,21 +55,33 @@ def main(args):
     if not cmd_in_path("ldid"):
         if Path(f"{os.getcwd()}/ldid").exists():
             if sys.platform == "linux" and platform.machine() == "x86_64":
+                if args.debug:
+                    print(f"[DEBUG] On Linux x86_64, ldid not found...")
+                    
                 if not LdidHash.check_linux_64():
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_64()
             elif sys.platform == "linux" and platform.machine() == "aarch64":
+                if args.debug:
+                    print(f"[DEBUG] On Linux aarch64, ldid not found...")
+                    
                 if not LdidHash.check_linux_arm64():
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_arm64()
             elif sys.platform == "darwin" and platform.machine() == "x86_64":
+                if args.debug:
+                    print(f"[DEBUG] On macOS x86_64, ldid not found...")
+                    
                 if not LdidHash.check_macos_64():
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_macos_64()
             elif sys.platform == "darwin" and platform.machine() == "arm64":
+                if args.debug:
+                    print(f"[DEBUG] On macOS arm64, ldid not found...")
+                    
                 if not LdidHash.check_macos_arm64():
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
@@ -80,18 +101,30 @@ def main(args):
     if not cmd_in_path("dpkg-deb"):
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
             if sys.platform == "linux" and platform.machine() == "x86_64":
+                if args.debug:
+                    print(f"[DEBUG] On Linux x86_64, dpkg-deb not found...")
+                    
                 print("[*] dpkg-deb not found, downloading.")
                 DpkgDeb.download_linux_64()
                 print()
             elif sys.platform == "linux" and platform.machine() == "aarch64":
+                if args.debug:
+                    print(f"[DEBUG] On Linux aarch64, dpkg-deb not found...")
+                    
                 print("[*] dpkg-deb not found, downloading.")
                 DpkgDeb.download_linux_arm64()
                 print()
             elif sys.platform == "darwin" and platform.machine() == "x86_64":
+                if args.debug:
+                    print(f"[DEBUG] On macOS x86_64, dpkg-deb not found...")
+                    
                 if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
                     print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                     exit(1)
             elif sys.platform == "darwin" and platform.machine() == "arm64":
+                if args.debug:
+                    print(f"[DEBUG] On macOS arm64, dpkg-deb not found...")
+                    
                 if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
                     print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                     exit(1)
@@ -211,10 +244,6 @@ def main(args):
             os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + full_path)
             
             if Path(frameworks_path).exists():
-                for path in Path(frameworks_path).rglob('*.dylib'):
-                    print(f"Signing framework {path.name.split('.')[0]}...")
-                    os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
-                    
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
                     if fname.endswith(".framework"):
@@ -224,7 +253,7 @@ def main(args):
                     dirs = os.listdir(folder)
                     for path in dirs:
                         if "." not in path:
-                            os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
+                            os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep " + path)
         else:
             print("Signing with ldid...")
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
@@ -247,9 +276,9 @@ def main(args):
                         if "." not in path:
                             print(f"Signing framework...")
                             if cmd_in_path("ldid"):
-                                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
+                                os.system(f"ldid -Upassword -Kdev_certificate.p12 " + path)
                             else:
-                                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + path)
+                                os.system(f"./ldid -Upassword -Kdev_certificate.p12 " + path)
                             os.system(f"chmod 0755 {path}")
         print()
 
