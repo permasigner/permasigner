@@ -17,6 +17,12 @@ from utils.hash import Hash, LdidHash
 
 """ Functions """
 def cmd_in_path(cmd):
+    try:
+        if (cmd == "ldid") and (not "-procursus" in subprocess.run("ldid".split(), capture_output=True, text=True).stdout):
+            return False
+    except:
+        return False
+        
     return which(cmd) is not None
 
 """ Main Function """
@@ -202,12 +208,12 @@ def main(args):
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
-            os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + full_path)
+            os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + full_path)
             
             if Path(frameworks_path).exists():
                 for path in Path(frameworks_path).rglob('*.dylib'):
                     print(f"Signing framework {path.name.split('.')[0]}...")
-                    os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
+                    os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
                     
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
@@ -218,7 +224,7 @@ def main(args):
                     dirs = os.listdir(folder)
                     for path in dirs:
                         if "." not in path:
-                            os.system("codesign -s 'Worth Doing Badly iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
+                            os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + path)
         else:
             print("Signing with ldid...")
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
