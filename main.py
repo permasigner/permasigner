@@ -133,6 +133,8 @@ def main(args):
     if not args.url or args.path:
         option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
         option = option.lower()
+
+    global out_deb_name
     
     with tempfile.TemporaryDirectory() as tmpfolder:
         print("[*] Created temporary directory.")
@@ -347,6 +349,8 @@ def main(args):
         if args.debug:
             print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
             
+        out_deb_name = app_name.replace(' ', '')
+
         if cmd_in_path(args, "dpkg-deb"):
             subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
         else:
@@ -357,6 +361,7 @@ def main(args):
     print("[*] We are finished!")
     print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
     print("[*] The app will continue to work when rebooted to stock.")
+    print(f"[*] Output file: output/{out_deb_name}.deb")
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
