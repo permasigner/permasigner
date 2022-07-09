@@ -130,7 +130,7 @@ def main(args):
                     exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
-    if not args.url or not args.path:
+    if not args.url or args.path:
         option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
         option = option.lower()
     
@@ -273,16 +273,19 @@ def main(args):
             print("Signing with codesign as it was specified...")
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
-            frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
-            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements {full_path}")
+            frameworks_path = f"{tmpfolder}/deb/Applications/{folder}/Frameworks"
+            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements '{full_path}'")
             
             if Path(frameworks_path).exists():
+                if args.debug:
+                    print("[DEBUG] Frameworks path exists")
+                    
                 for file in os.listdir(frameworks_path):
                     if file.endswith(".dylib"):
                         print(f"Signing dylib {file}...")
-                        os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {frameworks_path}/{file}")
-                        print(os.path.join("/mydir", file))
+                        os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep '{frameworks_path}/{file}'")
                         
+                """
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
                     if fname.endswith(".framework"):
@@ -292,27 +295,31 @@ def main(args):
                     dirs = os.listdir(folder)
                     for path in dirs:
                         if "." not in path:
-                            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {path}")
+                            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep '{path}'")
+                """
         else:
             print("Signing with ldid...")
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
-            frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
+            frameworks_path = f"{tmpfolder}/deb/Applications/{folder}/Frameworks"
             if cmd_in_path(args, "ldid"):
-                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 {full_path}")
+                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
             else:
                 subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 {full_path}")
+                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
             
             if Path(frameworks_path).exists():
+                if args.debug:
+                    print("[DEBUG] Frameworks path exists")
+                    
                 for file in os.listdir(frameworks_path):
                     if file.endswith(".dylib"):
                         print(f"Signing dylib {file}...")
                         if cmd_in_path(args, "ldid"):
-                            os.system(f"ldid -Upassword -Kdev_certificate.p12 {frameworks_path}/{file}")
+                            os.system(f"ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                         else:
-                            os.system(f"./ldid -Upassword -Kdev_certificate.p12 {frameworks_path}/{file}")
-                        print(os.path.join("/mydir", file))
+                            os.system(f"./ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                         
+                """
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
                     if fname.endswith(".framework"):
@@ -324,10 +331,11 @@ def main(args):
                         if "." not in path:
                             print(f"Signing framework...")
                             if cmd_in_path(args, "ldid"):
-                                os.system(f"ldid -Upassword -Kdev_certificate.p12 {path}")
+                                os.system(f"ldid -Upassword -Kdev_certificate.p12 '{path}'")
                             else:
-                                os.system(f"./ldid -Upassword -Kdev_certificate.p12 {path}")
+                                os.system(f"./ldid -Upassword -Kdev_certificate.p12 '{path}'")
                             os.system(f"chmod 0755 {path}")
+                """
         print()
 
         # Package the deb file
