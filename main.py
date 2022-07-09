@@ -130,8 +130,9 @@ def main(args):
                     exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
-    option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
-    option = option.lower()
+    if not args.url or not args.path:
+        option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
+        option = option.lower()
     
     with tempfile.TemporaryDirectory() as tmpfolder:
         print("[*] Created temporary directory.")
@@ -139,7 +140,39 @@ def main(args):
         
         # If the user's choice is external, download an IPA
         # Otherwise, copy the IPA to the temporary directory
-        if option == "external":
+        if args.url:
+            url = args.url
+            
+            if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
+                print("[-] URL provided is not an IPA, make sure to provide a direct link.")
+                exit(1)
+            
+            res = requests.get(url, stream=True)
+            
+            try:
+                if res.status_code == 200:
+                    print(f"[*] Downloading file...")
+                    
+                    with open(f"{tmpfolder}/app.ipa", "wb") as f:
+                        f.write(res.content)
+                else:
+                    print(f"[-] URL provided is not reachable. Status code: {res.status_code}")
+                    exit(1)
+            except requests.exceptions.RequestException as err:
+                print(f"[-] URL provided is not reachable. Error: {err}")
+                exit(1)
+        elif args.path:
+            path = args.path
+            
+            if path.strip()[-1] == " ":
+                path = path.strip()[:-1]
+            
+            if Path(path).exists():
+                copy(path, f"{tmpfolder}/app.ipa")
+            else:
+                print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
+                exit(1)
+        elif option == "external":
             url = input("[?] Paste in the *direct* path to an IPA online: ")
             
             if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
@@ -241,9 +274,15 @@ def main(args):
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
-            os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements " + full_path)
+            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements {full_path}")
             
             if Path(frameworks_path).exists():
+                for file in os.listdir(frameworks_path):
+                    if file.endswith(".dylib"):
+                        print(f"Signing dylib {file}...")
+                        os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {frameworks_path}/{file}")
+                        print(os.path.join("/mydir", file))
+                        
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
                     if fname.endswith(".framework"):
@@ -253,18 +292,27 @@ def main(args):
                     dirs = os.listdir(folder)
                     for path in dirs:
                         if "." not in path:
-                            os.system("codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep " + path)
+                            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {path}")
         else:
             print("Signing with ldid...")
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"'{tmpfolder}/deb/Applications/{folder}/Frameworks'"
             if cmd_in_path(args, "ldid"):
-                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
+                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 {full_path}")
             else:
                 subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 " + full_path)
+                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 {full_path}")
             
             if Path(frameworks_path).exists():
+                for file in os.listdir(frameworks_path):
+                    if file.endswith(".dylib"):
+                        print(f"Signing dylib {file}...")
+                        if cmd_in_path(args, "ldid"):
+                            os.system(f"ldid -Upassword -Kdev_certificate.p12 {frameworks_path}/{file}")
+                        else:
+                            os.system(f"./ldid -Upassword -Kdev_certificate.p12 {frameworks_path}/{file}")
+                        print(os.path.join("/mydir", file))
+                        
                 frameworks = []
                 for fname in os.listdir(path=frameworks_path):
                     if fname.endswith(".framework"):
@@ -276,9 +324,9 @@ def main(args):
                         if "." not in path:
                             print(f"Signing framework...")
                             if cmd_in_path(args, "ldid"):
-                                os.system(f"ldid -Upassword -Kdev_certificate.p12 " + path)
+                                os.system(f"ldid -Upassword -Kdev_certificate.p12 {path}")
                             else:
-                                os.system(f"./ldid -Upassword -Kdev_certificate.p12 " + path)
+                                os.system(f"./ldid -Upassword -Kdev_certificate.p12 {path}")
                             os.system(f"chmod 0755 {path}")
         print()
 
@@ -306,6 +354,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--codesign', action='store_true', help="uses codesign instead of ldid.")
     parser.add_argument('-d', '--debug', action='store_true', help="shows some debug info, only useful for testing.")
+    parser.add_argument('-u', '--url', type=str, help="the direct URL of the IPA to be signed.")
+    parser.add_argument('-p', '--path', type=str, help="the direct local path of the IPA to be signed.")
     args = parser.parse_args()
     
     main(args)
