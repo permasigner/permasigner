@@ -31,8 +31,12 @@ def cmd_in_path(args, cmd):
     
         if args.debug:
             print(f"[DEBUG] ldid is not in PATH... skipping.")
+            
+    if not f"{cmd} not found" in subprocess.run(f"which {cmd}".split(), capture_output=True, text=True).stdout:
+        return True
         
-    return which(cmd) is not None
+    #return which(cmd) is not None
+    
 
 """ Main Function """
 def main(args):
@@ -276,6 +280,7 @@ def main(args):
             subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"{tmpfolder}/deb/Applications/{folder}/Frameworks"
+            
             os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements '{full_path}'")
             
             if Path(frameworks_path).exists():
@@ -304,9 +309,15 @@ def main(args):
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
             frameworks_path = f"{tmpfolder}/deb/Applications/{folder}/Frameworks"
             if cmd_in_path(args, "ldid"):
+                if args.debug:
+                    print(f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
+            
                 os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
             else:
                 subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+                if args.debug:
+                    print(f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
+                
                 os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
             
             if Path(frameworks_path).exists():
@@ -317,8 +328,14 @@ def main(args):
                     if file.endswith(".dylib"):
                         print(f"Signing dylib {file}...")
                         if cmd_in_path(args, "ldid"):
+                            if args.debug:
+                                print(f"[DEBUG] Running command: ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                                
                             os.system(f"ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                         else:
+                            if args.debug:
+                                print(f"[DEBUG] Running command: ./ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                                
                             os.system(f"./ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                         
                 """
@@ -346,14 +363,17 @@ def main(args):
         if Path(f"output/{app_name}.deb").exists():
             os.remove(f"output/{app_name}.deb")
             
-        if args.debug:
-            print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
-            
         out_deb_name = app_name.replace(' ', '')
 
         if cmd_in_path(args, "dpkg-deb"):
+            if args.debug:
+                print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
+                
             subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
         else:
+            if args.debug:
+                print(f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
+            
             subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
 
     # Done!!!
