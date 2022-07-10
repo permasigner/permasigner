@@ -1,5 +1,27 @@
-<h1 align="center">Permasigner</h1>
-<p align="center">🖊 Permanently signs IPAs on jailbroken iDevices 14.0-14.8.1 (persists on stock).</p>
+<p align="center">
+  <img src="https://static.itsnebula.net/permasigner-title.png" width="240" />
+</p>
+
+<p align="center">
+  <a href="#">
+    <img src="https://img.shields.io/badge/made%20with-love-E760A4.svg" alt="Made with love">
+  </a>
+  <a href="https://github.com/itsnebulalol/permasigner/blob/main/LICENSE" target="_blank">
+    <img src="https://img.shields.io/github/license/itsnebulalol/permasigner.svg" alt="License">
+  </a>
+  <a href="https://github.com/itsnebulalol/permasigner/graphs/contributors" target="_blank">
+    <img src="https://img.shields.io/github/contributors/itsnebulalol/permasigner.svg" alt="Contributors">
+  </a>
+  <a href="https://github.com/itsnebulalol/permasigner/commits/main" target="_blank">
+    <img src="https://img.shields.io/github/commit-activity/w/itsnebulalol/permasigner.svg" alt="Commits">
+  </a>
+</p>
+
+<p align="center">
+Permanently sign IPAs on jailbroken iDevices 14.0-14.8.1 (persists on stock)
+</p>
+
+---
 
 # How does it work?
 In iOS 14.0-14.8.1, there is a bug where CoreTrust will allow any root certificate. Although the bug exists on iOS 15.0-15.4.1, it can not be abused (yet) since you need to be jailbroken at first to place the app in the /Applications folder. This bug does not exist on anything older than iOS 14.
