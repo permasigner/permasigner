@@ -21,19 +21,35 @@ def cmd_in_path(args, cmd):
         print(f"[DEBUG] Checking if command {cmd} is in PATH...")
         
     try:
-        if (cmd == "ldid") and (not "-procursus" in subprocess.run("ldid".split(), capture_output=True, text=True).stdout):
-            return False
-        
-            if args.debug:
-                print(f"[DEBUG] ldid installed is not from Procursus... skipping.")
+        which_cmd = subprocess.check_output(["which", f"{cmd}"], stderr=subprocess.STDOUT)
     except:
         return False
     
-        if args.debug:
-            print(f"[DEBUG] ldid is not in PATH... skipping.")
+    if not f"{cmd} not found" in which_cmd.decode("utf-8"):
+        try:
+            ldid_out = subprocess.check_output(["ldid"], stderr=subprocess.STDOUT)
+        except:
+            return False
+        
+        try:
+            if cmd == "ldid" and "procursus" not in ldid_out.decode("utf-8"):
+                return False
             
-    if not f"{cmd} not found" in subprocess.run(f"which {cmd}".split(), capture_output=True, text=True).stdout:
-        return True
+                if args.debug:
+                    print(f"[DEBUG] ldid installed is not from Procursus... skipping.")
+            else:
+                if args.debug:
+                    print(f"[DEBUG] ldid installed is from Procursus!")
+                    
+                return True
+        except:
+            return False
+        
+            if args.debug:
+                print(f"[DEBUG] ldid is not in PATH... skipping.")
+            
+    # if not f"{cmd} not found" in subprocess.run(f"which {cmd}".split(), capture_output=True, text=True).stdout:
+    #     return True
         
     #return which(cmd) is not None
     
@@ -122,14 +138,16 @@ def main(args):
                 if args.debug:
                     print(f"[DEBUG] On macOS x86_64, dpkg-deb not found...")
                     
-                if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
+                which_dpkg = subprocess.check_output(["which", "dpkg-deb"], stderr=subprocess.STDOUT)
+                if "dpkg not found" in which_dpkg.decode("utf-8"):
                     print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                     exit(1)
             elif sys.platform == "darwin" and platform.machine() == "arm64":
                 if args.debug:
                     print(f"[DEBUG] On macOS arm64, dpkg-deb not found...")
                     
-                if ("dpkg not found" in subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout) or (subprocess.run("which dpkg".split(), capture_output=True, text=True).stdout == ""):
+                which_dpkg = subprocess.check_output(["which", "dpkg-deb"], stderr=subprocess.STDOUT)
+                if "dpkg not found" in which_dpkg.decode("utf-8"):
                     print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                     exit(1)
     
