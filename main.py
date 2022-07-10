@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
-from shutil import rmtree, copytree, which
-import shutil
+from shutil import rmtree, copy, copytree, which
 import plistlib
 import requests
 from urllib.parse import urlparse
@@ -23,7 +22,7 @@ def cmd_in_path(args, cmd):
     
     if cmd == "ldid":
         try:
-            ldid_out = subprocess.check_output(["ldid"], stderr=subprocess.STDOUT)
+            ldid_out = subprocess.check_output(["ldid"], stderr=subprocess)
             if "procursus" not in ldid_out.decode("utf-8"):
                 return False
                 
@@ -184,7 +183,7 @@ def main(args):
                 path = path.strip()[:-1]
             
             if Path(path).exists():
-                shutil.copy(path, f"{tmpfolder}/app.ipa")
+                copy(path, f"{tmpfolder}/app.ipa")
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
@@ -216,7 +215,7 @@ def main(args):
                 path = path.strip()[:-1]
             
             if Path(path).exists():
-                shutil.copy(path, f"{tmpfolder}/app.ipa")
+                copy(path, f"{tmpfolder}/app.ipa")
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
