@@ -328,15 +328,15 @@ def main(args):
             frameworks_path = f"{tmpfolder}/deb/Applications/{folder}/Frameworks"
             if cmd_in_path(args, "ldid"):
                 if args.debug:
-                    print(f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
+                    print(f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
             
-                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
+                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
             else:
                 subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
                 if args.debug:
-                    print(f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
+                    print(f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
                 
-                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Upassword -Kdev_certificate.p12 '{full_path}'")
+                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
             
             if Path(frameworks_path).exists():
                 if args.debug:
@@ -347,14 +347,14 @@ def main(args):
                         print(f"Signing dylib {file}...")
                         if cmd_in_path(args, "ldid"):
                             if args.debug:
-                                print(f"[DEBUG] Running command: ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                                print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                                 
-                            os.system(f"ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                            os.system(f"ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                         else:
                             if args.debug:
-                                print(f"[DEBUG] Running command: ./ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                                print(f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                                 
-                            os.system(f"./ldid -Upassword -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                            os.system(f"./ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                         
                 """
                 frameworks = []
@@ -368,9 +368,9 @@ def main(args):
                         if "." not in path:
                             print(f"Signing framework...")
                             if cmd_in_path(args, "ldid"):
-                                os.system(f"ldid -Upassword -Kdev_certificate.p12 '{path}'")
+                                os.system(f"ldid -Kdev_certificate.p12 '{path}'")
                             else:
-                                os.system(f"./ldid -Upassword -Kdev_certificate.p12 '{path}'")
+                                os.system(f"./ldid -Kdev_certificate.p12 '{path}'")
                             os.system(f"chmod 0755 {path}")
                 """
         print()
