@@ -1,5 +1,7 @@
 import requests
 import subprocess
+import os
+from shutil import copy
 
 class DpkgDeb:
     def download_linux_64(args):
