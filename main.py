@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
-from shutil import rmtree, copy, copytree, which
+from shutil import rmtree, copytree, which
+import shutil
 import plistlib
 import requests
 from urllib.parse import urlparse
@@ -183,7 +184,7 @@ def main(args):
                 path = path.strip()[:-1]
             
             if Path(path).exists():
-                copy(path, f"{tmpfolder}/app.ipa")
+                shutil.copy(path, f"{tmpfolder}/app.ipa")
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
@@ -215,7 +216,7 @@ def main(args):
                 path = path.strip()[:-1]
             
             if Path(path).exists():
-                copy(path, f"{tmpfolder}/app.ipa")
+                shutil.copy(path, f"{tmpfolder}/app.ipa")
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
