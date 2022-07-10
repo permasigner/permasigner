@@ -118,38 +118,39 @@ def main(args):
                 Ldid.download_macos_arm64(args)
             
     # Auto download dpkg-deb on Linux
-    if not cmd_in_path(args, "dpkg-deb"):
+    if not cmd_in_path(args, "dpkg-deb") and sys.platform == "linux":
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
-            if sys.platform == "linux" and platform.machine() == "x86_64":
+            if platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On Linux x86_64, dpkg-deb not found...")
                     
                 print("[*] dpkg-deb not found, downloading.")
                 DpkgDeb.download_linux_64(args)
                 print()
-            elif sys.platform == "linux" and platform.machine() == "aarch64":
+            elif platform.machine() == "aarch64":
                 if args.debug:
                     print(f"[DEBUG] On Linux aarch64, dpkg-deb not found...")
                     
                 print("[*] dpkg-deb not found, downloading.")
                 DpkgDeb.download_linux_arm64(args)
                 print()
-            elif sys.platform == "darwin" and platform.machine() == "x86_64":
-                if args.debug:
-                    print(f"[DEBUG] On macOS x86_64, dpkg-deb not found...")
+                
+    if sys.platform == "darwin" and platform.machine() == "x86_64":
+        if args.debug:
+            print(f"[DEBUG] On macOS x86_64, dpkg-deb not found...")
                     
-                which_dpkg = subprocess.check_output(["which", "dpkg-deb"], stderr=subprocess.STDOUT)
-                if "dpkg not found" in which_dpkg.decode("utf-8"):
-                    print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
-                    exit(1)
-            elif sys.platform == "darwin" and platform.machine() == "arm64":
-                if args.debug:
-                    print(f"[DEBUG] On macOS arm64, dpkg-deb not found...")
+        which_dpkg = subprocess.check_output(["which", "dpkg"], stderr=subprocess.STDOUT)
+        if "dpkg not found" in which_dpkg.decode("utf-8"):
+            print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+            exit(1)
+    elif sys.platform == "darwin" and platform.machine() == "arm64":
+        if args.debug:
+            print(f"[DEBUG] On macOS arm64, dpkg-deb not found...")
                     
-                which_dpkg = subprocess.check_output(["which", "dpkg-deb"], stderr=subprocess.STDOUT)
-                if "dpkg not found" in which_dpkg.decode("utf-8"):
-                    print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
-                    exit(1)
+        which_dpkg = subprocess.check_output(["which", "dpkg"], stderr=subprocess.STDOUT)
+        if "dpkg not found" in which_dpkg.decode("utf-8"):
+            print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+            exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
     if not args.url or args.path:
