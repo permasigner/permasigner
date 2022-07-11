@@ -21,6 +21,16 @@ def cmd_in_path(args, cmd):
         print(f"[DEBUG] Checking if command {cmd} is in PATH...")
     
     if cmd == "ldid":
+        if is_ios():
+            if is_dpkg_installed("ldid"):
+                if args.debug:
+                    print(f"[DEBUG] ldid is installed via dpkg")
+                    
+                return True
+            else:
+                print("[-] ldid is required on iOS, but it is not installed. Please install it from Procursus.")
+                exit(1)
+            
         try:
             ldid_out = subprocess.check_output(["ldid"], stderr=subprocess)
             if "procursus" not in ldid_out.decode("utf-8"):
@@ -65,6 +75,9 @@ def is_ios():
         return False
     
     return platform.machine().startswith("i")
+
+def is_dpkg_installed(pkg):
+    return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
     
 
 """ Main Function """
