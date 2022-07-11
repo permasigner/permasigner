@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import platform
 import argparse
+import glob
 
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
@@ -171,7 +172,7 @@ def main(args):
             exit(1)
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
-    if not args.url or args.path:
+    if not (args.url or args.path):
         option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
         option = option.lower()
 
@@ -329,18 +330,18 @@ def main(args):
                         print(f"Signing dylib {file}...")
                         os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep '{frameworks_path}/{file}'")
                         
-                """
-                frameworks = []
-                for fname in os.listdir(path=frameworks_path):
-                    if fname.endswith(".framework"):
-                        frameworks.append(fname)
-                
-                for folder in frameworks:
-                    dirs = os.listdir(folder)
-                    for path in dirs:
-                        if "." not in path:
-                            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep '{path}'")
-                """
+                for fname in glob.glob(frameworks_path + '/*.framework'):
+                    for filename in os.listdir(fname):
+                        path = os.path.join(fname, filename)
+                        if filename == os.path.basename(fname).replace(".framework", ""):
+                            print(f"Signing framework executable {filename}...")
+                            if args.debug:
+                                print(
+                                    f"[DEBUG] Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing'",
+                                    "--force --deep {path}")
+                                subprocess.Popen(
+                                    ['codesign', '-s', "'We Do A Little Trolling iPhone OS Application Signing'",
+                                     '--force', '--deep', f'{path}'])
         else:
             print("Signing with ldid...")
             full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
@@ -375,23 +376,19 @@ def main(args):
                                 
                             os.system(f"./ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
                         
-                """
-                frameworks = []
-                for fname in os.listdir(path=frameworks_path):
-                    if fname.endswith(".framework"):
-                        frameworks.append(fname)
-                
-                for folder in frameworks:
-                    dirs = os.listdir(folder)
-                    for path in dirs:
-                        if "." not in path:
-                            print(f"Signing framework...")
+                for fname in glob.glob(frameworks_path + '/*.framework'):
+                    for filename in os.listdir(fname):
+                        path = os.path.join(fname, filename)
+                        if filename == os.path.basename(fname).replace(".framework", ""):
+                            print(f"Signing framework executable {filename}...")
                             if cmd_in_path(args, "ldid"):
-                                os.system(f"ldid -Kdev_certificate.p12 '{path}'")
+                                if args.debug:
+                                    print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {path}")
+                                subprocess.Popen(['ldid', '-Kdev_certificate.p12', f'{path}'])
                             else:
-                                os.system(f"./ldid -Kdev_certificate.p12 '{path}'")
-                            os.system(f"chmod 0755 {path}")
-                """
+                                if args.debug:
+                                    print(f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 {path}")
+                                subprocess.Popen(['./ldid', '-Kdev_certificate.p12', f'{path}'])
         print()
 
         # Package the deb file
@@ -429,3 +426,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     main(args)
+
