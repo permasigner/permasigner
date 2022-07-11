@@ -51,6 +51,21 @@ def cmd_in_path(args, cmd):
         
     #return which(cmd) is not None
     
+def is_macos():
+    if platform.machine().startswith("i"):
+        return False
+    
+    return sys.platform == "darwin"
+
+def is_linux():
+    return sys.platform == "linux"
+
+def is_ios():
+    if not sys.platform == "darwin":
+        return False
+    
+    return platform.machine().startswith("i")
+    
 
 """ Main Function """
 def main(args):
@@ -65,14 +80,14 @@ def main(args):
         
     # Check if codesign is added on Linux
     if args.codesign:
-        if sys.platform == "linux":
+        if is_linux():
             print("[-] You cannot use codesign on Linux, remove the argument and it'll use ldid instead.")
             exit(1)
         
     # Auto download ldid
     if not cmd_in_path(args, "ldid"):
         if Path(f"{os.getcwd()}/ldid").exists():
-            if sys.platform == "linux" and platform.machine() == "x86_64":
+            if is_linux() and platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On Linux x86_64, ldid not found...")
                     
@@ -80,7 +95,7 @@ def main(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_64()
-            elif sys.platform == "linux" and platform.machine() == "aarch64":
+            elif is_linux() and platform.machine() == "aarch64":
                 if args.debug:
                     print(f"[DEBUG] On Linux aarch64, ldid not found...")
                     
@@ -88,7 +103,7 @@ def main(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_arm64()
-            elif sys.platform == "darwin" and platform.machine() == "x86_64":
+            elif is_macos() and platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On macOS x86_64, ldid not found...")
                     
@@ -96,7 +111,7 @@ def main(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_macos_64()
-            elif sys.platform == "darwin" and platform.machine() == "arm64":
+            elif is_macos() and platform.machine() == "arm64":
                 if args.debug:
                     print(f"[DEBUG] On macOS arm64, ldid not found...")
                     
@@ -106,17 +121,17 @@ def main(args):
                     Ldid.download_macos_arm64()
         else:
             print("[*] ldid not found, downloading.")
-            if sys.platform == "linux" and platform.machine() == "x86_64":
+            if is_linux() and platform.machine() == "x86_64":
                 Ldid.download_linux_64(args)
-            elif sys.platform == "linux" and platform.machine() == "aarch64":
+            elif is_linux() and platform.machine() == "aarch64":
                 Ldid.download_linux_arm64(args)
-            elif sys.platform == "darwin" and platform.machine() == "x86_64":
+            elif is_macos() and platform.machine() == "x86_64":
                 Ldid.download_macos_64(args)
-            elif sys.platform == "darwin" and platform.machine() == "arm64":
+            elif is_macos() and platform.machine() == "arm64":
                 Ldid.download_macos_arm64(args)
             
     # Auto download dpkg-deb on Linux
-    if not cmd_in_path(args, "dpkg-deb") and sys.platform == "linux":
+    if not cmd_in_path(args, "dpkg-deb") and is_linux():
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
             if platform.machine() == "x86_64":
                 if args.debug:
@@ -133,7 +148,7 @@ def main(args):
                 DpkgDeb.download_linux_arm64(args)
                 print()
                 
-    if sys.platform == "darwin":
+    if is_macos():
         try:
             which_dpkg = subprocess.check_output(["which", "dpkg"], stderr=subprocess.STDOUT)
         except:
