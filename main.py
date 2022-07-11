@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import rmtree, copy, copytree, which
+from shutil import copy, copytree
 import plistlib
 import requests
 from urllib.parse import urlparse
@@ -14,7 +14,7 @@ from glob import glob
 
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
-from utils.hash import Hash, LdidHash
+from utils.hash import LdidHash
 
 """ Functions """
 def cmd_in_path(args, cmd):
@@ -50,7 +50,7 @@ def cmd_in_path(args, cmd):
                     print(f"[DEBUG] ldid installed is from Procursus!")
                         
                 return True
-        except:
+        except(Exception,):
             return False
             
             if args.debug:
@@ -205,6 +205,7 @@ def main(args):
                     
                     with open(f"{tmpfolder}/app.ipa", "wb") as f:
                         f.write(res.content)
+                        f.close()
                 else:
                     print(f"[-] URL provided is not reachable. Status code: {res.status_code}")
                     exit(1)
@@ -237,6 +238,7 @@ def main(args):
                     
                     with open(f"{tmpfolder}/app.ipa", "wb") as f:
                         f.write(res.content)
+                        f.close()
                 else:
                     print(f"[-] URL provided is not reachable. Status code: {res.status_code}")
                     exit(1)
@@ -264,6 +266,7 @@ def main(args):
         with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
             os.makedirs(f"{tmpfolder}/app", exist_ok=False)
             f.extractall(f"{tmpfolder}/app")
+            f.close()
         print()
             
         # Read data from the plist
@@ -294,6 +297,7 @@ def main(args):
                     app_executable = None
                     print("No executable found.")
                 print("Found information about the app!")
+                f.close()
         print()
         
         # Get the deb file ready
@@ -409,7 +413,7 @@ def main(args):
                                 exec_path = os.path.join(fpath, f_executable)
                                 if cmd_in_path(args, "ldid"):
                                     if args.debug:
-                                        print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {exec}")
+                                        print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {exec_path}")
                                     subprocess.run(f"ldid -Kdev_certificate.p12 '{exec_path}'", shell=True)
                                 else:
                                     if args.debug:
