@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 import platform
 import argparse
-import glob
+from glob import glob
 
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
