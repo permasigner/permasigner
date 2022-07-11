@@ -205,7 +205,6 @@ def main(args):
                     
                     with open(f"{tmpfolder}/app.ipa", "wb") as f:
                         f.write(res.content)
-                        f.close()
                 else:
                     print(f"[-] URL provided is not reachable. Status code: {res.status_code}")
                     exit(1)
@@ -238,7 +237,6 @@ def main(args):
                     
                     with open(f"{tmpfolder}/app.ipa", "wb") as f:
                         f.write(res.content)
-                        f.close()
                 else:
                     print(f"[-] URL provided is not reachable. Status code: {res.status_code}")
                     exit(1)
@@ -266,7 +264,6 @@ def main(args):
         with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
             os.makedirs(f"{tmpfolder}/app", exist_ok=False)
             f.extractall(f"{tmpfolder}/app")
-            f.close()
         print()
             
         # Read data from the plist
@@ -297,7 +294,6 @@ def main(args):
                     app_executable = None
                     print("No executable found.")
                 print("Found information about the app!")
-                f.close()
         print()
         
         # Get the deb file ready
@@ -353,7 +349,7 @@ def main(args):
                                 f_executable = None
                                 if args.debug:
                                     print(f"[DEBUG] No executable found in the {fname}")
-                            f.close()
+                                    
                             if f_executable is not None:
                                 print(f"Signing executable in {fname}")
                                 exec_path = os.path.join(fpath, f_executable)
@@ -407,7 +403,7 @@ def main(args):
                                 f_executable = None
                                 if args.debug:
                                     print(f"[DEBUG] No executable found in the {fname}")
-                            f.close()
+                                    
                             if f_executable is not None:
                                 print(f"Signing executable in {fname}")
                                 exec_path = os.path.join(fpath, f_executable)
