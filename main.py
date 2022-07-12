@@ -349,12 +349,11 @@ def main(args):
                                 f_executable = None
                                 if args.debug:
                                     print(f"[DEBUG] No executable found in the {fname}")
-                                    
                             if f_executable is not None:
                                 print(f"Signing executable in {fname}")
                                 exec_path = os.path.join(fpath, f_executable)
-                            if args.debug:
-                                print(f"[DEBUG] Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {exec_path}")
+                                if args.debug:
+                                    print(f"[DEBUG] Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {exec_path}")
                                 subprocess.run(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep '{exec_path}'", shell=True)
         else:
             print("Signing with ldid...")
@@ -403,7 +402,6 @@ def main(args):
                                 f_executable = None
                                 if args.debug:
                                     print(f"[DEBUG] No executable found in the {fname}")
-                                    
                             if f_executable is not None:
                                 print(f"Signing executable in {fname}")
                                 exec_path = os.path.join(fpath, f_executable)
