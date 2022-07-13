@@ -479,7 +479,7 @@ def main(args):
             option = option.lower()
         if option == 'y' or args.install:
             if is_macos():
-                if subprocess.run("system_profiler SPUSBDataType | grep 'iPhone\|iPad'".split()).returncode == 0:
+                if subprocess.run("system_profiler SPUSBDataType | grep 'iPhone\|iPad'".split(), stdout=DEVNULL).returncode == 0:
                     print("macOS - Found connected iPad or iPhone device")
                     install_deb()
                 else:
