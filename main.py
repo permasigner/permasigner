@@ -478,6 +478,7 @@ def main(args):
             option = input("[?] Would you like install the application to your device? [y, n] ")
             option = option.lower()
         if option == 'y' or args.install:
+            print(f"[*] Installing {app_name}.deb to the device")
             if is_macos():
                 if subprocess.run("system_profiler SPUSBDataType | grep 'iPhone\|iPad'".split(), stdout=DEVNULL).returncode == 0:
                     print("macOS - Found connected iPad or iPhone device")
