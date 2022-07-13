@@ -175,7 +175,7 @@ class PlistProtocol(BinaryProtocol):
         payload['MessageType'] = req
         payload['ProgName'] = 'tcprelay'
         if python3:
-            BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.writePlistToBytes(payload))
+            BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.dumps(payload))
         else:
             BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.writePlistToString(payload))
 
