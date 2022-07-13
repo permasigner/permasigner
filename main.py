@@ -462,6 +462,8 @@ def main(args):
                                 username='root',
                                 password=f'{password}',
                                 timeout=5000,
+                                allow_agent=False,
+                                look_for_keys=False,
                                 compress=True)
                     with SCPClient(ssh.get_transport()) as scp:
                         print(f"Sending {app_name}.deb to device")
