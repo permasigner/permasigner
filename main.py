@@ -16,6 +16,13 @@ from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
 from utils.hash import LdidHash
 
+import time
+
+from paramiko.client import AutoAddPolicy, SSHClient
+from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
+from scp import SCPClient
+from subprocess import PIPE, DEVNULL
+
 """ Functions """
 def cmd_in_path(args, cmd):
     if args.debug:
@@ -434,10 +441,68 @@ def main(args):
             
             subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
 
+        def install_deb():
+            print(f'[*] Installing {app_name} to the device')
+            print("Relaying TCP connection")
+            if args.debug:
+                print("[DEBUG] Running command: ./tcprelay.py -t 22:2222")
+            relay = subprocess.Popen('./tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
+            time.sleep(1)
+            try:
+                with SSHClient() as ssh:
+                    ssh.load_system_host_keys()
+                    ssh.set_missing_host_key_policy(AutoAddPolicy())
+                    ssh.connect('localhost',
+                                port=2222,
+                                username='root',
+                                password='alpine',
+                                timeout=5000,
+                                compress=True)
+                    with SCPClient(ssh.get_transport()) as scp:
+                        print(f"Sending {app_name}.deb to device")
+                        scp.put(f'output/{app_name}.deb', remote_path='/var/mobile/Documents')
+
+                    print(f"Unpacking {app_name}.deb")
+                    if args.debug:
+                        print(f'[DEBUG] Running command dpkg -i /var/mobile/Documents/{app_name}.deb on device')
+                    stdin, stdout, stderr = ssh.exec_command(f'dpkg -i /var/mobile/Documents/{app_name}.deb')
+                    stdout.read()
+            except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
+                print(e)
+                exit(1)
+            finally:
+                relay.kill()
+
+        option = 'n'
+        if not args.install:
+            option = input("[?] Would you like install the application to your device? [y, n] ")
+            option = option.lower()
+        if option == 'y' or args.install:
+            if is_macos():
+                if subprocess.run("system_profiler SPUSBDataType | grep 'iPhone\|iPad'".split()).returncode == 0:
+                    print("macOS - Found connected iPad or iPhone device")
+                    install_deb()
+                else:
+                    print("No connected iOS devices found")
+            elif is_linux():
+                if Path('/var/run/usbmuxd.pid').exists():
+                    print('Linux - Found an iOS device connected via usb')
+                    install_deb()
+                else:
+                    print('Linux - No usb device found')
+            elif is_ios():
+                print("ios - Please enter the password when prompted")
+                if args.debug:
+                    print(f"[DEBUG] Running command su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb on iOS")
+                subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb".split())
+
     # Done!!!
     print()
     print("[*] We are finished!")
-    print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
+    if args.install:
+        print("[*] The application was installed to your device, no further steps are required!")
+    else:
+        print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
     print("[*] The app will continue to work when rebooted to stock.")
     print(f"[*] Output file: output/{out_deb_name}.deb")
         
@@ -447,6 +512,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--debug', action='store_true', help="shows some debug info, only useful for testing.")
     parser.add_argument('-u', '--url', type=str, help="the direct URL of the IPA to be signed.")
     parser.add_argument('-p', '--path', type=str, help="the direct local path of the IPA to be signed.")
+    parser.add_argument('-i', '--install', action='store_true', help="installs the application to your device")
     args = parser.parse_args()
     
     main(args)
