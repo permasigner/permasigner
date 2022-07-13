@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from shutil import copy, copytree
 import plistlib
+
 import requests
 from urllib.parse import urlparse
 import zipfile
@@ -15,6 +16,7 @@ from glob import glob
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
 from utils.hash import LdidHash
+from utils.usbmux import USBMux
 
 import time
 
@@ -449,13 +451,13 @@ def main(args):
             relay = subprocess.Popen('./utils/tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
             time.sleep(1)
             try:
+                password = (input("Please enter your root password (default = alpine): ") or "alpine")
                 with SSHClient() as ssh:
-                    ssh.load_system_host_keys()
                     ssh.set_missing_host_key_policy(AutoAddPolicy())
                     ssh.connect('localhost',
                                 port=2222,
                                 username='root',
-                                password='alpine',
+                                password=f'{password}',
                                 timeout=5000,
                                 compress=True)
                     with SCPClient(ssh.get_transport()) as scp:
@@ -474,25 +476,27 @@ def main(args):
                 relay.kill()
 
         option = 'n'
+        is_installed = False
         if not args.install:
-            option = input("[?] Would you like install the application to your device? [y, n] ")
+            option = input("[?] Would you like install the application to your device? [y, n]: ")
             option = option.lower()
+
         if option == 'y' or args.install:
-            print(f"[*] Installing {app_name}.deb to the device")
-            if is_macos():
-                if subprocess.run("system_profiler SPUSBDataType | grep 'iPhone\|iPad'".split(), stdout=DEVNULL).returncode == 0:
-                    print("macOS - Found connected iPad or iPhone device")
-                    install_deb()
-                else:
-                    print("No connected iOS devices found")
-            elif is_linux():
-                if Path('/var/run/usbmuxd.pid').exists():
-                    print('Linux - Found an iOS device connected via usb')
-                    install_deb()
-                else:
-                    print('Linux - No usb device found')
+            if is_macos() or is_linux():
+                try:
+                    mux = USBMux()
+                    if not mux.devices:
+                        mux.process(1.0)
+                    if not mux.devices:
+                        print("Did not find a connected device")
+                    else:
+                        print("Found a connected device")
+                        install_deb()
+                except ConnectionRefusedError:
+                    print("Did not find a connected device")
+                    pass
             elif is_ios():
-                print("ios - Please enter the password when prompted")
+                print("Please enter the password when prompted")
                 if args.debug:
                     print(f"[DEBUG] Running command su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb on iOS")
                 subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb".split())
@@ -500,7 +504,7 @@ def main(args):
     # Done!!!
     print()
     print("[*] We are finished!")
-    if args.install:
+    if is_installed:
         print("[*] The application was installed to your device, no further steps are required!")
     else:
         print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
