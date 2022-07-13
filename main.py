@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from shutil import copy, copytree
 import plistlib
-
 import requests
 from urllib.parse import urlparse
 import zipfile
@@ -24,6 +23,8 @@ from paramiko.client import AutoAddPolicy, SSHClient
 from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
 from scp import SCPClient
 from subprocess import PIPE, DEVNULL
+
+from getpass import getpass
 
 """ Functions """
 def cmd_in_path(args, cmd):
@@ -451,7 +452,9 @@ def main(args):
             relay = subprocess.Popen('./utils/tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
             time.sleep(1)
             try:
-                password = (input("Please enter your root password (default = alpine): ") or "alpine")
+                password = getpass(prompt="Please enter your root password (default = alpine): ")
+                if len(password) == 0:
+                    password = 'alpine'
                 with SSHClient() as ssh:
                     ssh.set_missing_host_key_policy(AutoAddPolicy())
                     ssh.connect('localhost',
@@ -475,11 +478,10 @@ def main(args):
             finally:
                 relay.kill()
 
-        option = 'n'
         is_installed = False
+        option = 'n'
         if not args.install:
-            option = input("[?] Would you like install the application to your device? [y, n]: ")
-            option = option.lower()
+            option = input("[?] Would you like install the application to your device? [y, n]: ").lower()
 
         if option == 'y' or args.install:
             if is_macos() or is_linux():
@@ -492,6 +494,7 @@ def main(args):
                     else:
                         print("Found a connected device")
                         install_deb()
+                        is_installed = True
                 except ConnectionRefusedError:
                     print("Did not find a connected device")
                     pass
@@ -499,7 +502,8 @@ def main(args):
                 print("Please enter the password when prompted")
                 if args.debug:
                     print(f"[DEBUG] Running command su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb on iOS")
-                subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb".split())
+                subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb'".split())
+                is_installed = True
 
     # Done!!!
     print()
