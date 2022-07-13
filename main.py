@@ -445,8 +445,8 @@ def main(args):
             print(f'[*] Installing {app_name} to the device')
             print("Relaying TCP connection")
             if args.debug:
-                print("[DEBUG] Running command: ./tcprelay.py -t 22:2222")
-            relay = subprocess.Popen('./tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
+                print("[DEBUG] Running command: ./utils/tcprelay.py -t 22:2222")
+            relay = subprocess.Popen('./utils/tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
             time.sleep(1)
             try:
                 with SSHClient() as ssh:
