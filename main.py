@@ -441,8 +441,23 @@ def main(args):
         else:
             if args.debug:
                 print(f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
-            
+
             subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
+
+        def get_shell_output(shell):
+            out = ''
+            time.sleep(1)
+            while shell.recv_ready():
+                out += shell.recv(2048).decode()
+            return out
+
+        def shell_install_deb(shell):
+            s_output = get_shell_output(shell)
+            if 'Password' in s_output.strip():
+                shell.send((getpass() + '\n').encode())
+                s_output = get_shell_output(shell)
+            for line in s_output.splitlines():
+                print(line)
 
         def install_deb():
             print(f'[*] Installing {app_name} to the device')
@@ -452,32 +467,44 @@ def main(args):
             relay = subprocess.Popen('./utils/tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
             time.sleep(1)
             try:
-                password = getpass(prompt="Please enter your root password (default = alpine): ")
-                if len(password) == 0:
+                password = getpass(prompt="Please provide your user password (default = alpine): ")
+                if len(password.strip()) == 0:
                     password = 'alpine'
-                with SSHClient() as ssh:
-                    ssh.set_missing_host_key_policy(AutoAddPolicy())
-                    ssh.connect('localhost',
-                                port=2222,
-                                username='root',
-                                password=f'{password}',
-                                timeout=5000,
-                                allow_agent=False,
-                                look_for_keys=False,
-                                compress=True)
-                    with SCPClient(ssh.get_transport()) as scp:
+                with SSHClient() as client:
+                    client.set_missing_host_key_policy(AutoAddPolicy())
+                    client.connect('localhost',
+                                   port=2222,
+                                   username='mobile',
+                                   password=f'{password}',
+                                   timeout=5000,
+                                   allow_agent=False,
+                                   look_for_keys=False,
+                                   compress=True)
+                    # send deb file to the device using scp
+                    with SCPClient(client.get_transport()) as scp:
                         print(f"Sending {app_name}.deb to device")
                         scp.put(f'output/{app_name}.deb', remote_path='/var/mobile/Documents')
-
-                    print(f"Unpacking {app_name}.deb")
-                    if args.debug:
-                        print(f'[DEBUG] Running command dpkg -i /var/mobile/Documents/{app_name}.deb on device')
-                    stdin, stdout, stderr = ssh.exec_command(f'dpkg -i /var/mobile/Documents/{app_name}.deb')
-                    stdout.read()
+                    stdin, stdout, stderr = client.exec_command('sudo -v')
+                    error = stderr.readline()
+                    status = stdout.channel.recv_exit_status()
+                    # invoke an interactive shell to send commands to
+                    shell = client.invoke_shell()
+                    # sudo -v will return code 0 is user is in sudoers and has NOPASSWD configuration
+                    # will return a tty error if user is in sudoers but it can't prompt for a password
+                    # any other type of output means user has no sudo rights or sudo command is missing
+                    # in that case it will default to using su
+                    if status == 0 or 'tty' in error:
+                        print("User is in sudoers, using sudo")
+                        shell.send(f'sudo dpkg -i /var/mobile/Documents/{app_name}.deb\n'.encode())
+                        shell_install_deb(shell)
+                    else:
+                        print("User is not in sudoers, using su instead")
+                        shell.send(f"su -c 'dpkg -i /var/mobile/Documents/{app_name}.deb'\n".encode())
+                        shell_install_deb(shell)
             except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
                 print(e)
-                exit(1)
             finally:
+                shell.close()
                 relay.kill()
 
         is_installed = False
@@ -501,11 +528,14 @@ def main(args):
                     print("Did not find a connected device")
                     pass
             elif is_ios():
-                print("Please enter the password when prompted")
-                if args.debug:
-                    print(f"[DEBUG] Running command su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb on iOS")
-                subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb'".split())
-                is_installed = True
+                print("Checking if user is in sudoers")
+                rc, output = subprocess.getstatusoutput('sudo -v')
+                if rc == 0 or 'Password' in output:
+                    print("User is in sudoers, using sudo command")
+                    subprocess.run(f'sudo dpkg -i /var/mobile/Documents/{app_name}.deb'.split(), stdout=PIPE, stderr=PIPE)
+                else:
+                    print("User is not in sudoers, using su instead")
+                    subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
