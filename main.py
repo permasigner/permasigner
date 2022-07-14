@@ -18,7 +18,7 @@ from utils.hash import LdidHash
 from utils.usbmux import USBMux
 
 import time
-
+import pexpect
 from paramiko.client import AutoAddPolicy, SSHClient
 from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
 from scp import SCPClient
@@ -529,8 +529,8 @@ def main(args):
                     pass
             elif is_ios():
                 print("Checking if user is in sudoers")
-                rc, output = subprocess.getstatusoutput('sudo -v')
-                if rc == 0 or 'Password' in output:
+                output, rc = pexpect.run('sudo -v', timeout=1, withexitstatus=True)
+                if int(rc) == 0 or 'Password' in str(output):
                     print("User is in sudoers, using sudo command")
                     subprocess.run(f'sudo dpkg -i /var/mobile/Documents/{app_name}.deb'.split(), stdout=PIPE, stderr=PIPE)
                 else:
