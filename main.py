@@ -532,7 +532,7 @@ def main(args):
                 output, rc = pexpect.run('sudo -v', timeout=1, withexitstatus=True)
                 if int(rc) == 0 or 'Password' in str(output):
                     print("User is in sudoers, using sudo command")
-                    subprocess.run(f'sudo dpkg -i /var/mobile/Documents/{app_name}.deb'.split(), stdout=PIPE, stderr=PIPE)
+                    subprocess.run(f'sudo dpkg -i output/{app_name.replace(' ', '')}.deb'.split(), stdout=PIPE, stderr=PIPE)
                 else:
                     print("User is not in sudoers, using su instead")
                     subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb'".split(), stdout=PIPE, stderr=PIPE)
