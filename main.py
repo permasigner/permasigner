@@ -427,22 +427,21 @@ def main(args):
 
         # Package the deb file
         print("[*] Packaging the deb file...")
-        os.makedirs("output", exist_ok=True)
-        if Path(f"output/{app_name}.deb").exists():
-            os.remove(f"output/{app_name}.deb")
-            
         out_deb_name = app_name.replace(' ', '')
+        os.makedirs("output", exist_ok=True)
+        if Path(f"output/{out_deb_name}.deb").exists():
+            os.remove(f"output/{out_deb_name}.deb")
 
         if cmd_in_path(args, "dpkg-deb"):
             if args.debug:
-                print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
+                print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
                 
-            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
         else:
             if args.debug:
-                print(f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
+                print(f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
 
-            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
 
         def get_shell_output(shell):
             out = ''
@@ -460,7 +459,7 @@ def main(args):
                 print(line)
 
         def install_deb():
-            print(f'[*] Installing {app_name} to the device')
+            print(f'[*] Installing {out_deb_name} to the device')
             print("Relaying TCP connection")
             if args.debug:
                 print("[DEBUG] Running command: ./utils/tcprelay.py -t 22:2222")
@@ -482,8 +481,8 @@ def main(args):
                                    compress=True)
                     # send deb file to the device using scp
                     with SCPClient(client.get_transport()) as scp:
-                        print(f"Sending {app_name}.deb to device")
-                        scp.put(f'output/{app_name}.deb', remote_path='/var/mobile/Documents')
+                        print(f"Sending {out_deb_name}.deb to device")
+                        scp.put(f'output/{out_deb_name}.deb', remote_path='/var/mobile/Documents')
                     stdin, stdout, stderr = client.exec_command('sudo -v')
                     error = stderr.readline()
                     status = stdout.channel.recv_exit_status()
@@ -495,11 +494,11 @@ def main(args):
                     # in that case it will default to using su
                     if status == 0 or 'tty' in error:
                         print("User is in sudoers, using sudo")
-                        shell.send(f'sudo dpkg -i /var/mobile/Documents/{app_name}.deb\n'.encode())
+                        shell.send(f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
                         shell_install_deb(shell)
                     else:
                         print("User is not in sudoers, using su instead")
-                        shell.send(f"su -c 'dpkg -i /var/mobile/Documents/{app_name}.deb'\n".encode())
+                        shell.send(f"su -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
                         shell_install_deb(shell)
             except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
                 print(e)
@@ -532,10 +531,10 @@ def main(args):
                 output, rc = pexpect.run('sudo -v', timeout=1, withexitstatus=True)
                 if int(rc) == 0 or 'Password' in str(output):
                     print("User is in sudoers, using sudo command")
-                    subprocess.run(f'sudo dpkg -i output/{app_name.replace(' ', '')}.deb'.split(), stdout=PIPE, stderr=PIPE)
+                    subprocess.run(f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
                 else:
                     print("User is not in sudoers, using su instead")
-                    subprocess.run(f"su -c 'dpkg -i output/{app_name.replace(' ', '')}.deb'".split(), stdout=PIPE, stderr=PIPE)
+                    subprocess.run(f"su -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
