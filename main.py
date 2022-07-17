@@ -18,7 +18,6 @@ from utils.hash import LdidHash
 from utils.usbmux import USBMux
 
 import time
-import pexpect
 from paramiko.client import AutoAddPolicy, SSHClient
 from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
 from scp import SCPClient
@@ -479,26 +478,20 @@ def main(args):
                                    allow_agent=False,
                                    look_for_keys=False,
                                    compress=True)
-                    # send deb file to the device using scp
                     with SCPClient(client.get_transport()) as scp:
                         print(f"Sending {out_deb_name}.deb to device")
                         scp.put(f'output/{out_deb_name}.deb', remote_path='/var/mobile/Documents')
-                    stdin, stdout, stderr = client.exec_command('sudo -v')
+                    stdin, stdout, stderr = client.exec_command('sudo -nv')
                     error = stderr.readline()
                     status = stdout.channel.recv_exit_status()
-                    # invoke an interactive shell to send commands to
                     shell = client.invoke_shell()
-                    # sudo -v will return code 0 is user is in sudoers and has NOPASSWD configuration
-                    # will return a tty error if user is in sudoers but it can't prompt for a password
-                    # any other type of output means user has no sudo rights or sudo command is missing
-                    # in that case it will default to using su
-                    if status == 0 or 'tty' in error:
+                    if status == 0 or 'password' in error:
                         print("User is in sudoers, using sudo")
                         shell.send(f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
                         shell_install_deb(shell)
                     else:
                         print("User is not in sudoers, using su instead")
-                        shell.send(f"su -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
+                        shell.send(f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
                         shell_install_deb(shell)
             except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
                 print(e)
@@ -528,13 +521,13 @@ def main(args):
                     pass
             elif is_ios():
                 print("Checking if user is in sudoers")
-                output, rc = pexpect.run('sudo -v', timeout=1, withexitstatus=True)
-                if int(rc) == 0 or 'Password' in str(output):
+                p = subprocess.run('sudo -nv'.split(), stdout=PIPE, stderr=PIPE)
+                if p.returncode == 0 or 'password' in p.stderr.decode():
                     print("User is in sudoers, using sudo command")
                     subprocess.run(f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
                 else:
                     print("User is not in sudoers, using su instead")
-                    subprocess.run(f"su -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
+                    subprocess.run(f"su root -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
