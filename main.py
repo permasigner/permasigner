@@ -451,7 +451,7 @@ def main(args):
 
         def shell_install_deb(shell):
             s_output = get_shell_output(shell)
-            if 'Password' in s_output.strip():
+            if 'Password' in s_output.strip() or 'password' in s_output.strip():
                 shell.send((getpass() + '\n').encode())
                 s_output = get_shell_output(shell)
             for line in s_output.splitlines():
