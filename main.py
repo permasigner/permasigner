@@ -15,6 +15,15 @@ from glob import glob
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
 from utils.hash import LdidHash
+from utils.usbmux import USBMux
+
+import time
+from paramiko.client import AutoAddPolicy, SSHClient
+from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
+from scp import SCPClient
+from subprocess import PIPE, DEVNULL
+
+from getpass import getpass
 
 """ Functions """
 def cmd_in_path(args, cmd):
@@ -417,27 +426,122 @@ def main(args):
 
         # Package the deb file
         print("[*] Packaging the deb file...")
-        os.makedirs("output", exist_ok=True)
-        if Path(f"output/{app_name}.deb").exists():
-            os.remove(f"output/{app_name}.deb")
-            
         out_deb_name = app_name.replace(' ', '')
+        os.makedirs("output", exist_ok=True)
+        if Path(f"output/{out_deb_name}.deb").exists():
+            os.remove(f"output/{out_deb_name}.deb")
 
         if cmd_in_path(args, "dpkg-deb"):
             if args.debug:
-                print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
+                print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
                 
-            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
         else:
             if args.debug:
-                print(f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb")
-            
-            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{app_name.replace(' ', '')}.deb".split(), stdout=subprocess.DEVNULL)
+                print(f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
+
+            subprocess.run(f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
+
+        def get_shell_output(shell):
+            out = ''
+            time.sleep(1)
+            while shell.recv_ready():
+                out += shell.recv(2048).decode()
+            return out
+
+        def treat_shell_output(shell):
+            s_output = get_shell_output(shell)
+            if 'password' in s_output.lower():
+                shell.send((getpass() + '\n').encode())
+                s_output = get_shell_output(shell)
+            for line in s_output.splitlines():
+                print(line)
+
+        def install_deb():
+            print(f'[*] Installing {out_deb_name} to the device')
+            print("Relaying TCP connection")
+            if args.debug:
+                print("[DEBUG] Running command: ./utils/tcprelay.py -t 22:2222")
+            relay = subprocess.Popen('./utils/tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
+            time.sleep(1)
+            try:
+                password = getpass(prompt="Please provide your user password (default = alpine): ")
+                if len(password.strip()) == 0:
+                    password = 'alpine'
+                with SSHClient() as client:
+                    client.set_missing_host_key_policy(AutoAddPolicy())
+                    client.connect('localhost',
+                                   port=2222,
+                                   username='mobile',
+                                   password=f'{password}',
+                                   timeout=5000,
+                                   allow_agent=False,
+                                   look_for_keys=False,
+                                   compress=True)
+                    with SCPClient(client.get_transport()) as scp:
+                        print(f"Sending {out_deb_name}.deb to device")
+                        scp.put(f'output/{out_deb_name}.deb', remote_path='/var/mobile/Documents')
+                    stdin, stdout, stderr = client.exec_command('sudo -nv')
+                    error = stderr.readline()
+                    status = stdout.channel.recv_exit_status()
+                    shell = client.invoke_shell()
+                    if status == 0 or 'password' in error:
+                        print("User is in sudoers, using sudo")
+                        shell.send(f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
+                        treat_shell_output(shell)
+                        shell.send(f"sudo apt -f install\n".encode())
+                        treat_shell_output(shell)
+                    else:
+                        print("User is not in sudoers, using su instead")
+                        shell.send(f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
+                        treat_shell_output(shell)
+                        shell.send(f"su root -c 'apt -f install'\n".encode())
+                        treat_shell_output(shell)
+            except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
+                print(e)
+            finally:
+                shell.close()
+                relay.kill()
+
+        is_installed = False
+        option = 'n'
+        if not args.install:
+            option = input("[?] Would you like install the application to your device? [y, n]: ").lower()
+
+        if option == 'y' or args.install:
+            if is_macos() or is_linux():
+                try:
+                    mux = USBMux()
+                    if not mux.devices:
+                        mux.process(1.0)
+                    if not mux.devices:
+                        print("Did not find a connected device")
+                    else:
+                        print("Found a connected device")
+                        install_deb()
+                        is_installed = True
+                except ConnectionRefusedError:
+                    print("Did not find a connected device")
+                    pass
+            elif is_ios():
+                print("Checking if user is in sudoers")
+                p = subprocess.run('sudo -nv'.split(), stdout=PIPE, stderr=PIPE)
+                if p.returncode == 0 or 'password' in p.stderr.decode():
+                    print("User is in sudoers, using sudo command")
+                    subprocess.run(f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
+                    subprocess.run(f"sudo apt install -f".split(), stdout=PIPE, stderr=PIPE)
+                else:
+                    print("User is not in sudoers, using su instead")
+                    subprocess.run(f"su root -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
+                    subprocess.run(f"su root -c 'apt install -f'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
     print("[*] We are finished!")
-    print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
+    if is_installed:
+        print("[*] The application was installed to your device, no further steps are required!")
+    else:
+        print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
     print("[*] The app will continue to work when rebooted to stock.")
     print(f"[*] Output file: output/{out_deb_name}.deb")
         
@@ -447,6 +551,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--debug', action='store_true', help="shows some debug info, only useful for testing.")
     parser.add_argument('-u', '--url', type=str, help="the direct URL of the IPA to be signed.")
     parser.add_argument('-p', '--path', type=str, help="the direct local path of the IPA to be signed.")
+    parser.add_argument('-i', '--install', action='store_true', help="installs the application to your device")
     args = parser.parse_args()
     
     main(args)
