@@ -449,9 +449,9 @@ def main(args):
                 out += shell.recv(2048).decode()
             return out
 
-        def shell_install_deb(shell):
+        def treat_shell_output(shell):
             s_output = get_shell_output(shell)
-            if 'Password' in s_output.strip() or 'password' in s_output.strip():
+            if 'password' in s_output.lower():
                 shell.send((getpass() + '\n').encode())
                 s_output = get_shell_output(shell)
             for line in s_output.splitlines():
@@ -488,13 +488,15 @@ def main(args):
                     if status == 0 or 'password' in error:
                         print("User is in sudoers, using sudo")
                         shell.send(f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
-                        shell_install_deb(shell)
-                        shell.send(f"sudo apt install -f\n".encode())
+                        treat_shell_output(shell)
+                        shell.send(f"sudo apt -f install\n".encode())
+                        treat_shell_output(shell)
                     else:
                         print("User is not in sudoers, using su instead")
                         shell.send(f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
-                        shell_install_deb(shell)
-                        shell.send(f"su root -c 'sudo apt install -f'\n".encode())
+                        treat_shell_output(shell)
+                        shell.send(f"su root -c 'apt -f install'\n".encode())
+                        treat_shell_output(shell)
             except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
                 print(e)
             finally:
