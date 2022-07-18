@@ -436,7 +436,6 @@ def main(args):
                 print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
                 
             subprocess.run(f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
-
         else:
             if args.debug:
                 print(f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
@@ -450,12 +449,13 @@ def main(args):
                 out += shell.recv(2048).decode()
             return out
 
-        def shell_treat_output(shell):
+        def shell_install_deb(shell):
             s_output = get_shell_output(shell)
             if 'Password' in s_output.strip() or 'password' in s_output.strip():
                 shell.send((getpass() + '\n').encode())
                 s_output = get_shell_output(shell)
-            print(s_output)
+            for line in s_output.splitlines():
+                print(line)
 
         def install_deb():
             print(f'[*] Installing {out_deb_name} to the device')
@@ -487,14 +487,12 @@ def main(args):
                     shell = client.invoke_shell()
                     if status == 0 or 'password' in error:
                         print("User is in sudoers, using sudo")
-                        shell.send(f"sudo apt -y -f install /var/mobile/Documents/{out_deb_name}.deb\n".encode())
-                        shell_treat_output(shell)
-                        shell.send(f"sudo apt install -f\n".encode())
+                        shell.send(f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
+                        shell_install_deb(shell)
                     else:
                         print("User is not in sudoers, using su instead")
-                        shell.send(f"su root -c 'apt -y -f install /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
-                        shell_treat_output(shell)
-                        shell.send(f"su root -c 'apt install -f'\n".encode())
+                        shell.send(f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
+                        shell_install_deb(shell)
             except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
                 print(e)
             finally:
@@ -527,11 +525,9 @@ def main(args):
                 if p.returncode == 0 or 'password' in p.stderr.decode():
                     print("User is in sudoers, using sudo command")
                     subprocess.run(f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
-                    subprocess.run(f"sudo apt install -f", stdout=PIPE, stderr=PIPE)
                 else:
                     print("User is not in sudoers, using su instead")
                     subprocess.run(f"su root -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
-                    subprocess.run(f"su root -c 'apt install -f'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
