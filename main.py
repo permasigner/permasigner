@@ -11,19 +11,19 @@ import tempfile
 import platform
 import argparse
 from glob import glob
+import time
+from subprocess import PIPE, DEVNULL
+from getpass import getpass
 
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
 from utils.hash import LdidHash
-from utils.usbmux import USBMux
 
-import time
-from paramiko.client import AutoAddPolicy, SSHClient
-from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
-from scp import SCPClient
-from subprocess import PIPE, DEVNULL
-
-from getpass import getpass
+if not (sys.platform == "darwin" and platform.machine().startswith("i")):
+    from utils.usbmux import USBMux
+    from paramiko.client import AutoAddPolicy, SSHClient
+    from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
+    from scp import SCPClient
 
 """ Functions """
 def cmd_in_path(args, cmd):
@@ -123,7 +123,7 @@ def main(args):
                 if not LdidHash.check_linux_64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
-                    Ldid.download_linux_64()
+                    Ldid.download_linux_64(args)
             elif is_linux() and platform.machine() == "aarch64":
                 if args.debug:
                     print(f"[DEBUG] On Linux aarch64, ldid not found...")
@@ -131,7 +131,7 @@ def main(args):
                 if not LdidHash.check_linux_arm64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
-                    Ldid.download_linux_arm64()
+                    Ldid.download_linux_arm64(args)
             elif is_macos() and platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On macOS x86_64, ldid not found...")
@@ -139,7 +139,7 @@ def main(args):
                 if not LdidHash.check_macos_64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
-                    Ldid.download_macos_64()
+                    Ldid.download_macos_64(args)
             elif is_macos() and platform.machine() == "arm64":
                 if args.debug:
                     print(f"[DEBUG] On macOS arm64, ldid not found...")
@@ -147,7 +147,7 @@ def main(args):
                 if not LdidHash.check_macos_arm64(args):
                     print("[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
-                    Ldid.download_macos_arm64()
+                    Ldid.download_macos_arm64(args)
         else:
             print("[*] ldid not found, downloading.")
             if is_linux() and platform.machine() == "x86_64":
