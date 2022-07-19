@@ -257,14 +257,17 @@ def main(args):
         if Path(f"{tmpfolder}/app/Payload").exists():
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
                 if fname.endswith(".app"):
-                    folder = fname
-            print("Found plist!")
+                    app_dir = fname
+            print("Found app directory!")
         else:
             print("[-] IPA is not valid!")
             exit(1)
-            
-        if Path(f"{tmpfolder}/app/Payload/{folder}/Info.plist").exists():
-            with open(f"{tmpfolder}/app/Payload/{folder}/Info.plist", 'rb') as f:
+
+        pre_app_path = os.path.join(f"{tmpfolder}/app/Payload", app_dir)
+
+        if Path(f'{pre_app_path}/Info.plist').exists():
+            print("Found Info.plist")
+            with open(f'{pre_app_path}/Info.plist', 'rb') as f:
                 info = plistlib.load(f)
                 app_name = info["CFBundleName"]
                 app_bundle = info["CFBundleIdentifier"]
@@ -290,26 +293,26 @@ def main(args):
         Copy.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name)
         Copy.copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name, app_bundle, app_version, app_min_ios, app_author)
         print("Copying app files...")
-        copytree(f"{tmpfolder}/app/Payload/{folder}", f"{tmpfolder}/deb/Applications/{folder}")
+        full_app_path = os.path.join(f"{tmpfolder}/deb/Applications", app_dir)
+        copytree(pre_app_path, full_app_path)
         print("Changing deb file scripts permissions...")
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(), stdout=subprocess.DEVNULL)
         subprocess.run(f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=subprocess.DEVNULL)
         if app_executable is not None:
             print("Changing app executable permissions...")
-            full_path = f"'{tmpfolder}/deb/Applications/{folder}/{app_executable}'"
-            os.system("chmod 0755 " + full_path)
+            exec_path = os.path.join(full_app_path, app_executable)
+            subprocess.run(['chmod', '0755', f'{exec_path}'])
         print()
         
         # Sign the app
         print("[*] Signing app...")
         Copy.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle)
+        frameworks_path = os.path.join(full_app_path, 'Frameworks')
         if args.codesign:
             print("Signing with codesign as it was specified...")
-            subprocess.run(f"security import ./dev_certificate.p12 -P password -A".split(), stdout=subprocess.DEVNULL)
-            full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
-            frameworks_path = f"{tmpfolder}/deb/Applications/{folder}/Frameworks"
-            
-            os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep --preserve-metadata=entitlements '{full_path}'")
+            subprocess.run(['security', 'import', './dev_certificate.p12', '-P', 'password', '-A'], stdout=DEVNULL)
+
+            subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing', '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
             
             if Path(frameworks_path).exists():
                 if args.debug:
@@ -318,7 +321,7 @@ def main(args):
                 for file in os.listdir(frameworks_path):
                     if file.endswith(".dylib"):
                         print(f"Signing dylib {file}...")
-                        os.system(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep '{frameworks_path}/{file}'")
+                        subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing', '--force', '--deep', f'{frameworks_path}/{file}'], stdout=DEVNULL)
                         
                 for fpath in glob(frameworks_path + '/*.framework'):
                     fname = os.path.basename(fpath)
@@ -335,26 +338,24 @@ def main(args):
                                     print(f"[DEBUG] No executable found in the {fname}")
                             if f_executable is not None:
                                 print(f"Signing executable in {fname}")
-                                exec_path = os.path.join(fpath, f_executable)
+                                f_exec_path = os.path.join(fpath, f_executable)
                                 if args.debug:
-                                    print(f"[DEBUG] Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {exec_path}")
-                                subprocess.run(f"codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep '{exec_path}'", shell=True)
+                                    print(f"[DEBUG] Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {f_exec_path}")
+                                subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing', '--force', '--deep', f'{f_exec_path}'], stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            full_path = f"'{tmpfolder}/deb/Applications/{folder}'"
-            frameworks_path = f"{tmpfolder}/deb/Applications/{folder}/Frameworks"
             if cmd_in_path(args, "ldid"):
                 if args.debug:
-                    print(f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
+                    print(f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_app_path}'")
             
-                os.system(f"ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
+                subprocess.run(['ldid', f'-S{tmpfolder}/entitlements.plist', '-M', '-Kdev_certificate.p12', f'{full_app_path}'], stdout=DEVNULL)
             else:
                 subprocess.run("chmod +x ldid".split(), stdout=subprocess.DEVNULL)
                 if args.debug:
-                    print(f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
+                    print(f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_app_path}'")
                 
-                os.system(f"./ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_path}'")
-            
+                subprocess.run(['./ldid', f'-S{tmpfolder}/entitlements.plist', '-M', '-Kdev_certificate.p12', f'{full_app_path}'], stdout=DEVNULL)
+
             if Path(frameworks_path).exists():
                 if args.debug:
                     print("[DEBUG] Frameworks path exists")
@@ -364,14 +365,14 @@ def main(args):
                         print(f"Signing dylib {file}...")
                         if cmd_in_path(args, "ldid"):
                             if args.debug:
-                                print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                                print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {frameworks_path}/{file}")
                                 
-                            os.system(f"ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                            subprocess.run(['ldid', '-Kdev_certificate.p12', f'{frameworks_path}/{file}'])
                         else:
                             if args.debug:
-                                print(f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                                print(f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 {frameworks_path}/{file}")
                                 
-                            os.system(f"./ldid -Kdev_certificate.p12 '{frameworks_path}/{file}'")
+                            subprocess.run(['./ldid', '-Kdev_certificate.p12', f'{frameworks_path}/{file}'])
                         
                 for fpath in glob(frameworks_path + '/*.framework'):
                     fname = os.path.basename(fpath)
@@ -388,15 +389,15 @@ def main(args):
                                     print(f"[DEBUG] No executable found in the {fname}")
                             if f_executable is not None:
                                 print(f"Signing executable in {fname}")
-                                exec_path = os.path.join(fpath, f_executable)
+                                f_exec_path = os.path.join(fpath, f_executable)
                                 if cmd_in_path(args, "ldid"):
                                     if args.debug:
-                                        print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {exec_path}")
-                                    subprocess.run(f"ldid -Kdev_certificate.p12 '{exec_path}'", shell=True)
+                                        print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {f_exec_path}")
+                                    subprocess.run(['ldid', '-Kdev_certificate.p12', f'{f_exec_path}'], stdout=DEVNULL)
                                 else:
                                     if args.debug:
-                                        print(f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 {exec_path}")
-                                    subprocess.run(f"./ldid -Kdev_certificate.p12 '{exec_path}'", shell=True)
+                                        print(f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 {f_exec_path}")
+                                    subprocess.run(['./ldid', '-Kdev_certificate.p12', f'{f_exec_path}'], stdout=DEVNULL)
         print()
 
         # Package the deb file
