@@ -234,10 +234,8 @@ def main(args):
                 exit(1)  
         elif option == "L":
             path = input("[?] Paste in the path to an IPA in your file system: ")
-            
-            if path.strip()[-1] == " ":
-                path = path.strip()[:-1]
-            
+            path = path.strip().lstrip("'").rstrip("'")
+
             if Path(path).exists():
                 copy(path, f"{tmpfolder}/app.ipa")
             else:
