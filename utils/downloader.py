@@ -2,6 +2,7 @@ import requests
 import subprocess
 import os
 from shutil import copy
+from shutil import rmtree
 
 class DpkgDeb:
     def download_linux_64(args):
