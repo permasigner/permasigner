@@ -163,11 +163,9 @@ def main(args):
                 print()
                 
     if is_macos():
-        try:
-            which_dpkg = subprocess.check_output(["which", "dpkg"], stderr=subprocess.STDOUT)
-        except:
+        if not subprocess.getstatusoutput("which dpkg")[0] == 0:
             if args.debug:
-                print(f"[DEBUG] On macOS x86_64, dpkg-deb not found...")
+                print(f"[DEBUG] On macOS x86_64, dpkg not found...")
             print("[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
             exit(1)
     
@@ -176,8 +174,6 @@ def main(args):
         option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
         option = option.lower()
 
-    global out_deb_name
-    
     with tempfile.TemporaryDirectory() as tmpfolder:
         print("[*] Created temporary directory.")
         print()
