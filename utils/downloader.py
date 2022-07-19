@@ -2,13 +2,14 @@ import requests
 import subprocess
 import os
 from shutil import copy
+from shutil import rmtree
 
 class DpkgDeb:
     def download_linux_64(args):
         if args.debug:
             print(f"[DEBUG] Downloading dpkg-deb on Linux x86_64.")
             
-        res = requests.get("http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_amd64.deb", stream=True)
+        res = requests.get("http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.21.9_amd64.deb", stream=True)
         try:
             if res.status_code == 200:
                 with open(f"dpkg.deb", "wb") as f:
@@ -47,7 +48,7 @@ class DpkgDeb:
         if args.debug:
             print(f"[DEBUG] Downloading dpkg-deb on Linux aarch64.")
             
-        res = requests.get("http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.9_arm64.deb", stream=True)
+        res = requests.get("http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.21.9_arm64.deb", stream=True)
         try:
             if res.status_code == 200:
                 with open(f"dpkg.deb", "wb") as f:
