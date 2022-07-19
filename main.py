@@ -202,9 +202,7 @@ def main(args):
                 exit(1)
         elif args.path:
             path = args.path
-            
-            if path.strip()[-1] == " ":
-                path = path.strip()[:-1]
+            path = path.strip().lstrip("'").rstrip("'")
             
             if Path(path).exists():
                 copy(path, f"{tmpfolder}/app.ipa")
