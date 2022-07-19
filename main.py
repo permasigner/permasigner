@@ -310,7 +310,7 @@ def main(args):
         frameworks_path = os.path.join(full_app_path, 'Frameworks')
         if args.codesign:
             print("Signing with codesign as it was specified...")
-            subprocess.run(['security', 'import', './dev_certificate.p12', '-P', 'password', '-A'], stdout=DEVNULL)
+            subprocess.run(['security', 'import', './dev_certificate.p12', '-A'], stdout=DEVNULL)
 
             subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing', '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
             
