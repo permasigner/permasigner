@@ -257,8 +257,7 @@ def main(args):
             
         # Read data from the plist
         print("[*] Reading plist...")
-        global folder, app_name, app_bundle, app_version, app_min_ios, app_author, app_executable
-        
+
         if Path(f"{tmpfolder}/app/Payload").exists():
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
                 if fname.endswith(".app"):
