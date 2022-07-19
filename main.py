@@ -43,40 +43,25 @@ def cmd_in_path(args, cmd):
             else:
                 print("[-] ldid is required on iOS, but it is not installed. Please install it from Procursus.")
                 exit(1)
-            
-        try:
+
+        if args.debug:
+            print(f"[DEBUG] Checking ldid output...")
+
+        ldid_out = subprocess.getoutput('ldid')
+        if "procursus" not in ldid_out:
             if args.debug:
-                print(f"[DEBUG] Checking ldid output...")
-                
-            ldid_out = subprocess.check_output(["ldid"], stderr=subprocess.STDOUT)
-            if "procursus" not in ldid_out.decode("utf-8"):
-                if args.debug:
-                    print(f"[DEBUG] ldid installed is not from Procursus... skipping.")
-                    
-                return False
-            else:
-                if args.debug:
-                    print(f"[DEBUG] ldid installed is from Procursus!")
-                        
-                return True
-        except(Exception,):
+                print(f"[DEBUG] ldid installed is not from Procursus")
+
             return False
-            
+        else:
             if args.debug:
-                print(f"[DEBUG] ldid is not in PATH... skipping.")
-    
-    try:
-        which_cmd = subprocess.check_output(["which", f"{cmd}"], stderr=subprocess.STDOUT)
-    except:
-        return False
-    
-    return True
-    
-    # if not f"{cmd} not found" in subprocess.run(f"which {cmd}".split(), capture_output=True, text=True).stdout:
-    #     return True
-        
-    #return which(cmd) is not None
-    
+                print(f"[DEBUG] ldid installed is from Procursus!")
+
+            return True
+
+    return subprocess.getstatusoutput(f"which {cmd}")[0] == 0
+
+
 def is_macos():
     if platform.machine().startswith("i"):
         return False
