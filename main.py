@@ -97,9 +97,12 @@ def main(args):
         if is_linux():
             print("[-] You cannot use codesign on Linux, remove the argument and it'll use ldid instead.")
             exit(1)
-        
+
+    ldid_in_path = cmd_in_path(args, 'ldid')
+    dpkg_in_path = cmd_in_path(args, 'dpkg-deb')
+
     # Auto download ldid
-    if not cmd_in_path(args, "ldid"):
+    if not ldid_in_path:
         if Path(f"{os.getcwd()}/ldid").exists():
             if is_linux() and platform.machine() == "x86_64":
                 if args.debug:
@@ -145,7 +148,7 @@ def main(args):
                 Ldid.download_macos_arm64(args)
             
     # Auto download dpkg-deb on Linux
-    if not cmd_in_path(args, "dpkg-deb") and is_linux():
+    if not dpkg_in_path and is_linux():
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
             if platform.machine() == "x86_64":
                 if args.debug:
@@ -344,7 +347,7 @@ def main(args):
                                 subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing', '--force', '--deep', f'{f_exec_path}'], stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            if cmd_in_path(args, "ldid"):
+            if ldid_in_path:
                 if args.debug:
                     print(f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_app_path}'")
             
@@ -363,7 +366,7 @@ def main(args):
                 for file in os.listdir(frameworks_path):
                     if file.endswith(".dylib"):
                         print(f"Signing dylib {file}...")
-                        if cmd_in_path(args, "ldid"):
+                        if ldid_in_path:
                             if args.debug:
                                 print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {frameworks_path}/{file}")
                                 
@@ -390,7 +393,7 @@ def main(args):
                             if f_executable is not None:
                                 print(f"Signing executable in {fname}")
                                 f_exec_path = os.path.join(fpath, f_executable)
-                                if cmd_in_path(args, "ldid"):
+                                if ldid_in_path:
                                     if args.debug:
                                         print(f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {f_exec_path}")
                                     subprocess.run(['ldid', '-Kdev_certificate.p12', f'{f_exec_path}'], stdout=DEVNULL)
@@ -407,7 +410,7 @@ def main(args):
         if Path(f"output/{out_deb_name}.deb").exists():
             os.remove(f"output/{out_deb_name}.deb")
 
-        if cmd_in_path(args, "dpkg-deb"):
+        if dpkg_in_path:
             if args.debug:
                 print(f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
                 
