@@ -171,8 +171,7 @@ def main(args):
     
     # Prompt the user if they'd like to use an external IPA or a local IPA
     if not (args.url or args.path):
-        option = input("[?] Would you like to use an IPA stored on the web, or on your system? [external, local] ")
-        option = option.lower()
+        option = input("[?] Would you like to use an external or a local IPA? [E, L] ")
 
     with tempfile.TemporaryDirectory() as tmpfolder:
         print("[*] Created temporary directory.")
@@ -212,7 +211,7 @@ def main(args):
             else:
                 print("[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
-        elif option == "external":
+        elif option == "E":
             url = input("[?] Paste in the *direct* path to an IPA online: ")
             
             if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
@@ -233,7 +232,7 @@ def main(args):
             except requests.exceptions.RequestException as err:
                 print(f"[-] URL provided is not reachable. Error: {err}")
                 exit(1)  
-        elif option == "local":
+        elif option == "L":
             path = input("[?] Paste in the path to an IPA in your file system: ")
             
             if path.strip()[-1] == " ":
