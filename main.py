@@ -475,8 +475,8 @@ def main(args):
             subprocess.run(
                 f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
 
+        is_installed = False
         if not args.noinstall:
-            is_installed = False
             option = 'n'
             if not args.install:
                 option = input(
