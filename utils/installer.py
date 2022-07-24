@@ -50,7 +50,12 @@ class Installer:
 
                     if "password" in out:
                         print("User is in sudoers, using sudo")
-                        stdin, stdout, stderr = client.exec_command('sudo dpkg -i /var/mobile/Documents/YouTube.deb',
+                        if args.output:
+                            stdin, stdout, stderr = client.exec_command(
+                                f"sudo dpkg -i /var/mobile/Documents/{args.output.split('/')[-1].replace('.deb', '')}.deb",
+                                get_pty=True)
+                        else:
+                            stdin, stdout, stderr = client.exec_command(f'sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb',
                                                                     get_pty=True)
                         password = getpass()
                         stdin.write(f'{password}\n')
@@ -64,15 +69,23 @@ class Installer:
                         print(streams[1].read().decode())
                     elif status == 0:
                         print('User has nopasswd set')
-                        output = client.exec_command('sudo dpkg -i /var/mobile/Documents/YouTube.deb')[1]
+                        if args.output:
+                            output = client.exec_command(f"sudo dpkg -i /var/mobile/Documents/{args.output.split('/')[-1].replace('.deb', '')}.deb")[1]
+                        else:
+                            output = client.exec_command(f'sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb')[1]
                         print("Installing... this may take some time")
                         print(output.read().decode())
                         output = client.exec_command('sudo apt -f install')[1].read().decode()
                         print(output)
                     else:
                         print('Using su command')
-                        streams = client.exec_command("su root -c 'dpkg -i /var/mobile/Documents/YouTube.deb'",
+                        if args.output:
+                            streams = client.exec_command(f"su root -c 'dpkg -i /var/mobile/Documents/{args.output.split('/')[-1].replace('.deb', '')}.deb'",
                                                       get_pty=True)
+                        else:
+                            streams = client.exec_command(
+                                f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'",
+                                get_pty=True)
                         output = streams[1].channel.recv(2048).decode()
                         if "password" in output.lower():
                             password = getpass()
