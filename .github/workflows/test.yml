@@ -45,7 +45,7 @@ jobs:
       # Upload test artifact
       - uses: actions/upload-artifact@v3
         with:
-          name: TaurineTest-Python${{ matrix.python-version }}.deb
+          name: TaurineTest-linux-Python${{ matrix.python-version }}.deb
           path: output/Taurine.deb
 
   macos:
@@ -88,5 +88,5 @@ jobs:
       # Upload test artifact
       - uses: actions/upload-artifact@v3
         with:
-          name: TaurineTest-Python${{ matrix.python-version }}.deb
+          name: TaurineTest-${{ matrix.os }}-Python${{ matrix.python-version }}.deb
           path: output/Taurine.deb
