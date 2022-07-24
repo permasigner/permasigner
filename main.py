@@ -460,20 +460,22 @@ def main(args):
         if Path(f"output/{out_deb_name}.deb").exists():
             os.remove(f"output/{out_deb_name}.deb")
 
+        global dpkg_cmd
+        if args.output:
+            dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {args.output}"
+        else:
+            dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb"
+
         if dpkg_in_path:
             if args.debug:
-                print(
-                    f"[DEBUG] Running command: dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
+                print(f"[DEBUG] Running command: {dpkg_cmd}")
 
-            subprocess.run(
-                f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"{dpkg_cmd}".split(), stdout=subprocess.DEVNULL)
         else:
             if args.debug:
-                print(
-                    f"[DEBUG] Running command: ./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb")
+                print(f"[DEBUG] Running command: ./{dpkg_cmd}")
 
-            subprocess.run(
-                f"./dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"./{dpkg_cmd}".split(), stdout=subprocess.DEVNULL)
 
         is_installed = False
         if not args.noinstall:
@@ -492,7 +494,7 @@ def main(args):
                             print("Did not find a connected device")
                         else:
                             print("Found a connected device")
-                            Installer.install_deb(args)
+                            Installer.install_deb(args, out_deb_name)
                             is_installed = True
                     except ConnectionRefusedError:
                         print("Did not find a connected device")
@@ -503,43 +505,61 @@ def main(args):
                                        stdout=PIPE, stderr=PIPE)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
-                        subprocess.run(
-                            f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
+                        if args.output:
+                            subprocess.run(
+                                f"sudo dpkg -i {args.output}".split(), stdout=PIPE, stderr=PIPE)
+                        else:
+                            subprocess.run(
+                                f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
+
                         subprocess.run(
                             f"sudo apt install -f".split(), stdout=PIPE, stderr=PIPE)
                     else:
                         print("User is not in sudoers, using su instead")
-                        subprocess.run(
-                            f"su root -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
+                        if args.output:
+                            subprocess.run(
+                                f"su root -c 'dpkg -i {args.output}'".split(), stdout=PIPE, stderr=PIPE)
+                        else:
+                            subprocess.run(
+                                f"su root -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
+
                         subprocess.run(
                             f"su root -c 'apt install -f'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
     print("[*] We are finished!")
+
     if is_installed:
         print(
             "[*] The application was installed to your device, no further steps are required!")
     else:
         print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
+
     print("[*] The app will continue to work when rebooted to stock.")
-    print(f"[*] Output file: output/{out_deb_name}.deb")
+
+    if args.output:
+        print(f"[*] Output file: {args.output}")
+    else:
+        print(f"[*] Output file: output/{out_deb_name}.deb")
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--codesign', action='store_true',
-                        help="uses codesign instead of ldid.")
+                        help="uses codesign instead of ldid")
     parser.add_argument('-d', '--debug', action='store_true',
-                        help="shows some debug info, only useful for testing.")
+                        help="shows some debug info, only useful for testing")
     parser.add_argument('-u', '--url', type=str,
-                        help="the direct URL of the IPA to be signed.")
+                        help="the direct URL of the IPA to be signed")
     parser.add_argument('-p', '--path', type=str,
-                        help="the direct local path of the IPA to be signed.")
+                        help="the direct local path of the IPA to be signed")
     parser.add_argument('-i', '--install', action='store_true',
                         help="installs the application to your device")
     parser.add_argument('-n', '--noinstall',
                         action='store_true', help="skips the install prompt")
+    parser.add_argument('-o', '--output', type=str,
+                        help="specify output file")
     args = parser.parse_args()
 
     main(args)

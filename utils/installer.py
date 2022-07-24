@@ -16,11 +16,11 @@ class Installer:
         s_output = get_shell_output(args, shell)
         if 'password' in s_output.lower():
             shell.send((getpass() + '\n').encode())
-            s_output = get_shell_output(args, shell)
+            s_output = Installer.get_shell_output(args, shell)
         for line in s_output.splitlines():
             print(line)
 
-    def install_deb(args):
+    def install_deb(args, out_deb_name):
         print(f'[*] Installing {out_deb_name} to the device')
         print("Relaying TCP connection")
         if args.debug:
@@ -44,27 +44,43 @@ class Installer:
                                look_for_keys=False,
                                compress=True)
                 with SCPClient(client.get_transport()) as scp:
-                    print(f"Sending {out_deb_name}.deb to device")
-                    scp.put(f'output/{out_deb_name}.deb',
-                            remote_path='/var/mobile/Documents')
+                    if args.output:
+                        print(
+                            f"Sending {args.output.split('/')[-1]} to device")
+                        scp.put(f'{args.output}',
+                                remote_path='/var/mobile/Documents')
+                    else:
+                        print(f"Sending {out_deb_name}.deb to device")
+                        scp.put(f'output/{out_deb_name}.deb',
+                                remote_path='/var/mobile/Documents')
                 stdin, stdout, stderr = client.exec_command('sudo -nv')
                 error = stderr.readline()
                 status = stdout.channel.recv_exit_status()
                 shell = client.invoke_shell()
                 if status == 0 or 'password' in error:
                     print("User is in sudoers, using sudo")
-                    shell.send(
-                        f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
-                    treat_shell_output(args, shell)
+                    if args.output:
+                        shell.send(
+                            f"sudo dpkg -i /var/mobile/Documents/{args.output.split('/')[-1].replace('.deb', '')}.deb\n".encode())
+                    else:
+                        shell.send(
+                            f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
+
+                    Installer.treat_shell_output(args, shell)
                     shell.send(f"sudo apt -f install\n".encode())
-                    treat_shell_output(args, shell)
+                    Installer.treat_shell_output(args, shell)
                 else:
                     print("User is not in sudoers, using su instead")
-                    shell.send(
-                        f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
-                    treat_shell_output(args, shell)
+                    if args.output:
+                        shell.send(
+                            f"su root -c 'dpkg -i /var/mobile/Documents/{args.output.split('/')[-1].replace('.deb', '')}.deb'\n".encode())
+                    else:
+                        shell.send(
+                            f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
+
+                    Installer.treat_shell_output(args, shell)
                     shell.send(f"su root -c 'apt -f install'\n".encode())
-                    treat_shell_output(args, shell)
+                    Installer.treat_shell_output(args, shell)
         except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
             print(e)
         finally:
