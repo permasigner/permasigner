@@ -1,24 +1,14 @@
-from utils.usbmux import USBMux
+import subprocess
+import time
+from getpass import getpass
+
 from paramiko.client import AutoAddPolicy, SSHClient
 from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
 from scp import SCPClient
+from subprocess import DEVNULL, PIPE
 
 
 class Installer:
-    def get_shell_output(args, shell):
-        out = ''
-        time.sleep(1)
-        while shell.recv_ready():
-            out += shell.recv(2048).decode()
-        return out
-
-    def treat_shell_output(args, shell):
-        s_output = get_shell_output(args, shell)
-        if 'password' in s_output.lower():
-            shell.send((getpass() + '\n').encode())
-            s_output = Installer.get_shell_output(args, shell)
-        for line in s_output.splitlines():
-            print(line)
 
     def install_deb(args, out_deb_name):
         print(f'[*] Installing {out_deb_name} to the device')
@@ -53,36 +43,54 @@ class Installer:
                         print(f"Sending {out_deb_name}.deb to device")
                         scp.put(f'output/{out_deb_name}.deb',
                                 remote_path='/var/mobile/Documents')
-                stdin, stdout, stderr = client.exec_command('sudo -nv')
-                error = stderr.readline()
-                status = stdout.channel.recv_exit_status()
-                shell = client.invoke_shell()
-                if status == 0 or 'password' in error:
-                    print("User is in sudoers, using sudo")
-                    if args.output:
-                        shell.send(
-                            f"sudo dpkg -i /var/mobile/Documents/{args.output.split('/')[-1].replace('.deb', '')}.deb\n".encode())
-                    else:
-                        shell.send(
-                            f"sudo dpkg -i /var/mobile/Documents/{out_deb_name}.deb\n".encode())
 
-                    Installer.treat_shell_output(args, shell)
-                    shell.send(f"sudo apt -f install\n".encode())
-                    Installer.treat_shell_output(args, shell)
-                else:
-                    print("User is not in sudoers, using su instead")
-                    if args.output:
-                        shell.send(
-                            f"su root -c 'dpkg -i /var/mobile/Documents/{args.output.split('/')[-1].replace('.deb', '')}.deb'\n".encode())
-                    else:
-                        shell.send(
-                            f"su root -c 'dpkg -i /var/mobile/Documents/{out_deb_name}.deb'\n".encode())
+                    stdin, stdout, stderr = client.exec_command('sudo -nv')
+                    status = stdout.channel.recv_exit_status()
+                    out = stderr.read().decode()
 
-                    Installer.treat_shell_output(args, shell)
-                    shell.send(f"su root -c 'apt -f install'\n".encode())
-                    Installer.treat_shell_output(args, shell)
+                    if "password" in out:
+                        print("User is in sudoers, using sudo")
+                        stdin, stdout, stderr = client.exec_command('sudo dpkg -i /var/mobile/Documents/YouTube.deb',
+                                                                    get_pty=True)
+                        password = getpass()
+                        stdin.write(f'{password}\n')
+                        stdin.flush()
+                        print("Installing... this may take some time")
+                        print(stdout.read().decode())
+                        # for elucubratus bootstrap
+                        streams = client.exec_command('sudo apt -f install', get_pty=True)
+                        streams[0].write(f'{password}\n')
+                        streams[0].flush()
+                        print(streams[1].read().decode())
+                    elif status == 0:
+                        print('User has nopasswd set')
+                        output = client.exec_command('sudo dpkg -i /var/mobile/Documents/YouTube.deb')[1]
+                        print("Installing... this may take some time")
+                        print(output.read().decode())
+                        output = client.exec_command('sudo apt -f install')[1].read().decode()
+                        print(output)
+                    else:
+                        print('Using su command')
+                        streams = client.exec_command("su root -c 'dpkg -i /var/mobile/Documents/YouTube.deb'",
+                                                      get_pty=True)
+                        output = streams[1].channel.recv(2048).decode()
+                        if "password" in output.lower():
+                            password = getpass()
+                            streams[0].write(f'{password}\n')
+                            streams[0].flush()
+                            print("Installing... this may take some time")
+                            print(streams[1].read().decode())
+                            # for elucubratus bootstrap
+                            streams = client.exec_command("su root -c 'apt -f install'", get_pty=True)
+                            streams[0].write(f'{password}\n')
+                            streams[0].flush()
+                            print(streams[1].channel.recv(2048).decode())
+                        else:
+                            print("Installing... this may take some time")
+                            print(streams[1].read().decode())
+                            streams = client.exec_command('sudo apt -f install')
+                            print(streams[1].read().decode())
         except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
             print(e)
         finally:
-            shell.close()
             relay.kill()
