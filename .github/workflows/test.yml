@@ -9,13 +9,52 @@ on:
       - "main"
 
 jobs:
-  test:
+  linux:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Run with all these versions of Python
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+      # Checkout the latest code from the repo
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      # Setup which version of Python to use
+      - name: Set Up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Display the Python version being used
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run script
+      - name: Run script
+        run: python main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -n -d
+
+      # Upload test artifact
+      - uses: actions/upload-artifact@v3
+        with:
+          name: TaurineTest-Python${{ matrix.python-version }}.deb
+          path: output/Taurine.deb
+
+  macos:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        # Run with all of these operating systems
-        os: [ubuntu-latest, macos-11, macos-12]
+        # Run with all these versions of macOS
+        os: [macos-11, macos-12]
 
         # Run with all these versions of Python
         python-version: [3.7, 3.8, 3.9]
@@ -40,6 +79,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          brew install dpkg
 
       # Run script
       - name: Run script
