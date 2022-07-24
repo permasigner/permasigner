@@ -513,7 +513,7 @@ def main(args):
                                 f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
 
                         subprocess.run(
-                            f"sudo apt install -f".split(), stdout=PIPE, stderr=PIPE)
+                            f"sudo apt-get install -f".split(), stdout=PIPE, stderr=PIPE)
                     else:
                         print("User is not in sudoers, using su instead")
                         if args.output:
@@ -524,7 +524,7 @@ def main(args):
                                 f"su root -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
 
                         subprocess.run(
-                            f"su root -c 'apt install -f'".split(), stdout=PIPE, stderr=PIPE)
+                            f"su root -c 'apt-get install -f'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
