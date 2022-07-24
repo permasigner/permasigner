@@ -37,7 +37,7 @@ jobs:
       - name: Get name of app
         shell: python
         run: |
-          s = """${{ steps.run_script.outputs.content }}"""
+          s = """${{ steps.run_script.outputs.* }}"""
           new_s = s.splitlines()[-1].replace("[*] Output file: ", "")
 
           print(f"::set-output name=content::{new_s}")
@@ -46,5 +46,5 @@ jobs:
       # Upload test artifact
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.app_name.outputs.content }}
-          path: output/${{ steps.app_name.outputs.content }}
+          name: ${{ steps.app_name.outputs.* }}
+          path: output/${{ steps.app_name.outputs.* }}
