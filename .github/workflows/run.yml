@@ -37,12 +37,14 @@ jobs:
       - name: Get name of app
         shell: python
         run: |
-          s = """${{ steps.run_tests.outputs.* }}"""
-          print(s.splitlines()[-1].replace("[*] Output file: ", ""))
+          s = """${{ steps.run_tests.outputs.content }}"""
+          new_s = s.splitlines()[-1].replace("[*] Output file: ", "")
+
+          print(f"::set-output name=content::{new_s}")
         id: app_name
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.app_name.outputs.* }}
-          path: output/${{ steps.app_name.outputs.* }}
+          name: ${{ steps.app_name.outputs.content }}
+          path: output/${{ steps.app_name.outputs.content }}
