@@ -16,7 +16,7 @@ jobs:
       - name: autopep8
         uses: peter-evans/autopep8@v1
         with:
-          args: --recursive --in-place --aggressive --aggressive .
+          args: --recursive --in-place .
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
@@ -24,6 +24,6 @@ jobs:
           commit-message: Lint script with autopep8
           title: Lint script with autopep8
           body: This is an auto-generated PR linted by autopep8.
-          labels: autopep8, automated pr, lint
+          labels: automated
           reviewers: itsnebulalol
           branch: lint
