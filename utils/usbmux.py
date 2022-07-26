@@ -17,9 +17,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301  USA
 
-import socket, struct, select, sys
+import socket
+import struct
+import select
+import sys
 
 if sys.version_info > (3, 0):
     python3 = True
@@ -29,7 +33,7 @@ else:
 try:
     import plistlib
     haveplist = True
-except:
+except BaseException:
     haveplist = False
 
 
@@ -97,7 +101,10 @@ class BinaryProtocol(object):
 
     def _pack(self, req, payload):
         if req == self.TYPE_CONNECT:
-            return struct.pack("IH", payload['DeviceID'], payload['PortNumber']) + b"\x00\x00"
+            return struct.pack(
+                "IH",
+                payload['DeviceID'],
+                payload['PortNumber']) + b"\x00\x00"
         elif req == self.TYPE_LISTEN:
             return ""
         else:
@@ -107,13 +114,18 @@ class BinaryProtocol(object):
         if resp == self.TYPE_RESULT:
             return {'Number': struct.unpack("I", payload)[0]}
         elif resp == self.TYPE_DEVICE_ADD:
-            devid, usbpid, serial, pad, location = struct.unpack("IH256sHI", payload)
+            devid, usbpid, serial, pad, location = struct.unpack(
+                "IH256sHI", payload)
             if python3:
                 serial = serial.decode().split("\0")[0]
             else:
                 serial = serial.split("\0")[0]
-            return {'DeviceID': devid,
-                    'Properties': {'LocationID': location, 'SerialNumber': serial, 'ProductID': usbpid}}
+            return {
+                'DeviceID': devid,
+                'Properties': {
+                    'LocationID': location,
+                    'SerialNumber': serial,
+                    'ProductID': usbpid}}
         elif resp == self.TYPE_DEVICE_REMOVE:
             devid = struct.unpack("I", payload)[0]
             return {'DeviceID': devid}
@@ -141,7 +153,9 @@ class BinaryProtocol(object):
         body = self.socket.recv(dlen - 4)
         version, resp, tag = struct.unpack("3I", body[:0xc])
         if version != self.VERSION:
-            raise MuxVersionError("Version mismatch: expected %d, got %d" % (self.VERSION, version))
+            raise MuxVersionError(
+                "Version mismatch: expected %d, got %d" %
+                (self.VERSION, version))
         payload = self._unpack(resp, body[0xc:])
         return (resp, tag, payload)
 
@@ -175,9 +189,14 @@ class PlistProtocol(BinaryProtocol):
         payload['MessageType'] = req
         payload['ProgName'] = 'tcprelay'
         if python3:
-            BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.dumps(payload))
+            BinaryProtocol.sendpacket(
+                self, self.TYPE_PLIST, tag, plistlib.dumps(payload))
         else:
-            BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.writePlistToString(payload))
+            BinaryProtocol.sendpacket(
+                self,
+                self.TYPE_PLIST,
+                tag,
+                plistlib.writePlistToString(payload))
 
     def getpacket(self):
         resp, tag, payload = BinaryProtocol.getpacket(self)
@@ -216,8 +235,11 @@ class MuxConnection(object):
         resp, tag, data = self.proto.getpacket()
         if resp == self.proto.TYPE_DEVICE_ADD:
             self.devices.append(
-                MuxDevice(data['DeviceID'], data['Properties']['ProductID'], data['Properties']['SerialNumber'],
-                          data['Properties']['LocationID']))
+                MuxDevice(
+                    data['DeviceID'],
+                    data['Properties']['ProductID'],
+                    data['Properties']['SerialNumber'],
+                    data['Properties']['LocationID']))
         elif resp == self.proto.TYPE_DEVICE_REMOVE:
             for dev in self.devices:
                 if dev.devid == data['DeviceID']:
@@ -235,7 +257,11 @@ class MuxConnection(object):
         self.proto.sendpacket(req, mytag, payload)
         recvtag, data = self._getreply()
         if recvtag != mytag:
-            raise MuxError('Replay tag mismatch: expected', str(mytag), 'received', str(recvtag))
+            raise MuxError(
+                'Replay tag mismatch: expected',
+                str(mytag),
+                'received',
+                str(recvtag))
         return data['Number']
 
     def listen(self):
@@ -245,8 +271,10 @@ class MuxConnection(object):
 
     def process(self, timeout=None):
         if self.proto.connected:
-            raise MuxError("Socket is connected, cannot process listener events")
-        rlo, wlo, xlo = select.select([self.socket.sock], [], [self.socket.sock], timeout)
+            raise MuxError(
+                "Socket is connected, cannot process listener events")
+        rlo, wlo, xlo = select.select([self.socket.sock], [], [
+                                      self.socket.sock], timeout)
         if xlo:
             self.socket.sock.close()
             raise MuxError("Exception in listener socket")
@@ -254,8 +282,11 @@ class MuxConnection(object):
             self._processpacket()
 
     def connect(self, device, port):
-        ret = self._exchange(self.proto.TYPE_CONNECT,
-                             {'DeviceID': device.devid, 'PortNumber': ((port << 8) & 0xFF00) | (port >> 8)})
+        ret = self._exchange(
+            self.proto.TYPE_CONNECT, {
+                'DeviceID': device.devid, 'PortNumber': (
+                    (port << 8) & 0xFF00) | (
+                    port >> 8)})
         if ret != 0:
             raise MuxError("Connect failed: error %d" % ret)
         self.proto.connected = True

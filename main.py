@@ -47,7 +47,8 @@ def cmd_in_path(args, cmd):
                 exit(1)
 
         # It seems like a better idea to force download ldid on macOS and Linux to make sure
-        # they have the proper version all the time. A lot of ugly code is necessary for it.
+        # they have the proper version all the time. A lot of ugly code is
+        # necessary for it.
         return False
 
     return subprocess.getstatusoutput(f"which {cmd}")[0] == 0
@@ -321,9 +322,11 @@ def main(args):
         copytree(pre_app_path, full_app_path)
         print("Changing deb file scripts permissions...")
         subprocess.run(
-            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(), stdout=DEVNULL)
+            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(),
+            stdout=DEVNULL)
         subprocess.run(
-            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=DEVNULL)
+            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(),
+            stdout=DEVNULL)
         if app_executable is not None:
             print("Changing app executable permissions...")
             exec_path = os.path.join(full_app_path, app_executable)
@@ -336,11 +339,22 @@ def main(args):
         frameworks_path = os.path.join(full_app_path, 'Frameworks')
         if args.codesign:
             print("Signing with codesign as it was specified...")
-            subprocess.run(
-                ['security', 'import', './data/certificate.p12', '-P', 'password', '-A'], stdout=DEVNULL)
+            subprocess.run(['security',
+                            'import',
+                            './data/certificate.p12',
+                            '-P',
+                            'password',
+                            '-A'],
+                           stdout=DEVNULL)
 
-            subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
-                           '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
+            subprocess.run(['codesign',
+                            '-s',
+                            'We Do A Little Trolling iPhone OS Application Signing',
+                            '--force',
+                            '--deep',
+                            '--preserve-metadata=entitlements',
+                            f'{full_app_path}'],
+                           stdout=DEVNULL)
         else:
             print("Signing with ldid...")
             if ldid_in_path:
@@ -348,8 +362,13 @@ def main(args):
                     print(
                         f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
 
-                subprocess.run(['ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                               '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+                subprocess.run(['ldid',
+                                f'-S{tmpfolder}/entitlements.plist',
+                                '-M',
+                                '-Kdata/certificate.p12',
+                                '-Upassword',
+                                f'{full_app_path}'],
+                               stdout=DEVNULL)
             else:
                 subprocess.run("chmod +x ldid".split(),
                                stdout=DEVNULL)
@@ -357,8 +376,13 @@ def main(args):
                     print(
                         f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
 
-                subprocess.run(['./ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                               '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+                subprocess.run(['./ldid',
+                                f'-S{tmpfolder}/entitlements.plist',
+                                '-M',
+                                '-Kdata/certificate.p12',
+                                '-Upassword',
+                                f'{full_app_path}'],
+                               stdout=DEVNULL)
 
             if is_ios():
                 if Path(frameworks_path).exists():
@@ -376,8 +400,10 @@ def main(args):
                                 print(
                                     f"[DEBUG] Running command: {command} -Kdev_certificate.p12 -Upassword {frameworks_path}/{file}")
 
-                            subprocess.run(
-                                [f'{command}', '-Kdev_certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
+                            subprocess.run([f'{command}',
+                                            '-Kdev_certificate.p12',
+                                            '-Upassword',
+                                            f'{frameworks_path}/{file}'])
 
                     for fpath in glob(frameworks_path + '/*.framework'):
                         fname = os.path.basename(fpath)
@@ -408,8 +434,11 @@ def main(args):
                                         if args.debug:
                                             print(
                                                 f"[DEBUG] Running command: ./ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
-                                        subprocess.run(
-                                            ['./ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
+                                        subprocess.run(['./ldid',
+                                                        '-Kdata/certificate.p12',
+                                                        '-Upassword',
+                                                        f'{f_exec_path}'],
+                                                       stdout=DEVNULL)
         print()
 
         # Package the deb file
@@ -476,8 +505,14 @@ def main(args):
                             print(
                                 f"[DEBUG] Running command: su root -c 'dpkg -i {path_to_deb}")
 
-                        subprocess.run(
-                            ["su", "root", "-c", "'dpkg", "-i", f"{path_to_deb}'"], stdout=PIPE, stderr=PIPE)
+                        subprocess.run(["su",
+                                        "root",
+                                        "-c",
+                                        "'dpkg",
+                                        "-i",
+                                        f"{path_to_deb}'"],
+                                       stdout=PIPE,
+                                       stderr=PIPE)
 
                         subprocess.run(
                             ["su", "root", "-c", "'apt-get install", "-f'"], stdout=PIPE, stderr=PIPE)

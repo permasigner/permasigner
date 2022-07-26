@@ -17,9 +17,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301  USA
 
-import select, sys, usbmux
+import select
+import sys
+import usbmux
 from optparse import OptionParser
 
 if sys.version_info > (3, 0):
@@ -114,13 +117,33 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, TCPServer):
 
 HOST = "localhost"
 
-parser = OptionParser(usage="usage: %prog [OPTIONS] RemotePort[:LocalPort] [RemotePort[:LocalPort]]...")
-parser.add_option("-t", "--threaded", dest='threaded', action='store_true', default=False,
-                  help="use threading to handle multiple connections at once")
-parser.add_option("-b", "--bufsize", dest='bufsize', action='store', metavar='KILOBYTES', type='int', default=128,
-                  help="specify buffer size for socket forwarding")
-parser.add_option("-s", "--socket", dest='sockpath', action='store', metavar='PATH', type='str', default=None,
-                  help="specify the path of the usbmuxd socket")
+parser = OptionParser(
+    usage="usage: %prog [OPTIONS] RemotePort[:LocalPort] [RemotePort[:LocalPort]]...")
+parser.add_option(
+    "-t",
+    "--threaded",
+    dest='threaded',
+    action='store_true',
+    default=False,
+    help="use threading to handle multiple connections at once")
+parser.add_option(
+    "-b",
+    "--bufsize",
+    dest='bufsize',
+    action='store',
+    metavar='KILOBYTES',
+    type='int',
+    default=128,
+    help="specify buffer size for socket forwarding")
+parser.add_option(
+    "-s",
+    "--socket",
+    dest='sockpath',
+    action='store',
+    metavar='PATH',
+    type='str',
+    default=None,
+    help="specify the path of the usbmuxd socket")
 
 options, args = parser.parse_args()
 
@@ -143,7 +166,7 @@ for arg in args:
             ports.append((rport, lport))
         else:
             ports.append((int(arg), int(arg)))
-    except:
+    except BaseException:
         parser.print_help()
         sys.exit(1)
 
@@ -163,5 +186,5 @@ while alive:
         rl, wl, xl = select.select(servers, [], [])
         for server in rl:
             server.handle_request()
-    except:
+    except BaseException:
         alive = False
