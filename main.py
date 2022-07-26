@@ -11,20 +11,13 @@ import tempfile
 import platform
 import argparse
 from glob import glob
-import time
 from subprocess import PIPE, DEVNULL
-from getpass import getpass
 
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
 from utils.hash import LdidHash
 from utils.installer import Installer
-
-if not (sys.platform == "darwin" and platform.machine().startswith("i")):
-    from utils.usbmux import USBMux
-    from paramiko.client import AutoAddPolicy, SSHClient
-    from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
-    from scp import SCPClient
+from utils.usbmux import USBMux
 
 """ Functions """
 
@@ -331,9 +324,9 @@ def main(args):
         copytree(pre_app_path, full_app_path)
         print("Changing deb file scripts permissions...")
         subprocess.run(
-            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(), stdout=subprocess.DEVNULL)
+            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(), stdout=DEVNULL)
         subprocess.run(
-            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=subprocess.DEVNULL)
+            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=DEVNULL)
         if app_executable is not None:
             print("Changing app executable permissions...")
             exec_path = os.path.join(full_app_path, app_executable)
@@ -396,7 +389,7 @@ def main(args):
                                '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
             else:
                 subprocess.run("chmod +x ldid".split(),
-                               stdout=subprocess.DEVNULL)
+                               stdout=DEVNULL)
                 if args.debug:
                     print(
                         f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
@@ -412,19 +405,15 @@ def main(args):
                     if file.endswith(".dylib"):
                         print(f"Signing dylib {file}...")
                         if ldid_in_path:
-                            if args.debug:
-                                print(
-                                    f"[DEBUG] Running command: ldid -Kdata/certificate.p12 -Upassword {frameworks_path}/{file}")
-
-                            subprocess.run(
-                                ['ldid', '-Kdata/certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
+                            command = 'ldid'
                         else:
-                            if args.debug:
-                                print(
-                                    f"[DEBUG] Running command: ./ldid -Kdata/certificate.p12 -Upassword {frameworks_path}/{file}")
+                            command = './ldid'
+                        if args.debug:
+                            print(
+                                f"[DEBUG] Running command: {command} -Kdev_certificate.p12 -Upassword {frameworks_path}/{file}")
 
-                            subprocess.run(
-                                ['./ldid', '-Kdata/certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
+                        subprocess.run(
+                            [f'{command}', '-Kdev_certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
 
                 for fpath in glob(frameworks_path + '/*.framework'):
                     fname = os.path.basename(fpath)
@@ -460,27 +449,24 @@ def main(args):
 
         # Package the deb file
         print("[*] Packaging the deb file...")
-        out_deb_name = app_name.replace(' ', '')
-        os.makedirs("output", exist_ok=True)
-        if Path(f"output/{out_deb_name}.deb").exists():
-            os.remove(f"output/{out_deb_name}.deb")
-
-        global dpkg_cmd
         if args.output:
-            dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {args.output}"
+            path_to_deb = args.output
         else:
-            dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb output/{out_deb_name}.deb"
+            path_to_deb = 'output/' + app_name.replace(' ', '') + '.deb'
+            os.makedirs("output", exist_ok=True)
+
+        dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {path_to_deb}"
 
         if dpkg_in_path:
             if args.debug:
                 print(f"[DEBUG] Running command: {dpkg_cmd}")
 
-            subprocess.run(f"{dpkg_cmd}".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"{dpkg_cmd}".split(), stdout=DEVNULL)
         else:
             if args.debug:
                 print(f"[DEBUG] Running command: ./{dpkg_cmd}")
 
-            subprocess.run(f"./{dpkg_cmd}".split(), stdout=subprocess.DEVNULL)
+            subprocess.run(f"./{dpkg_cmd}".split(), stdout=DEVNULL)
 
         is_installed = False
         if not args.noinstall:
@@ -499,7 +485,7 @@ def main(args):
                             print("Did not find a connected device")
                         else:
                             print("Found a connected device")
-                            Installer.install_deb(args, out_deb_name)
+                            Installer.install_deb(args, path_to_deb)
                             is_installed = True
                     except ConnectionRefusedError:
                         print("Did not find a connected device")
@@ -510,26 +496,22 @@ def main(args):
                                        stdout=PIPE, stderr=PIPE)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
-                        if args.output:
-                            subprocess.run(
-                                f"sudo dpkg -i {args.output}".split(), stdout=PIPE, stderr=PIPE)
-                        else:
-                            subprocess.run(
-                                f"sudo dpkg -i output/{out_deb_name}.deb".split(), stdout=PIPE, stderr=PIPE)
+                        if args.debug:
+                            print(f"[DEBUG] Running command: sudo dpkg -i {path_to_deb}")
 
-                        subprocess.run(
-                            f"sudo apt-get install -f".split(), stdout=PIPE, stderr=PIPE)
+                        subprocess.run(["sudo", "dpkg", "-i", f"{path_to_deb}"], stdout=PIPE, stderr=PIPE)
+
+                        subprocess.run(['sudo', 'apt-get', 'install', '-f'], stdout=PIPE, stderr=PIPE)
                     else:
                         print("User is not in sudoers, using su instead")
-                        if args.output:
-                            subprocess.run(
-                                f"su root -c 'dpkg -i {args.output}'".split(), stdout=PIPE, stderr=PIPE)
-                        else:
-                            subprocess.run(
-                                f"su root -c 'dpkg -i output/{out_deb_name}.deb'".split(), stdout=PIPE, stderr=PIPE)
+                        if args.debug:
+                            print(f"[DEBUG] Running command: su root -c 'dpkg -i {path_to_deb}")
 
                         subprocess.run(
-                            f"su root -c 'apt-get install -f'".split(), stdout=PIPE, stderr=PIPE)
+                            ["su", "root", "-c", "'dpkg", "-i", f"{path_to_deb}'"], stdout=PIPE, stderr=PIPE)
+
+                        subprocess.run(
+                            ["su", "root", "-c", "'apt-get install", "-f'"], stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
@@ -542,11 +524,7 @@ def main(args):
         print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
 
     print("[*] The app will continue to work when rebooted to stock.")
-
-    if args.output:
-        print(f"[*] Output file: {args.output}")
-    else:
-        print(f"[*] Output file: output/{out_deb_name}.deb")
+    print(f"[*] Output file: {path_to_deb}")
 
 
 if __name__ == '__main__':
