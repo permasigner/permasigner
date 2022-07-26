@@ -352,40 +352,6 @@ def main(args):
 
             subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
                            '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
-
-            if Path(frameworks_path).exists():
-                if args.debug:
-                    print("[DEBUG] Frameworks path exists")
-
-                for file in os.listdir(frameworks_path):
-                    if file.endswith(".dylib"):
-                        print(f"Signing dylib {file}...")
-                        subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
-                                       '--force', '--deep', f'{frameworks_path}/{file}'], stdout=DEVNULL)
-
-                for fpath in glob(frameworks_path + '/*.framework'):
-                    fname = os.path.basename(fpath)
-                    if Path(f"{fpath}/Info.plist").exists():
-                        with open(f"{fpath}/Info.plist", 'rb') as f:
-                            info = plistlib.load(f)
-                            if info["CFBundleExecutable"]:
-                                f_executable = info["CFBundleExecutable"]
-                                if args.debug:
-                                    print(
-                                        f"[DEBUG] Executable found in the {fname}")
-                            else:
-                                f_executable = None
-                                if args.debug:
-                                    print(
-                                        f"[DEBUG] No executable found in the {fname}")
-                            if f_executable is not None:
-                                print(f"Signing executable in {fname}")
-                                f_exec_path = os.path.join(fpath, f_executable)
-                                if args.debug:
-                                    print(
-                                        f"[DEBUG] Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing' --force --deep {f_exec_path}")
-                                subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
-                                               '--force', '--deep', f'{f_exec_path}'], stdout=DEVNULL)
         else:
             print("Signing with ldid...")
             if ldid_in_path:
