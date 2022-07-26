@@ -46,20 +46,9 @@ def cmd_in_path(args, cmd):
                     "[-] ldid is required on iOS, but it is not installed. Please install it from Procursus.")
                 exit(1)
 
-        if args.debug:
-            print(f"[DEBUG] Checking ldid output...")
-
-        ldid_out = subprocess.getoutput('ldid')
-        if "procursus" not in ldid_out:
-            if args.debug:
-                print(f"[DEBUG] ldid installed is not from Procursus")
-
-            return False
-        else:
-            if args.debug:
-                print(f"[DEBUG] ldid installed is from Procursus!")
-
-            return True
+        # It seems like a better idea to force download ldid on macOS and Linux to make sure
+        # they have the proper version all the time. A lot of ugly code is necessary for it.
+        return False
 
     return subprocess.getstatusoutput(f"which {cmd}")[0] == 0
 
