@@ -360,54 +360,56 @@ def main(args):
                 subprocess.run(['./ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
                                '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
 
-            if Path(frameworks_path).exists():
-                if args.debug:
-                    print("[DEBUG] Frameworks path exists")
+            if is_ios():
+                if Path(frameworks_path).exists():
+                    if args.debug:
+                        print("[DEBUG] Frameworks path exists")
 
-                for file in os.listdir(frameworks_path):
-                    if file.endswith(".dylib"):
-                        print(f"Signing dylib {file}...")
-                        if ldid_in_path:
-                            command = 'ldid'
-                        else:
-                            command = './ldid'
-                        if args.debug:
-                            print(
-                                f"[DEBUG] Running command: {command} -Kdev_certificate.p12 -Upassword {frameworks_path}/{file}")
-
-                        subprocess.run(
-                            [f'{command}', '-Kdev_certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
-
-                for fpath in glob(frameworks_path + '/*.framework'):
-                    fname = os.path.basename(fpath)
-                    if Path(f"{fpath}/Info.plist").exists():
-                        with open(f"{fpath}/Info.plist", 'rb') as f:
-                            info = plistlib.load(f)
-                            if info["CFBundleExecutable"]:
-                                f_executable = info["CFBundleExecutable"]
-                                if args.debug:
-                                    print(
-                                        f"[DEBUG] Executable found in the {fname}")
+                    for file in os.listdir(frameworks_path):
+                        if file.endswith(".dylib"):
+                            print(f"Signing dylib {file}...")
+                            if ldid_in_path:
+                                command = 'ldid'
                             else:
-                                f_executable = None
-                                if args.debug:
-                                    print(
-                                        f"[DEBUG] No executable found in the {fname}")
-                            if f_executable is not None:
-                                print(f"Signing executable in {fname}")
-                                f_exec_path = os.path.join(fpath, f_executable)
-                                if ldid_in_path:
+                                command = './ldid'
+                            if args.debug:
+                                print(
+                                    f"[DEBUG] Running command: {command} -Kdev_certificate.p12 -Upassword {frameworks_path}/{file}")
+
+                            subprocess.run(
+                                [f'{command}', '-Kdev_certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
+
+                    for fpath in glob(frameworks_path + '/*.framework'):
+                        fname = os.path.basename(fpath)
+                        if Path(f"{fpath}/Info.plist").exists():
+                            with open(f"{fpath}/Info.plist", 'rb') as f:
+                                info = plistlib.load(f)
+                                if info["CFBundleExecutable"]:
+                                    f_executable = info["CFBundleExecutable"]
                                     if args.debug:
                                         print(
-                                            f"[DEBUG] Running command: ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
-                                    subprocess.run(
-                                        ['ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
+                                            f"[DEBUG] Executable found in the {fname}")
                                 else:
+                                    f_executable = None
                                     if args.debug:
                                         print(
-                                            f"[DEBUG] Running command: ./ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
-                                    subprocess.run(
-                                        ['./ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
+                                            f"[DEBUG] No executable found in the {fname}")
+                                if f_executable is not None:
+                                    print(f"Signing executable in {fname}")
+                                    f_exec_path = os.path.join(
+                                        fpath, f_executable)
+                                    if ldid_in_path:
+                                        if args.debug:
+                                            print(
+                                                f"[DEBUG] Running command: ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
+                                        subprocess.run(
+                                            ['ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
+                                    else:
+                                        if args.debug:
+                                            print(
+                                                f"[DEBUG] Running command: ./ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
+                                        subprocess.run(
+                                            ['./ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
         print()
 
         # Package the deb file
