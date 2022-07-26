@@ -8,7 +8,7 @@ class Copy:
         """
         
         # Read the file
-        with open("postinst", 'r') as file:
+        with open("data/postinst", 'r') as file:
             filedata = file.read()
 
         # Replace the target string
@@ -27,7 +27,7 @@ class Copy:
         """
         
         # Read the file
-        with open('postrm', 'r') as file:
+        with open('data/postrm', 'r') as file:
             filedata = file.read()
 
         # Replace the target string
@@ -50,7 +50,7 @@ class Copy:
         """
         
         # Read the file
-        with open('control', 'r') as file:
+        with open('data/control', 'r') as file:
             filedata = file.read()
 
         # Replace the target strings
@@ -73,7 +73,7 @@ class Copy:
         """
         
         # Read the file
-        with open('entitlements.plist', 'r') as file:
+        with open('data/entitlements.plist', 'r') as file:
             filedata = file.read()
 
         # Replace the target string

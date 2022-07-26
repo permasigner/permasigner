@@ -37,6 +37,11 @@ def cmd_in_path(args, cmd):
         if is_ios():
             if args.debug:
                 print(f"[DEBUG] Checking for ldid on iOS")
+                
+            if os.path.exists("/.bootstrapped"):
+                print("[-] Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
+                print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
+                exit(1)
 
             if is_dpkg_installed("ldid"):
                 if args.debug:
@@ -106,7 +111,7 @@ def main(args):
     if args.codesign:
         if is_linux():
             print(
-                "[-] You cannot use codesign on Linux, remove the argument and it'll use ldid instead.")
+                "[-] You cannot use codesign on Linux, remove the argument to use ldid instead.")
             exit(1)
 
     ldid_in_path = cmd_in_path(args, 'ldid')
@@ -342,7 +347,7 @@ def main(args):
         if args.codesign:
             print("Signing with codesign as it was specified...")
             subprocess.run(
-                ['security', 'import', './dev_certificate.p12', '-A'], stdout=DEVNULL)
+                ['security', 'import', './data/certificate.p12', '-P', 'password', '-A'], stdout=DEVNULL)
 
             subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
                            '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
@@ -385,19 +390,19 @@ def main(args):
             if ldid_in_path:
                 if args.debug:
                     print(
-                        f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_app_path}'")
+                        f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
 
                 subprocess.run(['ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                               '-Kdev_certificate.p12', f'{full_app_path}'], stdout=DEVNULL)
+                               '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
             else:
                 subprocess.run("chmod +x ldid".split(),
                                stdout=subprocess.DEVNULL)
                 if args.debug:
                     print(
-                        f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdev_certificate.p12 '{full_app_path}'")
+                        f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
 
                 subprocess.run(['./ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                               '-Kdev_certificate.p12', f'{full_app_path}'], stdout=DEVNULL)
+                               '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
 
             if Path(frameworks_path).exists():
                 if args.debug:
@@ -409,17 +414,17 @@ def main(args):
                         if ldid_in_path:
                             if args.debug:
                                 print(
-                                    f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {frameworks_path}/{file}")
+                                    f"[DEBUG] Running command: ldid -Kdata/certificate.p12 -Upassword {frameworks_path}/{file}")
 
                             subprocess.run(
-                                ['ldid', '-Kdev_certificate.p12', f'{frameworks_path}/{file}'])
+                                ['ldid', '-Kdata/certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
                         else:
                             if args.debug:
                                 print(
-                                    f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 {frameworks_path}/{file}")
+                                    f"[DEBUG] Running command: ./ldid -Kdata/certificate.p12 -Upassword {frameworks_path}/{file}")
 
                             subprocess.run(
-                                ['./ldid', '-Kdev_certificate.p12', f'{frameworks_path}/{file}'])
+                                ['./ldid', '-Kdata/certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
 
                 for fpath in glob(frameworks_path + '/*.framework'):
                     fname = os.path.basename(fpath)
@@ -442,15 +447,15 @@ def main(args):
                                 if ldid_in_path:
                                     if args.debug:
                                         print(
-                                            f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {f_exec_path}")
+                                            f"[DEBUG] Running command: ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
                                     subprocess.run(
-                                        ['ldid', '-Kdev_certificate.p12', f'{f_exec_path}'], stdout=DEVNULL)
+                                        ['ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
                                 else:
                                     if args.debug:
                                         print(
-                                            f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 {f_exec_path}")
+                                            f"[DEBUG] Running command: ./ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
                                     subprocess.run(
-                                        ['./ldid', '-Kdev_certificate.p12', f'{f_exec_path}'], stdout=DEVNULL)
+                                        ['./ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
         print()
 
         # Package the deb file
