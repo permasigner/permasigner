@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/docker-existing-dockerfile
 {
-	"name": "Run",
+	"name": "Development",
 	"runArgs": ["--init"],
 
 	// Sets the run context to one level up instead of the .devcontainer folder.
@@ -14,13 +14,13 @@
 	"settings": {},
 	
 	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": ["ms-python.vscode-pylance", "ms-python.python", "eetami.whitespace-formatter", "kevinrose.vsc-python-indent", "njpwerner.autodocstring", "github.copilot"],
+	"extensions": ["ms-python.vscode-pylance", "ms-python.python", "eetami.whitespace-formatter", "donjayamanne.python-extension-pack"],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": "echo \"alias start='python ./main.py'\" >> ~/.bashrc",
+	"postCreateCommand": "echo \"alias main='python ./main.py'\" >> ~/.bashrc",
 
 	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
 	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
