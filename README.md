@@ -42,9 +42,11 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
 
 # Tutorials
 - [Run Online](https://github.com/itsnebulalol/permasigner/wiki/Run-Online)
+- [Run in Docker](https://github.com/itsnebulalol/permasigner/wiki/Run-in-Docker)
 - [Run on iOS](https://github.com/itsnebulalol/permasigner/wiki/Run-on-iOS)
 - [Run on macOS](https://github.com/itsnebulalol/permasigner/wiki/Run-on-macOS)
 - [Run on Linux](https://github.com/itsnebulalol/permasigner/wiki/Run-on-Linux)
+- [Run on Windows](https://github.com/itsnebulalol/permasigner/wiki/Run-on-Windows)
 
 # In Progress
 View the [GitHub Projects board](https://github.com/users/itsnebulalol/projects/2/views/1)!
