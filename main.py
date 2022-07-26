@@ -30,7 +30,7 @@ def cmd_in_path(args, cmd):
         if is_ios():
             if args.debug:
                 print(f"[DEBUG] Checking for ldid on iOS")
-                
+
             if os.path.exists("/.bootstrapped"):
                 print("[-] Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
                 print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
@@ -190,7 +190,7 @@ def main(args):
     # Prompt the user if they'd like to use an external IPA or a local IPA
     if not (args.url or args.path):
         option = input(
-            "[?] Would you like to use an external or a local IPA? [E, L] ")
+            "[?] Would you like to use an external or a local IPA? [E, L] ").lower()
 
     with tempfile.TemporaryDirectory() as tmpfolder:
         print("[*] Created temporary directory.")
@@ -231,7 +231,7 @@ def main(args):
                 print(
                     "[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
-        elif option == "E":
+        elif option == "e":
             url = input("[?] Paste in the *direct* path to an IPA online: ")
 
             if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
@@ -254,9 +254,17 @@ def main(args):
             except requests.exceptions.RequestException as err:
                 print(f"[-] URL provided is not reachable. Error: {err}")
                 exit(1)
-        elif option == "L":
-            path = input(
-                "[?] Paste in the path to an IPA in your file system: ")
+        elif option == "l":
+            if os.environ.get('IS_DOCKER_CONTAINER', False):
+                print(
+                    "[*] Running in Docker container, please place an IPA in the ipas folder, then put the name of the file below.")
+                ipa_name = input(
+                    '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ')
+                path = f"/usr/src/permasigner/ipas/{ipa_name}"
+            else:
+                path = input(
+                    "[?] Paste in the path to an IPA in your file system: ")
+
             path = path.strip().lstrip("'").rstrip("'")
 
             if Path(path).exists():
@@ -497,15 +505,19 @@ def main(args):
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
                         if args.debug:
-                            print(f"[DEBUG] Running command: sudo dpkg -i {path_to_deb}")
+                            print(
+                                f"[DEBUG] Running command: sudo dpkg -i {path_to_deb}")
 
-                        subprocess.run(["sudo", "dpkg", "-i", f"{path_to_deb}"], stdout=PIPE, stderr=PIPE)
+                        subprocess.run(
+                            ["sudo", "dpkg", "-i", f"{path_to_deb}"], stdout=PIPE, stderr=PIPE)
 
-                        subprocess.run(['sudo', 'apt-get', 'install', '-f'], stdout=PIPE, stderr=PIPE)
+                        subprocess.run(
+                            ['sudo', 'apt-get', 'install', '-f'], stdout=PIPE, stderr=PIPE)
                     else:
                         print("User is not in sudoers, using su instead")
                         if args.debug:
-                            print(f"[DEBUG] Running command: su root -c 'dpkg -i {path_to_deb}")
+                            print(
+                                f"[DEBUG] Running command: su root -c 'dpkg -i {path_to_deb}")
 
                         subprocess.run(
                             ["su", "root", "-c", "'dpkg", "-i", f"{path_to_deb}'"], stdout=PIPE, stderr=PIPE)
