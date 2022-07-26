@@ -19,7 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import select, sys, usbmux
+import select
+import sys
+import usbmux
 from optparse import OptionParser
 
 if sys.version_info > (3, 0):
@@ -114,7 +116,8 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, TCPServer):
 
 HOST = "localhost"
 
-parser = OptionParser(usage="usage: %prog [OPTIONS] RemotePort[:LocalPort] [RemotePort[:LocalPort]]...")
+parser = OptionParser(
+    usage="usage: %prog [OPTIONS] RemotePort[:LocalPort] [RemotePort[:LocalPort]]...")
 parser.add_option("-t", "--threaded", dest='threaded', action='store_true', default=False,
                   help="use threading to handle multiple connections at once")
 parser.add_option("-b", "--bufsize", dest='bufsize', action='store', metavar='KILOBYTES', type='int', default=128,

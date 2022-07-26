@@ -19,7 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import socket, struct, select, sys
+import socket
+import struct
+import select
+import sys
 
 if sys.version_info > (3, 0):
     python3 = True
@@ -107,7 +110,8 @@ class BinaryProtocol(object):
         if resp == self.TYPE_RESULT:
             return {'Number': struct.unpack("I", payload)[0]}
         elif resp == self.TYPE_DEVICE_ADD:
-            devid, usbpid, serial, pad, location = struct.unpack("IH256sHI", payload)
+            devid, usbpid, serial, pad, location = struct.unpack(
+                "IH256sHI", payload)
             if python3:
                 serial = serial.decode().split("\0")[0]
             else:
@@ -141,7 +145,8 @@ class BinaryProtocol(object):
         body = self.socket.recv(dlen - 4)
         version, resp, tag = struct.unpack("3I", body[:0xc])
         if version != self.VERSION:
-            raise MuxVersionError("Version mismatch: expected %d, got %d" % (self.VERSION, version))
+            raise MuxVersionError(
+                "Version mismatch: expected %d, got %d" % (self.VERSION, version))
         payload = self._unpack(resp, body[0xc:])
         return (resp, tag, payload)
 
@@ -175,9 +180,11 @@ class PlistProtocol(BinaryProtocol):
         payload['MessageType'] = req
         payload['ProgName'] = 'tcprelay'
         if python3:
-            BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.dumps(payload))
+            BinaryProtocol.sendpacket(
+                self, self.TYPE_PLIST, tag, plistlib.dumps(payload))
         else:
-            BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.writePlistToString(payload))
+            BinaryProtocol.sendpacket(
+                self, self.TYPE_PLIST, tag, plistlib.writePlistToString(payload))
 
     def getpacket(self):
         resp, tag, payload = BinaryProtocol.getpacket(self)
@@ -235,7 +242,8 @@ class MuxConnection(object):
         self.proto.sendpacket(req, mytag, payload)
         recvtag, data = self._getreply()
         if recvtag != mytag:
-            raise MuxError('Replay tag mismatch: expected', str(mytag), 'received', str(recvtag))
+            raise MuxError('Replay tag mismatch: expected',
+                           str(mytag), 'received', str(recvtag))
         return data['Number']
 
     def listen(self):
@@ -245,8 +253,10 @@ class MuxConnection(object):
 
     def process(self, timeout=None):
         if self.proto.connected:
-            raise MuxError("Socket is connected, cannot process listener events")
-        rlo, wlo, xlo = select.select([self.socket.sock], [], [self.socket.sock], timeout)
+            raise MuxError(
+                "Socket is connected, cannot process listener events")
+        rlo, wlo, xlo = select.select([self.socket.sock], [], [
+                                      self.socket.sock], timeout)
         if xlo:
             self.socket.sock.close()
             raise MuxError("Exception in listener socket")
