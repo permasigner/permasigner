@@ -340,7 +340,7 @@ def main(args):
                 ['security', 'import', './data/certificate.p12', '-P', 'password', '-A'], stdout=DEVNULL)
 
             subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
-                           '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
+                            '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
         else:
             print("Signing with ldid...")
             if ldid_in_path:
@@ -349,7 +349,7 @@ def main(args):
                         f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
 
                 subprocess.run(['ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                               '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+                                '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
             else:
                 subprocess.run("chmod +x ldid".split(),
                                stdout=DEVNULL)
@@ -358,7 +358,7 @@ def main(args):
                         f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
 
                 subprocess.run(['./ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                               '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+                                '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
 
             if is_ios():
                 if Path(frameworks_path).exists():

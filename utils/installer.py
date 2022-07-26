@@ -38,9 +38,11 @@ class Installer:
                     print(f"Sending {path_to_deb} to device")
                     filename = path_to_deb.split("/")[-1]
                     if args.debug:
-                        print(f"[DEBUG] Copying via scp from {path_to_deb} to /var/mobile/Documents/")
+                        print(
+                            f"[DEBUG] Copying via scp from {path_to_deb} to /var/mobile/Documents/")
 
-                    scp.put(f'{path_to_deb}', remote_path='/var/mobile/Documents')
+                    scp.put(f'{path_to_deb}',
+                            remote_path='/var/mobile/Documents')
                     if args.debug:
                         print(f"[DEBUG] Running command: sudo -nv")
 
@@ -54,16 +56,19 @@ class Installer:
                         if args.debug:
                             print(f"[DEBUG] Running command: {command}")
 
-                        stdin, stdout, stderr = client.exec_command(f"{command}", get_pty=True)
+                        stdin, stdout, stderr = client.exec_command(
+                            f"{command}", get_pty=True)
                         stdin.write(f'{password}\n')
                         stdin.flush()
                         print("Installing... this may take some time")
                         print(stdout.read().decode())
 
                         if args.debug:
-                            print(f"[DEBUG] Running command: sudo apt-get install -f")
+                            print(
+                                f"[DEBUG] Running command: sudo apt-get install -f")
                         # for elucubratus bootstrap
-                        streams = client.exec_command('sudo apt-get install -f', get_pty=True)
+                        streams = client.exec_command(
+                            'sudo apt-get install -f', get_pty=True)
                         streams[0].write(f'{password}\n')
                         streams[0].flush()
                         print(streams[1].read().decode())
@@ -78,9 +83,11 @@ class Installer:
                         print("Installing... this may take some time")
                         print(output.read().decode())
                         if args.debug:
-                            print(f"[DEBUG] Running command: sudo apt-get install -f")
+                            print(
+                                f"[DEBUG] Running command: sudo apt-get install -f")
 
-                        output = client.exec_command('sudo apt-get install -f')[1]
+                        output = client.exec_command(
+                            'sudo apt-get install -f')[1]
                         print(output.read().decode())
                     else:
                         print('Using su command')
@@ -88,7 +95,8 @@ class Installer:
                         if args.debug:
                             print(f"[DEBUG] Running command: {command}")
 
-                        streams = client.exec_command(f"{command}", get_pty=True)
+                        streams = client.exec_command(
+                            f"{command}", get_pty=True)
 
                         output = streams[1].channel.recv(2048).decode()
                         if "password" in output.lower():
@@ -98,7 +106,8 @@ class Installer:
                             print("Installing... this may take some time")
                             print(streams[1].read().decode())
                             # for elucubratus bootstrap
-                            streams = client.exec_command("su root -c 'apt-get install -f'", get_pty=True)
+                            streams = client.exec_command(
+                                "su root -c 'apt-get install -f'", get_pty=True)
                             streams[0].write(f'{password}\n')
                             streams[0].flush()
                             print(streams[1].channel.recv(2048).decode())
@@ -106,9 +115,11 @@ class Installer:
                             print("Installing... this may take some time")
                             print(streams[1].read().decode())
                             if args.debug:
-                                print(f"[DEBUG] Running command: sudo apt-get install -f")
+                                print(
+                                    f"[DEBUG] Running command: sudo apt-get install -f")
 
-                            output = client.exec_command('sudo apt-get install -f')[1]
+                            output = client.exec_command(
+                                'sudo apt-get install -f')[1]
                             print(output.read().decode())
         except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
             print(e)
