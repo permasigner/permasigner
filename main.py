@@ -11,20 +11,13 @@ import tempfile
 import platform
 import argparse
 from glob import glob
-import time
 from subprocess import PIPE, DEVNULL
-from getpass import getpass
 
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
 from utils.hash import LdidHash
 from utils.installer import Installer
-
-if not (sys.platform == "darwin" and platform.machine().startswith("i")):
-    from utils.usbmux import USBMux
-    from paramiko.client import AutoAddPolicy, SSHClient
-    from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
-    from scp import SCPClient
+from utils.usbmux import USBMux
 
 """ Functions """
 
@@ -407,19 +400,15 @@ def main(args):
                     if file.endswith(".dylib"):
                         print(f"Signing dylib {file}...")
                         if ldid_in_path:
-                            if args.debug:
-                                print(
-                                    f"[DEBUG] Running command: ldid -Kdev_certificate.p12 {frameworks_path}/{file}")
-
-                            subprocess.run(
-                                ['ldid', '-Kdev_certificate.p12', f'{frameworks_path}/{file}'])
+                            command = 'ldid'
                         else:
-                            if args.debug:
-                                print(
-                                    f"[DEBUG] Running command: ./ldid -Kdev_certificate.p12 {frameworks_path}/{file}")
+                            command = './ldid'
+                        if args.debug:
+                            print(
+                                f"[DEBUG] Running command: {command} -Kdev_certificate.p12 {frameworks_path}/{file}")
 
-                            subprocess.run(
-                                ['./ldid', '-Kdev_certificate.p12', f'{frameworks_path}/{file}'])
+                        subprocess.run(
+                            [f'{command}', '-Kdev_certificate.p12', f'{frameworks_path}/{file}'])
 
                 for fpath in glob(frameworks_path + '/*.framework'):
                     fname = os.path.basename(fpath)
