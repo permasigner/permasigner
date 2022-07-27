@@ -76,7 +76,7 @@ def is_linux():
 
 
 def is_dpkg_installed(pkg):
-    return subprocess.call(f"dpkg -s {pkg} > /dev/null 2>&1".split()) == 0
+    return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
 
 """ Main Function """
