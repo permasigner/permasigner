@@ -1,16 +1,18 @@
 ---
 name: Feature request
-about: If you have a feature request
+about: Suggest an idea for the project.
+title: "[FEATURE] "
+labels: enhancement
 ---
 
-## Context
-What are you trying to do, or how would you want to do it differently? Is it something you currently you cannot do? Is this related to an issue/problem?
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-## Alternatives
-Can you achieve the same result doing it in an alternative way? Is the alternative considerable?
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-## Has the feature been requested before?
-Please provide a link to the issue.
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
-## If the feature request is approved, would you be willing to submit a PR?
-Yes / No _(Help can be provided if you need assistance submitting a PR)_
+**Additional context**
+Add any other context about the feature request here.

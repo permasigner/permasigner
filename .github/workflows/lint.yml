@@ -1,23 +1,23 @@
 name: Lint script
 
 on:
-  push:
-    paths-ignore:
-      - 'README.md'
-    branches:
-      - "main"
+    push:
+        paths-ignore:
+            - "README.md"
+        branches:
+            - "main"
 
 jobs:
-  autopep8:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+    autopep8:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
 
-      - name: autopep8
-        uses: peter-evans/autopep8@v1
-        with:
-          args: --recursive --in-place .
+            - name: autopep8
+              uses: peter-evans/autopep8@v1
+              with:
+                  args: --recursive --in-place .
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Lint script with autopep8
+            - uses: stefanzweifel/git-auto-commit-action@v4
+              with:
+                  commit_message: Lint script with autopep8
