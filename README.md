@@ -16,7 +16,7 @@
     <img src="https://img.shields.io/github/commit-activity/w/itsnebulalol/permasigner.svg" alt="Commits">
   </a>
   <a href="https://dsc.gg/permasigner" target="_blank">
-    <img src="https://img.shields.io/discord/1001905994458206229?label=discord.svg" alt="Commits">
+    <img src="https://img.shields.io/discord/1001905994458206229?label=discord" alt="Commits">
   </a>
 </p>
 
