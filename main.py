@@ -32,7 +32,8 @@ def cmd_in_path(args, cmd):
                 print(f"[DEBUG] Checking for ldid on iOS")
 
             if os.path.exists("/.bootstrapped"):
-                print("[-] Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
+                print(
+                    "[-] Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
                 print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
                 exit(1)
 
@@ -72,7 +73,7 @@ def is_ios():
 
 
 def is_dpkg_installed(pkg):
-    return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
+    return subprocess.call(f"dpkg -s {pkg} > /dev/null 2>&1".split()) == 0
 
 
 """ Main Function """
@@ -89,11 +90,11 @@ def main(args):
         print("[-] Script must be ran on macOS or Linux.")
         exit(1)
 
-    # Check if codesign is added on Linux
+    # Check if codesign is added on Linux or iOS
     if args.codesign:
-        if is_linux():
+        if not is_macos():
             print(
-                "[-] You cannot use codesign on Linux, remove the argument to use ldid instead.")
+                "[-] Codesign can only be used on macOS, remove the argument to use ldid instead.")
             exit(1)
 
     ldid_in_path = cmd_in_path(args, 'ldid')
@@ -343,22 +344,17 @@ def main(args):
                             '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            if ldid_in_path:
-                if args.debug:
-                    print(
-                        f"[DEBUG] Running command: ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
-
-                subprocess.run(['ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                                '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+            subprocess.run("chmod +x ldid".split(), stderr=DEVNULL)
+            if is_ios():
+                ldid_cmd = 'ldid'
             else:
-                subprocess.run("chmod +x ldid".split(),
-                               stdout=DEVNULL)
-                if args.debug:
-                    print(
-                        f"[DEBUG] Running command: ./ldid -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
+                ldid_cmd = './ldid'
+            if args.debug:
+                print(
+                    f"[DEBUG] Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
 
-                subprocess.run(['./ldid', f'-S{tmpfolder}/entitlements.plist', '-M',
-                                '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+            subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
+                            '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
 
             if is_ios():
                 if Path(frameworks_path).exists():
@@ -368,16 +364,13 @@ def main(args):
                     for file in os.listdir(frameworks_path):
                         if file.endswith(".dylib"):
                             print(f"Signing dylib {file}...")
-                            if ldid_in_path:
-                                command = 'ldid'
-                            else:
-                                command = './ldid'
+                            dylib_path = os.path.join(frameworks_path, file)
                             if args.debug:
                                 print(
-                                    f"[DEBUG] Running command: {command} -Kdev_certificate.p12 -Upassword {frameworks_path}/{file}")
+                                    f"[DEBUG] Running command: ldid -Kdev_certificate.p12 -Upassword {dylib_path}")
 
                             subprocess.run(
-                                [f'{command}', '-Kdev_certificate.p12', '-Upassword', f'{frameworks_path}/{file}'])
+                                [f'ldid', '-Kdev_certificate.p12', '-Upassword', f'{dylib_path}'])
 
                     for fpath in glob(frameworks_path + '/*.framework'):
                         fname = os.path.basename(fpath)
@@ -398,18 +391,11 @@ def main(args):
                                     print(f"Signing executable in {fname}")
                                     f_exec_path = os.path.join(
                                         fpath, f_executable)
-                                    if ldid_in_path:
-                                        if args.debug:
-                                            print(
-                                                f"[DEBUG] Running command: ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
-                                        subprocess.run(
-                                            ['ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
-                                    else:
-                                        if args.debug:
-                                            print(
-                                                f"[DEBUG] Running command: ./ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
-                                        subprocess.run(
-                                            ['./ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
+                                    if args.debug:
+                                        print(
+                                            f"[DEBUG] Running command: ldid -Kdata/certificate.p12 -Upassword {f_exec_path}")
+                                    subprocess.run(
+                                        ['ldid', '-Kdata/certificate.p12', '-Upassword', f'{f_exec_path}'], stdout=DEVNULL)
         print()
 
         # Package the deb file
@@ -477,10 +463,10 @@ def main(args):
                                 f"[DEBUG] Running command: su root -c 'dpkg -i {path_to_deb}")
 
                         subprocess.run(
-                            ["su", "root", "-c", "'dpkg", "-i", f"{path_to_deb}'"], stdout=PIPE, stderr=PIPE)
+                            f"su root -c 'dpkg -i {path_to_deb}'".split(), stdout=PIPE, stderr=PIPE)
 
                         subprocess.run(
-                            ["su", "root", "-c", "'apt-get install", "-f'"], stdout=PIPE, stderr=PIPE)
+                            "su root -c 'apt-get install -f'".split(), stdout=PIPE, stderr=PIPE)
 
     # Done!!!
     print()
