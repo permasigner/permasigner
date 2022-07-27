@@ -347,7 +347,6 @@ def main(args):
                             '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            subprocess.run("chmod +x ldid".split(), stderr=DEVNULL)
             if is_ios():
                 ldid_cmd = 'ldid'
             else:
