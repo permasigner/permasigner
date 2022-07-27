@@ -11,7 +11,7 @@ import tempfile
 import platform
 import argparse
 from glob import glob
-from subprocess import PIPE, DEVNULL
+from subprocess import DEVNULL
 
 from utils.copy import Copy
 from utils.downloader import DpkgDeb, Ldid
@@ -444,7 +444,7 @@ def main(args):
                 elif is_ios():
                     print("Checking if user is in sudoers")
                     p = subprocess.run('sudo -nv'.split(),
-                                       stdout=PIPE, stderr=PIPE)
+                                       capture_output=True)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
                         if args.debug:
@@ -452,10 +452,10 @@ def main(args):
                                 f"[DEBUG] Running command: sudo dpkg -i {path_to_deb}")
 
                         subprocess.run(
-                            ["sudo", "dpkg", "-i", f"{path_to_deb}"], stdout=PIPE, stderr=PIPE)
+                            ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
 
                         subprocess.run(
-                            ['sudo', 'apt-get', 'install', '-f'], stdout=PIPE, stderr=PIPE)
+                            ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
                     else:
                         print("User is not in sudoers, using su instead")
                         if args.debug:
@@ -463,10 +463,10 @@ def main(args):
                                 f"[DEBUG] Running command: su root -c 'dpkg -i {path_to_deb}")
 
                         subprocess.run(
-                            f"su root -c 'dpkg -i {path_to_deb}'".split(), stdout=PIPE, stderr=PIPE)
+                            f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)
 
                         subprocess.run(
-                            "su root -c 'apt-get install -f'".split(), stdout=PIPE, stderr=PIPE)
+                            "su root -c 'apt-get install -f'".split(), capture_output=True)
 
     # Done!!!
     print()
