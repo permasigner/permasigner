@@ -1,3 +1,6 @@
+from utils.copy import Copy
+from utils.hash import LdidHash
+from utils.downloader import DpkgDeb, Ldid
 import os
 from pathlib import Path
 from shutil import copy, copytree
@@ -13,11 +16,18 @@ import argparse
 from glob import glob
 from subprocess import PIPE, DEVNULL
 
-from utils.copy import Copy
-from utils.downloader import DpkgDeb, Ldid
-from utils.hash import LdidHash
-from utils.installer import Installer
-from utils.usbmux import USBMux
+
+def is_ios():
+    # Check iOS function is up here so we can conditionally import stuff
+    if not sys.platform == "darwin":
+        return False
+
+    return platform.machine().startswith("i")
+
+
+if not is_ios():
+    from utils.usbmux import USBMux
+    from utils.installer import Installer
 
 """ Functions """
 
@@ -62,13 +72,6 @@ def is_macos():
 
 def is_linux():
     return sys.platform == "linux"
-
-
-def is_ios():
-    if not sys.platform == "darwin":
-        return False
-
-    return platform.machine().startswith("i")
 
 
 def is_dpkg_installed(pkg):
