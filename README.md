@@ -58,8 +58,8 @@ View the [GitHub Projects board](https://github.com/users/itsnebulalol/projects/
 - [verygenericname](https://github.com/verygenericname) for the ldid downloader and support
 - [superrnovae](https://github.com/superrnovae) for contributing lots of fixes and features
 - the [Procursus Team](https://github.com/ProcursusTeam) for the amazing bootstrap and the ldid fork
-
-and anyone who sent a pull request or issue! Your contribution helps a lot!
+- [Amy](https://github.com/elihwyma) for the Procursus with cache GitHub action from the Sileo Git repository
+- anyone who sent a pull request or issue! Your contribution helps a lot!
 
 # Other Stuff
 - [Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
