@@ -14,6 +14,10 @@ if [ ! -z "$BUNDLEID" ]; then
     ARGS="$ARGS -b $BUNDLEID"
 fi
 
+if [ ! -z "$NAME" ]; then
+    ARGS="$ARGS -N $NAME"
+fi
+
 echo "Running Permasigner with args:$ARGS"
 echo ""
 python -u main.py $ARGS -n
