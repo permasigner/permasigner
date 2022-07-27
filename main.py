@@ -141,7 +141,7 @@ def main(args):
                     Ldid.download_macos_arm64(args)
         else:
             print(
-                "[*] ldid not found, not from Procursus, or not up to date, downloading latest binary.")
+                "[*] ldid binary is not found or fails hash check, downloading latest binary.")
             if is_linux() and platform.machine() == "x86_64":
                 Ldid.download_linux_64(args)
             elif is_linux() and platform.machine() == "aarch64":
