@@ -297,8 +297,8 @@ def main(args):
             with open(f'{pre_app_path}/Info.plist', 'rb') as f:
                 info = plistlib.load(f)
                 app_name = info["CFBundleName"]
-                if args.bundle:
-                    app_bundle = args.bundle
+                if args.bundleid:
+                    app_bundle = args.bundleid
                 else:
                     app_bundle = info["CFBundleIdentifier"]
                 app_version = info["CFBundleShortVersionString"]
