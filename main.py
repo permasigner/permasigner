@@ -297,7 +297,10 @@ def main(args):
             with open(f'{pre_app_path}/Info.plist', 'rb') as f:
                 info = plistlib.load(f)
                 app_name = info["CFBundleName"]
-                app_bundle = info["CFBundleIdentifier"]
+                if args.bundle:
+                    app_bundle = args.bundle
+                else:
+                    app_bundle = info["CFBundleIdentifier"]
                 app_version = info["CFBundleShortVersionString"]
                 app_min_ios = info["MinimumOSVersion"]
                 app_author = app_bundle.split(".")[1]
@@ -500,6 +503,8 @@ if __name__ == '__main__':
                         action='store_true', help="skips the install prompt")
     parser.add_argument('-o', '--output', type=str,
                         help="specify output file")
+    parser.add_argument('-b', '--bundleid', type=str,
+                        help="specify new bundle id")
     args = parser.parse_args()
 
     main(args)
