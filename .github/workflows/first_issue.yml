@@ -3,11 +3,11 @@ name: First issue
 on: [pull_request, issues]
 
 jobs:
-    greeting:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/first-interaction@v1
-              with:
-                  repo-token: ${{ secrets.GITHUB_TOKEN }}
-                  issue-message: "Hi there! This seems like your first issue! We are very happy you are contributing to Permasigner :)"
-                  pr-message: "Hi there! This seems like your first pull request! We are very happy you are contributing to Permasigner :)"
+  greeting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: "Hi there! This seems like your first issue! We are very happy you are contributing to Permasigner :)"
+        pr-message: "Hi there! This seems like your first pull request! We are very happy you are contributing to Permasigner :)"
