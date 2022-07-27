@@ -296,8 +296,16 @@ def main(args):
             print("Found Info.plist")
             with open(f'{pre_app_path}/Info.plist', 'rb') as f:
                 info = plistlib.load(f)
-                app_name = info["CFBundleName"]
-                app_bundle = info["CFBundleIdentifier"]
+                if args.name:
+                    app_name = args.name
+                else:
+                    app_name = info["CFBundleName"]
+
+                if args.bundleid:
+                    app_bundle = args.bundleid
+                else:
+                    app_bundle = info["CFBundleIdentifier"]
+
                 app_version = info["CFBundleShortVersionString"]
                 app_min_ios = info["MinimumOSVersion"]
                 app_author = app_bundle.split(".")[1]
@@ -460,6 +468,10 @@ if __name__ == '__main__':
                         action='store_true', help="skips the install prompt")
     parser.add_argument('-o', '--output', type=str,
                         help="specify output file")
+    parser.add_argument('-b', '--bundleid', type=str,
+                        help="specify new bundle id")
+    parser.add_argument('-N', '--name', type=str,
+                        help="specify new app name")
     args = parser.parse_args()
 
     main(args)
