@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          poetry install -E scp
+          poetry install
 
       # Run script
       - name: Run script
