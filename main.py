@@ -17,6 +17,7 @@ from utils.copy import Copy
 from utils.hash import LdidHash
 from utils.downloader import DpkgDeb, Ldid
 
+
 def is_ios():
     # Check iOS function is up here so we can conditionally import stuff
     if not sys.platform == "darwin":
@@ -30,6 +31,8 @@ if not is_ios():
     from utils.installer import Installer
 
 """ Functions """
+
+
 def cmd_in_path(args, cmd):
     if args.debug:
         print(f"[DEBUG] Checking if command {cmd} is in PATH...")
@@ -78,6 +81,8 @@ def is_dpkg_installed(pkg):
 
 
 """ Main Function """
+
+
 def main(args):
     if "main" not in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
         ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
