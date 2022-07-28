@@ -14,12 +14,8 @@ description: Run Permasigner on Linux.
 If you have extra entitlements, add them in `data/entitlements.xml`. If you don't know what this means, you can keep it as is.
 {% endhint %}
 
-4\. Run the script with `python main.py` or `python3 main.py`
-
-* If you get an error that curl isn't found, install it with your package manager of choice; ex. `sudo apt install curl`.
-
-5\. Install the newly created deb file on your iDevice
-
-* You can use something like Dropbox or Mega; advanced users can use `openssh-sftp-server` from Procursus.
-
-6\. Reboot to stock, the app will still work!
+4. Run the script with `python main.py` or `python3 main.py`
+   * If you get an error that curl isn't found, install it with your package manager of choice; ex. `sudo apt install curl`.
+5. Install the newly created deb file on your iDevice
+    * You can use something like Dropbox or Mega; advanced users can use `openssh-sftp-server` from Procursus.
+6. Reboot to stock, the app will still work!

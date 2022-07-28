@@ -4,11 +4,13 @@ on:
   push:
     paths-ignore:
       - 'README.md'
+      - 'docs/'
     branches:
       - "main"
   pull_request:
     paths-ignore:
       - 'README.md'
+      - 'docs/'
     branches:
       - "main"
 
