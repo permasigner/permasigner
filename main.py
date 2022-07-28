@@ -313,10 +313,11 @@ def main(args):
                     app_bundle = info["CFBundleIdentifier"]
 
                 app_version = info["CFBundleShortVersionString"]
-                if info["MinimumOSVersion"]:
-                    app_min_ios = info["MinimumOSVersion"]
+                
+                if args.minver:
+                    app_min_ios = args.minver
                 else:
-                    app_min_ios = "14.0"
+                    app_min_ios = info["MinimumOSVersion"]
 
                 app_author = app_bundle.split(".")[1]
                 app_executable = info["CFBundleExecutable"]
@@ -479,6 +480,8 @@ if __name__ == '__main__':
                         help="specify new bundle id")
     parser.add_argument('-N', '--name', type=str,
                         help="specify new app name")
+    parser.add_argument('-m', '--minver', type=str,
+                        help="specify new minimum app version (14.0 recommended)")
     args = parser.parse_args()
 
     main(args)

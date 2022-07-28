@@ -18,6 +18,10 @@ if [ ! -z "$NAME" ]; then
     ARGS="$ARGS -N $NAME"
 fi
 
+if [ ! -z "$MINVER" ]; then
+    ARGS="$ARGS -m $MINVER"
+fi
+
 echo "Running Permasigner with args:$ARGS"
 echo ""
 python -u main.py $ARGS -n
