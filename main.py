@@ -1,6 +1,3 @@
-from utils.copy import Copy
-from utils.hash import LdidHash
-from utils.downloader import DpkgDeb, Ldid
 import os
 from pathlib import Path
 from shutil import copy, copytree
@@ -15,6 +12,10 @@ import platform
 import argparse
 from glob import glob
 from subprocess import DEVNULL
+
+from utils.copy import Copy
+from utils.hash import LdidHash
+from utils.downloader import DpkgDeb, Ldid
 
 
 def is_ios():

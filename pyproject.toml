@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "permasigner"
+version = "1.0.0"
+description = "Permanently signs IPAs on jailbroken iDevices (persists on stock)."
+authors = ["Nebula"]
+license = "BSD-3-Clause"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+bcrypt = "3.2.2"
+certifi = "2022.6.15"
+cffi = "1.15.1"
+charset-normalizer = "2.1.0"
+cryptography = "37.0.4"
+idna = "3.3"
+paramiko = "2.11.0"
+pycodestyle = "2.8.0"
+pycparser = "2.21"
+PyNaCl = "1.5.0"
+requests = "2.28.1"
+scp = "0.14.4"
+six = "1.16.0"
+toml = "0.10.2"
+urllib3 = "1.26.10"
+
+[tool.poetry.dev-dependencies]
+autopep8 = "1.6.0"
+
+[tool.autopep8]
+max_line_length = 130
+ignore = ["E701", "E70", "E722", "E402", "E302", "E266", "E265", "E26"]
+in-place = true
+recursive = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
