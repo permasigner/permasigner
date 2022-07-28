@@ -312,7 +312,7 @@ def main(args):
                     app_min_ios = info["MinimumOSVersion"]
                 else:
                     app_min_ios = "14.0"
-                    
+
                 app_author = app_bundle.split(".")[1]
                 app_executable = info["CFBundleExecutable"]
                 print("Found information about the app!")
