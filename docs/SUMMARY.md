@@ -1,10 +1,8 @@
----
-description: Welcome to the Permasigner docs!
----
+# Table of contents
 
-# Home
+* [Home](README.md)
 
-## Usage Guides
+## Usage Guides <a href="#usage" id="usage"></a>
 
 * [Run Online](usage/run-online.md)
 * [Run in Docker](usage/run-in-docker.md)
