@@ -308,14 +308,13 @@ def main(args):
                     app_bundle = info["CFBundleIdentifier"]
 
                 app_version = info["CFBundleShortVersionString"]
-                app_min_ios = info["MinimumOSVersion"]
-                app_author = app_bundle.split(".")[1]
-                if info["CFBundleExecutable"]:
-                    app_executable = info["CFBundleExecutable"]
-                    print("Executable found.")
+                if info["MinimumOSVersion"]:
+                    app_min_ios = info["MinimumOSVersion"]
                 else:
-                    app_executable = None
-                    print("No executable found.")
+                    app_min_ios = "14.0"
+                    
+                app_author = app_bundle.split(".")[1]
+                app_executable = info["CFBundleExecutable"]
                 print("Found information about the app!")
         print()
 
