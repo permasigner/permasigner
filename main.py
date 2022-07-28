@@ -79,7 +79,7 @@ def is_dpkg_installed(pkg):
 
 """ Main Function """
 def main(args):
-    if subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']) != "main":
+    if "main" not in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
         ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
     else:
         ver_string = f"{subprocess.check_output(['poetry', 'version', '--short']).decode('ascii').strip()}"

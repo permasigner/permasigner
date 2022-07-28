@@ -1,11 +1,16 @@
 FROM python:3.10.0-slim-bullseye 
 
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 # system dependencies
 RUN apt update
 RUN apt install -y curl git gcc python3-dev
 
 # python dependencies
+COPY ./requirements.txt .
 COPY . .
 RUN pip install --upgrade pip setuptools wheel
-RUN poetry install
+RUN pip install -r requirements.txt
 RUN pip install autopep8

@@ -22,21 +22,15 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install and configure Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          installer-parallel: true
-
       # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          poetry install -E scp
+          pip install -r requirements.txt
 
       # Run script
       - name: Run script
-        run: poetry run python3 main.py -u ${{ github.event.inputs.ipa }} -n -d
+        run: python main.py -u ${{ github.event.inputs.ipa }} -n -d
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
