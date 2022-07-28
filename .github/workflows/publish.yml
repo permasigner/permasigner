@@ -25,16 +25,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  pypi:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  #pypi:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v2
 
-      - name: Build and publish to PyPi
-        uses: JRubics/poetry-publish@v1.12
-        with:
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
-          ignore_dev_requirements: "yes"
+  #    - name: Build and publish to PyPi
+  #      uses: JRubics/poetry-publish@v1.12
+  #      with:
+  #        pypi_token: ${{ secrets.PYPI_TOKEN }}
+  #        ignore_dev_requirements: "yes"
 
       
