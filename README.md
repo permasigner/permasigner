@@ -44,12 +44,12 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
     - The device needs to be jailbroken at first to place the app in the /Applications folder. After installing it'll continue working on stock.
 
 # Tutorials
-- [Run Online](https://github.com/itsnebulalol/permasigner/wiki/Run-Online)
-- [Run in Docker](https://github.com/itsnebulalol/permasigner/wiki/Run-in-Docker)
-- [Run on iOS](https://github.com/itsnebulalol/permasigner/wiki/Run-on-iOS)
-- [Run on macOS](https://github.com/itsnebulalol/permasigner/wiki/Run-on-macOS)
-- [Run on Linux](https://github.com/itsnebulalol/permasigner/wiki/Run-on-Linux)
-- [Run on Windows](https://github.com/itsnebulalol/permasigner/wiki/Run-on-Windows)
+- [Run Online](https://permasigner.itsnebula.net/usage/run-online)
+- [Run in Docker](https://permasigner.itsnebula.net/usage/run-in-docker)
+- [Run on iOS](https://permasigner.itsnebula.net/usage/run-on-ios)
+- [Run on macOS](https://permasigner.itsnebula.net/usage/run-on-macos)
+- [Run on Linux](https://permasigner.itsnebula.net/usage/run-on-linux)
+- [Run on Windows](https://permasigner.itsnebula.net/usage/run-on-windows)
 
 # In Progress
 View the [GitHub Projects board](https://github.com/users/itsnebulalol/projects/2/views/1)!
