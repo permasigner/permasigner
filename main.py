@@ -82,7 +82,7 @@ def main(args):
     if subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']) != "main":
         ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
     else:
-        ver_string = f"{subprocess.check_output(['poetry', 'version', '--short']).decode('ascii').strip()}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+        ver_string = f"{subprocess.check_output(['poetry', 'version', '--short']).decode('ascii').strip()}"
 
     print(
         f"IPA Permasigner | Version {ver_string}")

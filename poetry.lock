@@ -2,7 +2,7 @@
 name = "autopep8"
 version = "1.6.0"
 description = "A tool that automatically formats Python code to conform to the PEP 8 style guide"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -194,7 +194,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "4ed600cc1b094888a339bf3707626b7b7f52b58b0279aa07f053eb4479bd94bb"
+content-hash = "91652105602ba7c8a586256303e480d9d07f80d7e0793aade4a7fc82df0ce663"
 
 [metadata.files]
 autopep8 = [

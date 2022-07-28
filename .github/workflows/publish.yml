@@ -25,13 +25,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: itsnebulalol/permasigner:latest
+  pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Build and publish to PyPi
         uses: JRubics/poetry-publish@v1.12
