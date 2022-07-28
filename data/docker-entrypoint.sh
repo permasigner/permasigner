@@ -20,4 +20,4 @@ fi
 
 echo "Running Permasigner with args:$ARGS"
 echo ""
-python -u main.py $ARGS -n
+poetry run python3 -u main.py $ARGS -n
