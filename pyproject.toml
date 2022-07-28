@@ -4,9 +4,6 @@ version = "1.0.0"
 description = "Permanently signs IPAs on jailbroken iDevices (persists on stock)."
 authors = ["Nebula"]
 license = "BSD-3-Clause"
-packages = [
-    { include = "." }
-]
 
 [tool.poetry.dependencies]
 python = "^3.7"
