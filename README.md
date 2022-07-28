@@ -27,7 +27,7 @@ Permanently sign IPAs on jailbroken iDevices 14.0-14.8.1 (persists on stock)
 ---
 
 # Update 6/27/22: We have switched to Poetry from pip
-If you are having dependency issues, install Poetry with `pip install poetry`, then `poetry install`.
+If you are having dependency issues, install Poetry with `pip install poetry`, then `poetry install -E scp` on macOS/Linux or `poetry install` on iOS.
 
 Then, use `poetry run python3 main.py` to run the script instead.
 
