@@ -7,22 +7,25 @@ license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-bcrypt = "3.2.2"
 certifi = "2022.6.15"
-cffi = "1.15.1"
 charset-normalizer = "2.1.0"
-cryptography = "37.0.4"
 idna = "3.3"
-paramiko = "2.11.0"
-pycodestyle = "2.8.0"
-pycparser = "2.21"
-PyNaCl = "1.5.0"
-requests = "2.28.1"
-scp = "0.14.4"
-six = "1.16.0"
-toml = "0.10.2"
 urllib3 = "1.26.10"
+requests = "2.28.1"
+toml = "0.10.2"
+pycodestyle = "2.8.0"
+bcrypt = { version = "3.2.2", optional = true }
+cffi = { version = "1.14.6", optional = true }
+cryptography = { version = "37.0.4", optional = true }
+paramiko = { version = "2.11.0", optional = true }
+pycparser = { version = "2.21", optional = true }
+PyNaCl = { version = "1.5.0", optional = true }
+six = { version = "1.16.0", optional = true }
+scp = { version = "0.14.4", optional = true }
 
+[tool.poetry.extras]
+scp = ["bcrypt", "cffi", "cryptography", "paramiko", "pycparser", "PyNaCl", "six", "scp"]
+	
 [tool.poetry.dev-dependencies]
 autopep8 = "1.6.0"
 
