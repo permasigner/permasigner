@@ -17,7 +17,6 @@ from utils.copy import Copy
 from utils.hash import LdidHash
 from utils.downloader import DpkgDeb, Ldid
 
-
 def is_ios():
     # Check iOS function is up here so we can conditionally import stuff
     if not sys.platform == "darwin":
@@ -25,14 +24,11 @@ def is_ios():
 
     return platform.machine().startswith("i")
 
-
 if not is_ios():
     from utils.usbmux import USBMux
     from utils.installer import Installer
 
 """ Functions """
-
-
 def cmd_in_path(args, cmd):
     if args.debug:
         print(f"[DEBUG] Checking if command {cmd} is in PATH...")
@@ -81,11 +77,14 @@ def is_dpkg_installed(pkg):
 
 
 """ Main Function """
-
-
 def main(args):
+    if subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']) != "main":
+        ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+    else:
+        ver_string = f"{subprocess.check_output(['poetry', 'version', '--short']).decode('ascii').strip()}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+    
     print(
-        f"IPA Permasigner | Version {subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}")
+        f"IPA Permasigner | Version {ver_string}")
     print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print()
 
@@ -450,6 +449,8 @@ def main(args):
         print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
 
     print("[*] The app will continue to work when rebooted to stock.")
+    print("[*] Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)")
+    print("    https://patreon.com/nebulalol")
     print(f"[*] Output file: {path_to_deb}")
 
 
