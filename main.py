@@ -313,7 +313,7 @@ def main(args):
                     app_bundle = info["CFBundleIdentifier"]
 
                 app_version = info["CFBundleShortVersionString"]
-                
+
                 if args.minver:
                     app_min_ios = args.minver
                 else:
