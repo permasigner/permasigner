@@ -13,9 +13,9 @@ import argparse
 from glob import glob
 from subprocess import DEVNULL
 
-from permasigner.utils.copy import Copy
-from permasigner.utils.hash import LdidHash
-from permasigner.utils.downloader import DpkgDeb, Ldid
+from permasigner.copy import Copy
+from permasigner.hash import LdidHash
+from permasigner.downloader import DpkgDeb, Ldid
 
 
 def is_ios():
@@ -27,8 +27,8 @@ def is_ios():
 
 
 if not is_ios():
-    from permasigner.utils.usbmux import USBMux
-    from permasigner.utils.installer import Installer
+    from permasigner.usbmux import USBMux
+    from permasigner.installer import Installer
 
 """ Functions """
 

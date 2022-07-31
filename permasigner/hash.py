@@ -1,7 +1,7 @@
 import os
 import hashlib
 import requests
-from permasigner.utils.downloader import Ldid
+from permasigner.downloader import Ldid
 
 
 class Hash:
