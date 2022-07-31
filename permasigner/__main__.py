@@ -29,6 +29,9 @@ if not Utils.is_ios():
 
 
 def main(args, in_package=False):
+    data_dir = f"{Utils.get_home_data_directory(args)}/.permasigner"
+    os.makedirs(data_dir, exist_ok=True)
+    
     if in_package:
         if args.debug:
             print("[DEBUG] Running from package, not cloned repo.")
@@ -326,7 +329,7 @@ def main(args, in_package=False):
             if Utils.is_ios():
                 ldid_cmd = 'ldid'
             else:
-                ldid_cmd = './ldid'
+                ldid_cmd = f'{data_dir}/ldid'
             if args.debug:
                 print(
                     f"[DEBUG] Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
@@ -358,7 +361,7 @@ def main(args, in_package=False):
             if args.debug:
                 print(f"[DEBUG] Running command: ./{dpkg_cmd}")
 
-            subprocess.run(f"./{dpkg_cmd}".split(), stdout=DEVNULL)
+            subprocess.run(f"{data_dir}/{dpkg_cmd}".split(), stdout=DEVNULL)
 
         is_installed = False
         if not args.noinstall:
