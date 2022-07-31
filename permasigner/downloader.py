@@ -1,12 +1,13 @@
 import requests
 import subprocess
 import os
-from shutil import copy
-from shutil import rmtree
+from shutil import copy, rmtree, move
+
+from .utils import Utils
 
 
 class DpkgDeb:
-    def download_linux_64(args):
+    def download_linux_64(args, is_package):
         if args.debug:
             print(f"[DEBUG] Downloading dpkg-deb on Linux x86_64.")
 
@@ -45,6 +46,7 @@ class DpkgDeb:
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
+        move("dpkg-deb", f"{Utils.get_home_data_directory(args)}/.permasigner/dpkg-deb")
         if args.debug:
             print(f"[DEBUG] Cleaned up.")
 
@@ -87,6 +89,7 @@ class DpkgDeb:
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
+        move("dpkg-deb", f"{Utils.get_home_data_directory(args)}/.permasigner/dpkg-deb")
         if args.debug:
             print(f"[DEBUG] Cleaned up.")
 
@@ -117,6 +120,7 @@ class Ldid:
             exit(1)
 
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        move("ldid", f"{Utils.get_home_data_directory(args)}/.permasigner/ldid")
 
     def download_linux_arm64(args):
         if args.debug:
@@ -138,6 +142,7 @@ class Ldid:
             exit(1)
 
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        move("ldid", f"{Utils.get_home_data_directory(args)}/.permasigner/ldid")
 
     def download_macos_64(args):
         if args.debug:
@@ -159,6 +164,7 @@ class Ldid:
             exit(1)
 
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        move("ldid", f"{Utils.get_home_data_directory(args)}/.permasigner/ldid")
 
     def download_macos_arm64(args):
         if args.debug:
@@ -180,3 +186,4 @@ class Ldid:
             exit(1)
 
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        move("ldid", f"{Utils.get_home_data_directory(args)}/.permasigner/ldid")

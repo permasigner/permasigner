@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 
 from permasigner import __main__
-from permasigner import __version__
 
 if __name__  == '__main__':
     parser = argparse.ArgumentParser()
@@ -32,7 +32,8 @@ if __name__  == '__main__':
     args = parser.parse_args()
     
     if args.version:
+        from permasigner import __version__
         print(f"Permasigner v{__version__.__version__}")
         exit(0)
 
-    __main__.main(args)
+    __main__.main(args, in_package=True)

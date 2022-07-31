@@ -13,95 +13,46 @@ import argparse
 from glob import glob
 from subprocess import DEVNULL
 
-from permasigner.copy import Copy
-from permasigner.hash import LdidHash
-from permasigner.downloader import DpkgDeb, Ldid
-from permasigner import __version__
+from .copy import Copy
+from .hash import LdidHash
+from .downloader import DpkgDeb, Ldid
+from . import __version__
+from .utils import Utils
 
 
-def is_ios():
-    # Check iOS function is up here so we can conditionally import stuff
-    if not sys.platform == "darwin":
-        return False
-
-    return platform.machine().startswith("i")
-
-
-if not is_ios():
-    from permasigner.usbmux import USBMux
-    from permasigner.installer import Installer
-
-""" Functions """
-
-
-def cmd_in_path(args, cmd):
-    if args.debug:
-        print(f"[DEBUG] Checking if command {cmd} is in PATH...")
-
-    if cmd == "ldid":
-        if is_ios():
-            if args.debug:
-                print(f"[DEBUG] Checking for ldid on iOS")
-
-            if os.path.exists("/.bootstrapped"):
-                print(
-                    "[-] Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
-                print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
-                exit(1)
-
-            if is_dpkg_installed("ldid"):
-                if args.debug:
-                    print(f"[DEBUG] ldid is installed via dpkg")
-
-                return True
-            else:
-                print(
-                    "[-] ldid is required on iOS, but it is not installed. Please install it from Procursus.")
-                exit(1)
-
-        # It seems like a better idea to force download ldid on macOS and Linux to make sure
-        # they have the proper version all the time. A lot of ugly code is necessary for it.
-        return False
-
-    return subprocess.getstatusoutput(f"which {cmd}")[0] == 0
-
-
-def is_macos():
-    if platform.machine().startswith("i"):
-        return False
-
-    return sys.platform == "darwin"
-
-
-def is_linux():
-    return sys.platform == "linux"
-
-
-def is_dpkg_installed(pkg):
-    return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
-
-
-def is_package(args):
-    return (subprocess.getstatusoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])[0] == 128) or (not cmd_in_path(args, "git"))
+if not Utils.is_ios():
+    from .usbmux import USBMux
+    from .installer import Installer
 
 
 """ Main Function """
 
 
-def main(args):
-    ldid_in_path = cmd_in_path(args, 'ldid')
-    dpkg_in_path = cmd_in_path(args, 'dpkg-deb')
-    git_in_path = cmd_in_path(args, 'git')
+def main(args, in_package=False):
+    if in_package:
+        if args.debug:
+            print("[DEBUG] Running from package, not cloned repo.")
     
-    if not git_in_path:
-        ver_string = f"{__version__.__version__}"
-    else:
-        if is_package(args): 
+    ldid_in_path = Utils.cmd_in_path(args, 'ldid')
+    dpkg_in_path = Utils.cmd_in_path(args, 'dpkg-deb')
+    git_in_path = Utils.cmd_in_path(args, 'git')
+    
+    if git_in_path:
+        if args.debug:
+            print(f"[DEBUG] Git is in PATH")
+            
+        if in_package: 
             ver_string = f"{__version__.__version__}"
         elif not "main" in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
             ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
             ver_string = f"{__version__.__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+            
+    else:
+        if args.debug:
+            print(f"[DEBUG] Git is not in PATH")
+        
+        ver_string = f"{__version__.__version__}"
 
     print(
         f"IPA Permasigner | Version {ver_string}")
@@ -115,7 +66,7 @@ def main(args):
 
     # Check if codesign is added on Linux or iOS
     if args.codesign:
-        if not is_macos():
+        if not Utils.is_macos():
             print(
                 "[-] Codesign can only be used on macOS, remove the argument to use ldid instead.")
             exit(1)
@@ -123,7 +74,7 @@ def main(args):
     # Auto download ldid
     if not ldid_in_path:
         if Path(f"{os.getcwd()}/ldid").exists():
-            if is_linux() and platform.machine() == "x86_64":
+            if Utils.is_linux() and platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On Linux x86_64, ldid not found...")
 
@@ -132,7 +83,7 @@ def main(args):
                         "[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_64(args)
-            elif is_linux() and platform.machine() == "aarch64":
+            elif Utils.is_linux() and platform.machine() == "aarch64":
                 if args.debug:
                     print(f"[DEBUG] On Linux aarch64, ldid not found...")
 
@@ -141,7 +92,7 @@ def main(args):
                         "[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_linux_arm64(args)
-            elif is_macos() and platform.machine() == "x86_64":
+            elif Utils.is_macos() and platform.machine() == "x86_64":
                 if args.debug:
                     print(f"[DEBUG] On macOS x86_64, ldid not found...")
 
@@ -150,7 +101,7 @@ def main(args):
                         "[*] ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{os.getcwd()}/ldid")
                     Ldid.download_macos_64(args)
-            elif is_macos() and platform.machine() == "arm64":
+            elif Utils.is_macos() and platform.machine() == "arm64":
                 if args.debug:
                     print(f"[DEBUG] On macOS arm64, ldid not found...")
 
@@ -162,17 +113,17 @@ def main(args):
         else:
             print(
                 "[*] ldid binary is not found or fails hash check, downloading latest binary.")
-            if is_linux() and platform.machine() == "x86_64":
+            if Utils.is_linux() and platform.machine() == "x86_64":
                 Ldid.download_linux_64(args)
-            elif is_linux() and platform.machine() == "aarch64":
+            elif Utils.is_linux() and platform.machine() == "aarch64":
                 Ldid.download_linux_arm64(args)
-            elif is_macos() and platform.machine() == "x86_64":
+            elif Utils.is_macos() and platform.machine() == "x86_64":
                 Ldid.download_macos_64(args)
-            elif is_macos() and platform.machine() == "arm64":
+            elif Utils.is_macos() and platform.machine() == "arm64":
                 Ldid.download_macos_arm64(args)
 
     # Auto download dpkg-deb on Linux
-    if not dpkg_in_path and is_linux():
+    if not dpkg_in_path and Utils.is_linux():
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
             if platform.machine() == "x86_64":
                 if args.debug:
@@ -189,7 +140,7 @@ def main(args):
                 DpkgDeb.download_linux_arm64(args)
                 print()
 
-    if is_macos():
+    if Utils.is_macos():
         if not subprocess.getstatusoutput("which dpkg")[0] == 0:
             if args.debug:
                 print(f"[DEBUG] On macOS x86_64, dpkg not found...")
@@ -372,7 +323,7 @@ def main(args):
                             '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            if is_ios():
+            if Utils.is_ios():
                 ldid_cmd = 'ldid'
             else:
                 ldid_cmd = './ldid'
@@ -389,8 +340,8 @@ def main(args):
         print("[*] Packaging the deb file...")
         if args.output:
             path_to_deb = args.output
-        elif is_package(args):
-            path_to_deb = f"{os.path.expanduser('~')}/.permasigner/output/{app_name.replace(' ', '')}.deb"
+        elif in_package:
+            path_to_deb = f"{Utils.get_home_data_directory(args)}/.permasigner/output/{app_name.replace(' ', '')}.deb"
         else:
             os.makedirs("output", exist_ok=True)
             path_to_deb = f"output/{app_name.replace(' ', '')}.deb"
@@ -417,7 +368,7 @@ def main(args):
                     "[?] Would you like install the application to your device (must be connected)? [y, n]: ").lower()
 
             if option == 'y' or args.install:
-                if is_macos() or is_linux():
+                if Utils.is_macos() or Utils.is_linux():
                     try:
                         mux = USBMux()
                         if not mux.devices:
@@ -431,7 +382,7 @@ def main(args):
                     except ConnectionRefusedError:
                         print("Did not find a connected device")
                         pass
-                elif is_ios():
+                elif Utils.is_ios():
                     print("Checking if user is in sudoers")
                     p = subprocess.run('sudo -nv'.split(),
                                        capture_output=True)
