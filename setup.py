@@ -1,8 +1,10 @@
 from os.path import join
-from setuptools import setup
+import setuptools
 
 with open("README.md", "r") as fh:
     readme = fh.read()
+    
+exec(open('permasigner/__version__.py').read())
 
 def parse_requirements(requirements, ignore=('setuptools',)):
     with open(requirements) as f:
@@ -18,14 +20,14 @@ def parse_requirements(requirements, ignore=('setuptools',)):
                 packages.add(pkg)
         return tuple(packages)
 
-setup(
+setuptools.setup(
     name='permasigner',
-    version='1.0.0',
+    version=__version__,
     description=('Permanently signs IPAs on jailbroken iDevices (persists on stock).'),
     license='BSD-3-Clause',
     url='https://github.com/itsnebulalol/permasigner',
     python_requires=">=3.7",
-    packages=['permasigner'],
+    packages=setuptools.find_packages(),
     long_description=readme,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -34,11 +36,7 @@ setup(
         'Environment :: Console',
         'Operating System :: OS Independent',
     ],
-    entry_points={
-        'console_scripts': [
-            'permasigner = permasigner.__main__:main',
-        ]
-    },
+    scripts=['bin/permasigner'],
     keywords='python, windows, macos, linux, docker, cli, open-source, ios, command-line-app, cli-app, hacktoberfest, procursu,s permasign, permasigner',
     include_package_data=True,
     author='Nebula',

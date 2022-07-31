@@ -92,15 +92,17 @@ def main(args):
     dpkg_in_path = cmd_in_path(args, 'dpkg-deb')
     git_in_path = cmd_in_path(args, 'git')
     
+    exec(open('permasigner/__version__.py').read())
+    
     if not git_in_path:
-        ver_string = f"{__init__.version}"
+        ver_string = f"{__version__}"
     else:
         if not "main" in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
             ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         elif is_package(args):
-            ver_string = f"{__init__.version}"
+            ver_string = f"{__version__}"
         else:
-            ver_string = f"{__init__.version}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+            ver_string = f"{__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
 
     print(
         f"IPA Permasigner | Version {ver_string}")
@@ -471,30 +473,3 @@ def main(args):
     print("[*] Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)")
     print("    https://patreon.com/nebulalol")
     print(f"[*] Output file: {path_to_deb}")
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--codesign', action='store_true',
-                        help="uses codesign instead of ldid")
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help="shows some debug info, only useful for testing")
-    parser.add_argument('-u', '--url', type=str,
-                        help="the direct URL of the IPA to be signed")
-    parser.add_argument('-p', '--path', type=str,
-                        help="the direct local path of the IPA to be signed")
-    parser.add_argument('-i', '--install', action='store_true',
-                        help="installs the application to your device")
-    parser.add_argument('-n', '--noinstall',
-                        action='store_true', help="skips the install prompt")
-    parser.add_argument('-o', '--output', type=str,
-                        help="specify output file")
-    parser.add_argument('-b', '--bundleid', type=str,
-                        help="specify new bundle id")
-    parser.add_argument('-N', '--name', type=str,
-                        help="specify new app name")
-    parser.add_argument('-m', '--minver', type=str,
-                        help="specify new minimum app version (14.0 recommended)")
-    args = parser.parse_args()
-
-    main(args)
