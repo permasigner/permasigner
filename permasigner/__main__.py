@@ -82,7 +82,7 @@ def is_dpkg_installed(pkg):
 
 
 def is_package(args):
-    return ("fatal: not a git repository" in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])) or (not cmd_in_path(args, "git"))
+    return (subprocess.getstatusoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])[0] == 128) or (not cmd_in_path(args, "git"))
 
 
 """ Main Function """
