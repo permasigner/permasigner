@@ -2,8 +2,6 @@
 description: Run Permasigner on Windows using WSL or Docker.
 ---
 
-# Run on Windows
-
 ## Docker (recommended)
 
 Read the [Run in Docker](run-in-docker.md) guide.
