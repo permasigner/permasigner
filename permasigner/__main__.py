@@ -76,46 +76,34 @@ def main(args, in_package=False):
 
     # Auto download ldid
     if not ldid_in_path:
-        if Path(f"{os.getcwd()}/ldid").exists():
+        if Path(f"{data_dir}/ldid").exists():
             if Utils.is_linux() and platform.machine() == "x86_64":
-                if args.debug:
-                    print(f"[DEBUG] On Linux x86_64, ldid not found...")
-
-                if not LdidHash.check_linux_64(args):
+                if not LdidHash.check_linux_64(args, data_dir):
                     print(
                         "[*] ldid is outdated or malformed, downloading latest version...")
-                    os.remove(f"{os.getcwd()}/ldid")
+                    os.remove(f"{data_dir}/ldid")
                     Ldid.download_linux_64(args)
             elif Utils.is_linux() and platform.machine() == "aarch64":
-                if args.debug:
-                    print(f"[DEBUG] On Linux aarch64, ldid not found...")
-
-                if not LdidHash.check_linux_arm64(args):
+                if not LdidHash.check_linux_arm64(args, data_dir):
                     print(
                         "[*] ldid is outdated or malformed, downloading latest version...")
-                    os.remove(f"{os.getcwd()}/ldid")
+                    os.remove(f"{data_dir}/ldid")
                     Ldid.download_linux_arm64(args)
             elif Utils.is_macos() and platform.machine() == "x86_64":
-                if args.debug:
-                    print(f"[DEBUG] On macOS x86_64, ldid not found...")
-
-                if not LdidHash.check_macos_64(args):
+                if not LdidHash.check_macos_64(args, data_dir):
                     print(
                         "[*] ldid is outdated or malformed, downloading latest version...")
-                    os.remove(f"{os.getcwd()}/ldid")
+                    os.remove(f"{data_dir}/ldid")
                     Ldid.download_macos_64(args)
             elif Utils.is_macos() and platform.machine() == "arm64":
-                if args.debug:
-                    print(f"[DEBUG] On macOS arm64, ldid not found...")
-
-                if not LdidHash.check_macos_arm64(args):
+                if not LdidHash.check_macos_arm64(args, data_dir):
                     print(
                         "[*] ldid is outdated or malformed, downloading latest version...")
-                    os.remove(f"{os.getcwd()}/ldid")
+                    os.remove(f"{data_dir}/ldid")
                     Ldid.download_macos_arm64(args)
         else:
             print(
-                "[*] ldid binary is not found or fails hash check, downloading latest binary.")
+                "[*] ldid binary is not found, downloading latest binary.")
             if Utils.is_linux() and platform.machine() == "x86_64":
                 Ldid.download_linux_64(args)
             elif Utils.is_linux() and platform.machine() == "aarch64":

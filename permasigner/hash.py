@@ -24,12 +24,12 @@ class Hash:
 
 
 class LdidHash:
-    def check_linux_64(args):
+    def check_linux_64(args, data_dir):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.linux_64_url)
-        local_hash = Hash.get_hash("ldid", None)
+        local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
             if args.debug:
@@ -42,12 +42,12 @@ class LdidHash:
 
             return False
 
-    def check_linux_arm64(args):
+    def check_linux_arm64(args, data_dir):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.linux_arm64_url)
-        local_hash = Hash.get_hash("ldid", None)
+        local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
             if args.debug:
@@ -60,12 +60,12 @@ class LdidHash:
 
             return False
 
-    def check_macos_64(args):
+    def check_macos_64(args, data_dir):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.macos_64_url)
-        local_hash = Hash.get_hash("ldid", None)
+        local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
             if args.debug:
@@ -78,12 +78,12 @@ class LdidHash:
 
             return False
 
-    def check_macos_arm64(args):
+    def check_macos_arm64(args, data_dir):
         if args.debug:
             print(f"[DEBUG] Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.macos_arm64_url)
-        local_hash = Hash.get_hash("ldid", None)
+        local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
             if args.debug:
