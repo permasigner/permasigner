@@ -16,6 +16,7 @@ from subprocess import DEVNULL
 from permasigner.copy import Copy
 from permasigner.hash import LdidHash
 from permasigner.downloader import DpkgDeb, Ldid
+from permasigner import __version__
 
 
 def is_ios():
@@ -92,17 +93,15 @@ def main(args):
     dpkg_in_path = cmd_in_path(args, 'dpkg-deb')
     git_in_path = cmd_in_path(args, 'git')
     
-    exec(open('permasigner/__version__.py').read())
-    
     if not git_in_path:
-        ver_string = f"{__version__}"
+        ver_string = f"{__version__.__version__}"
     else:
         if not "main" in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
             ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         elif is_package(args):
-            ver_string = f"{__version__}"
+            ver_string = f"{__version__.__version__}"
         else:
-            ver_string = f"{__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+            ver_string = f"{__version__.__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
 
     print(
         f"IPA Permasigner | Version {ver_string}")
