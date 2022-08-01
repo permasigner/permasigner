@@ -14,7 +14,7 @@ from glob import glob
 from subprocess import DEVNULL
 import pkgutil
 
-from .copy import Copy
+from .copier import Copier
 from .hash import LdidHash
 from .downloader import DpkgDeb, Ldid
 from . import __version__
@@ -264,9 +264,9 @@ def main(args, in_package=False):
         os.makedirs(f"{tmpfolder}/deb/Applications", exist_ok=False)
         os.makedirs(f"{tmpfolder}/deb/DEBIAN", exist_ok=False)
         print("Copying deb file scripts and control...")
-        Copy.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name, in_package)
-        Copy.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name, in_package)
-        Copy.copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name,
+        Copier.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name, in_package)
+        Copier.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name, in_package)
+        Copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name,
                           app_bundle, app_version, app_min_ios, app_author, in_package)
         print("Copying app files...")
         full_app_path = os.path.join(f"{tmpfolder}/deb/Applications", app_dir)
@@ -284,7 +284,7 @@ def main(args, in_package=False):
 
         # Sign the app
         Logger.log(f"Signing app...", color=Colors.pink)
-        Copy.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, in_package)
+        Copier.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, in_package)
         frameworks_path = os.path.join(full_app_path, 'Frameworks')
         if in_package:
             cert_path = Utils.get_resource_path(__name__, "data/certificate.p12")

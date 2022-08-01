@@ -1,7 +1,7 @@
 import pkgutil
 from urllib.parse import urlparse
 
-class Copy:
+class Copier:
     def copy_postinst(file_path, app_name, in_package):
         """Copy postinst file.
 
