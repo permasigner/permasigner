@@ -39,7 +39,7 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     scripts=['bin/permasigner'],
-    keywords='python, windows, macos, linux, docker, cli, open-source, ios, command-line-app, cli-app, hacktoberfest, procursu,s permasign, permasigner',
+    keywords='python, windows, macos, linux, docker, cli, open-source, ios, command-line-app, cli-app, hacktoberfest, procursus, permasign, permasigner',
     include_package_data=True,
     author='Nebula',
     install_requires=parse_requirements('requirements.txt'),
