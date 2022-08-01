@@ -2,14 +2,11 @@
 description: Run Permasigner on Debian based Linux distros.
 ---
 
-{% hint style="danger" %}
-These steps will **not work** on non-Debian based systems. Refer to [Run in Docker](usage/run-in-docker.md) to run Permasigner on any distro that Docker supports.
-{% endhint %}
-
 ## Run from Package
 
 * Open a terminal using Ctrl + Shift + T on most Linux distros
-* Install all requirements with `pip install permasigner` or `pip3 install permasigner`
+* Install [bzip2](https://command-not-found.com/bunzip2) using your package manager of choice; ex. `sudo apt install bzip2`
+* Install the package with `pip install permasigner` or `pip3 install permasigner`
    * If this fails, install python3 with your package manager of choice; ex. `sudo apt install python3`.
 * Run the script with `python -m permasigner` or `python3 -m permasigner`
 * Install the newly created deb file on your iDevice
@@ -19,6 +16,7 @@ These steps will **not work** on non-Debian based systems. Refer to [Run in Dock
 ## Run from Source
 
 * Open a terminal using Ctrl + Shift + T on most Linux distros
+* Install [bzip2](https://command-not-found.com/bunzip2) using your package manager of choice; ex. `sudo apt install bzip2`
 * Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
    * If this fails, install git with your package manager of choice; ex. `sudo apt install git`.
 * Install all requirements with `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
