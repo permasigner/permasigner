@@ -33,27 +33,30 @@ if not Utils.is_ios():
 def main(args, in_package=False):
     data_dir = f"{Utils.get_home_data_directory(args)}/.permasigner"
     os.makedirs(data_dir, exist_ok=True)
-    
+
     if in_package:
-        if args.debug: Logger.debug(f"Running from package, not cloned repo.")
-    
+        if args.debug:
+            Logger.debug(f"Running from package, not cloned repo.")
+
     ldid_in_path = Utils.cmd_in_path(args, 'ldid')
     dpkg_in_path = Utils.cmd_in_path(args, 'dpkg-deb')
     git_in_path = Utils.cmd_in_path(args, 'git')
-    
+
     if git_in_path:
-        if args.debug: Logger.debug(f"Git is in PATH")
-            
-        if in_package: 
+        if args.debug:
+            Logger.debug(f"Git is in PATH")
+
+        if in_package:
             ver_string = f"{__version__.__version__}"
         elif not "main" in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
             ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
             ver_string = f"{__version__.__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
-            
+
     else:
-        if args.debug: Logger.debug(f"Git is not in PATH")
-        
+        if args.debug:
+            Logger.debug(f"Git is not in PATH")
+
         ver_string = f"{__version__.__version__}"
 
     print(Colors.bold + f"Permasigner | Version {ver_string}")
@@ -109,13 +112,15 @@ def main(args, in_package=False):
     if not dpkg_in_path and Utils.is_linux():
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
             if platform.machine() == "x86_64":
-                if args.debug: Logger.debug(f"On Linux x86_64, dpkg-deb not found...")
+                if args.debug:
+                    Logger.debug(f"On Linux x86_64, dpkg-deb not found...")
 
                 Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
                 DpkgDeb.download_linux_64(args)
                 print()
             elif platform.machine() == "aarch64":
-                if args.debug: Logger.debug(f"On Linux aarch64, dpkg-deb not found...")
+                if args.debug:
+                    Logger.debug(f"On Linux aarch64, dpkg-deb not found...")
 
                 Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
                 DpkgDeb.download_linux_arm64(args)
@@ -123,7 +128,8 @@ def main(args, in_package=False):
 
     if Utils.is_macos():
         if not subprocess.getstatusoutput("which dpkg")[0] == 0:
-            if args.debug: Logger.debug(f"On macOS x86_64, dpkg not found...")
+            if args.debug:
+                Logger.debug(f"On macOS x86_64, dpkg not found...")
             Logger.error("dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
             exit(1)
 
@@ -253,7 +259,7 @@ def main(args, in_package=False):
 
                 app_author = app_bundle.split(".")[1]
                 app_author = app_author[0].upper() + app_author[1:]
-                
+
                 app_executable = info["CFBundleExecutable"]
                 print("Found information about the app!")
         print()
@@ -267,7 +273,7 @@ def main(args, in_package=False):
         Copier.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name, in_package)
         Copier.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name, in_package)
         Copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name,
-                          app_bundle, app_version, app_min_ios, app_author, in_package)
+                            app_bundle, app_version, app_min_ios, app_author, in_package)
         print("Copying app files...")
         full_app_path = os.path.join(f"{tmpfolder}/deb/Applications", app_dir)
         copytree(pre_app_path, full_app_path)
@@ -290,7 +296,7 @@ def main(args, in_package=False):
             cert_path = Utils.get_resource_path(__name__, "data/certificate.p12")
         else:
             cert_path = "permasigner/data/certificate.p12"
-        
+
         if args.codesign:
             print("Signing with codesign as it was specified...")
             subprocess.run(
@@ -304,7 +310,9 @@ def main(args, in_package=False):
                 ldid_cmd = 'ldid'
             else:
                 ldid_cmd = f'{data_dir}/ldid'
-            if args.debug: Logger.debug(f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
+            if args.debug:
+                Logger.debug(
+                    f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
@@ -331,7 +339,8 @@ def main(args, in_package=False):
 
             subprocess.run(f"{dpkg_cmd}".split(), stdout=DEVNULL)
         else:
-            if args.debug: Logger.debug(f"Running command: ./{dpkg_cmd}")
+            if args.debug:
+                Logger.debug(f"Running command: ./{dpkg_cmd}")
 
             subprocess.run(f"{data_dir}/{dpkg_cmd}".split(), stdout=DEVNULL)
 
@@ -362,7 +371,8 @@ def main(args, in_package=False):
                                        capture_output=True)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
-                        if args.debug: Logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
+                        if args.debug:
+                            Logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
 
                         subprocess.run(
                             ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
@@ -371,7 +381,8 @@ def main(args, in_package=False):
                             ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
                     else:
                         print("User is not in sudoers, using su instead")
-                        if args.debug: Logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
+                        if args.debug:
+                            Logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
 
                         subprocess.run(
                             f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)

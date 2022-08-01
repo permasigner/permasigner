@@ -14,7 +14,7 @@ class Colors:
     lightblue = '\033[94m'
     pink = '\033[95m'
     lightcyan = '\033[96m'
-    
+
     reset = '\033[0m'
     bold = '\033[01m'
     disable = '\033[02m'
@@ -23,18 +23,19 @@ class Colors:
     strikethrough = '\033[09m'
     invisible = '\033[08m'
 
+
 class Logger:
     def log(message, color=None):
         if color is None:
             print(f"[*] {message}")
         else:
             print(color + Colors.bold + "[*] " + Colors.reset + color + f"{message}" + Colors.reset)
-        
+
     def debug(message):
         print(Colors.lightblue + Colors.bold + "[DEBUG] " + Colors.reset + Colors.lightblue + f"{message}" + Colors.reset)
-        
+
     def error(message):
         print(Colors.lightred + Colors.bold + "[!] " + Colors.reset + Colors.lightred + f"{message}" + Colors.reset)
-        
+
     def ask(message):
         return input(Colors.orange + Colors.bold + "[?] " + Colors.reset + Colors.orange + f"{message}" + Colors.reset)

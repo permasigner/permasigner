@@ -4,6 +4,7 @@ import requests
 from .downloader import Ldid
 from .logger import Logger
 
+
 class Hash:
     def get_hash(filePath, url):
         m = hashlib.md5()
@@ -25,61 +26,73 @@ class Hash:
 
 class LdidHash:
     def check_linux_64(args, data_dir):
-        if args.debug: Logger.debug(f"Checking ldid hash...")
+        if args.debug:
+            Logger.debug(f"Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.linux_64_url)
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
-            if args.debug: Logger.debug(f"ldid hash successfully verified.")
+            if args.debug:
+                Logger.debug(f"ldid hash successfully verified.")
 
             return True
         else:
-            if args.debug: Logger.debug(f"ldid hash failed to verify.")
+            if args.debug:
+                Logger.debug(f"ldid hash failed to verify.")
 
             return False
 
     def check_linux_arm64(args, data_dir):
-        if args.debug: Logger.debug(f"Checking ldid hash...")
+        if args.debug:
+            Logger.debug(f"Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.linux_arm64_url)
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
-            if args.debug: Logger.debug(f"ldid hash successfully verified.")
+            if args.debug:
+                Logger.debug(f"ldid hash successfully verified.")
 
             return True
         else:
-            if args.debug: Logger.debug(f"ldid hash failed to verify.")
+            if args.debug:
+                Logger.debug(f"ldid hash failed to verify.")
 
             return False
 
     def check_macos_64(args, data_dir):
-        if args.debug: Logger.debug(f"Checking ldid hash...")
+        if args.debug:
+            Logger.debug(f"Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.macos_64_url)
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
-            if args.debug: Logger.debug(f"ldid hash successfully verified.")
+            if args.debug:
+                Logger.debug(f"ldid hash successfully verified.")
 
             return True
         else:
-            if args.debug: Logger.debug(f"ldid hash failed to verify.")
+            if args.debug:
+                Logger.debug(f"ldid hash failed to verify.")
 
             return False
 
     def check_macos_arm64(args, data_dir):
-        if args.debug: Logger.debug(f"Checking ldid hash...")
+        if args.debug:
+            Logger.debug(f"Checking ldid hash...")
 
         remote_hash = Hash.get_hash(None, Ldid.macos_arm64_url)
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
-            if args.debug: Logger.debug(f"ldid hash successfully verified.")
+            if args.debug:
+                Logger.debug(f"ldid hash successfully verified.")
 
             return True
         else:
-            if args.debug: Logger.debug(f"ldid hash failed to verify.")
+            if args.debug:
+                Logger.debug(f"ldid hash failed to verify.")
 
             return False

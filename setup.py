@@ -3,8 +3,9 @@ import setuptools
 
 with open("README.md", "r") as fh:
     readme = fh.read()
-    
+
 exec(open('permasigner/__version__.py').read())
+
 
 def parse_requirements(requirements, ignore=('setuptools',)):
     with open(requirements) as f:
@@ -19,6 +20,7 @@ def parse_requirements(requirements, ignore=('setuptools',)):
             if pkg not in ignore:
                 packages.add(pkg)
         return tuple(packages)
+
 
 setuptools.setup(
     name='permasigner',
