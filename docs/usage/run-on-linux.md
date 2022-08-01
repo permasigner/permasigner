@@ -1,6 +1,10 @@
 ---
-description: Run Permasigner on Linux.
+description: Run Permasigner on Debian based Linux distros.
 ---
+
+{% hint style="danger" %}
+These steps will **not work** on non-Debian based systems. Refer to [Run in Docker](usage/run-in-docker.md) to run Permasigner on any distro that Docker supports.
+{% endhint %}
 
 ## Run from Package
 
