@@ -1,4 +1,5 @@
 import pkgutil
+from urllib.parse import urlparse
 
 class Copy:
     def copy_postinst(file_path, app_name, in_package):
@@ -66,6 +67,7 @@ class Copy:
 
         # Replace the target strings
         filedata = filedata.replace("{APP_NAME}", app_name)
+        filedata = filedata.replace("{APP_NAME_ENCODED}", urlparse(app_name).path)
         filedata = filedata.replace("{APP_BUNDLE}", app_bundle)
         filedata = filedata.replace("{APP_VERSION}", app_version)
         filedata = filedata.replace("{APP_MIN_IOS}", app_min_ios)
