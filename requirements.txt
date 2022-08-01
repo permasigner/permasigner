@@ -1,16 +1,16 @@
-autopep8==1.6.0
-bcrypt==3.2.2
-certifi==2022.6.15
-cffi==1.15.1
-charset-normalizer==2.1.0
-cryptography==37.0.4
-idna==3.3
-paramiko==2.11.0
-pycodestyle==2.8.0
-pycparser==2.21
-PyNaCl==1.5.0
 requests==2.28.1
-scp==0.14.4
-six==1.16.0
 toml==0.10.2
 urllib3==1.26.10
+pycodestyle==2.8.0
+idna==3.3
+charset-normalizer==2.1.0
+certifi==2022.6.15
+autopep8==1.6.0
+scp==0.14.4 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+six==1.16.0 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+bcrypt==3.2.2 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+cffi==1.15.1 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+cryptography==37.0.4 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+paramiko==2.11.0 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+pycparser==2.21 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+PyNaCl==1.5.0 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
