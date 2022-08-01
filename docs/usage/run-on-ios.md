@@ -4,7 +4,18 @@ description: Run Permasigner on a jailbroken iDevice using the Procursus bootstr
 
 **Note:** A jailbreak using Procursus is required (eg. Taurine, odysseyra1n).
 
-## Shortcut
+## Run from Package
+
+* Open a terminal using Ctrl + Shift + T on most Linux distros
+* Install bzip2 using your package manager of choice; ex. `sudo apt install bzip2` or Sileo
+* Install the package with `python3 -m pip install permasigner`
+   * If this fails, install python3 with your package manager of choice; ex. `sudo apt install python3` or Sileo.
+* Run the script with `python3 -m permasigner`
+* Install the newly created deb file
+   * Find it in Filza at `/var/mobile/.permasigner/output`
+* Reboot to stock, the app will still work!
+
+## Run with Shortcut
 
 * Import the shortcut from [here](https://routinehub.co/shortcut/12520/)
    * Make sure to pay attention to the import questions.
@@ -14,12 +25,12 @@ description: Run Permasigner on a jailbroken iDevice using the Procursus bootstr
 * The app will install if you choose!
    * If you choose not to, it's in /var/mobile/.permasigner/src/output.
 
-## Manual
+## Run from Source
 
 * Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
 * Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
    * If this fails, install git with `sudo apt install git`.
-* Install all requirements with `python3 -m pip install -r ios_requirements.txt`
+* Install all requirements with `python3 -m pip install -r requirements.txt`
    * If this fails, install python3 with `sudo apt install python3`.
 
 {% hint style="info" %}
