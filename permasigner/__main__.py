@@ -19,6 +19,7 @@ from .hash import LdidHash
 from .downloader import DpkgDeb, Ldid
 from . import __version__
 from .utils import Utils
+from .logger import Logger, Colors
 
 
 if not Utils.is_ios():
@@ -34,16 +35,14 @@ def main(args, in_package=False):
     os.makedirs(data_dir, exist_ok=True)
     
     if in_package:
-        if args.debug:
-            print("[DEBUG] Running from package, not cloned repo.")
+        if args.debug: Logger.debug(f"Running from package, not cloned repo.")
     
     ldid_in_path = Utils.cmd_in_path(args, 'ldid')
     dpkg_in_path = Utils.cmd_in_path(args, 'dpkg-deb')
     git_in_path = Utils.cmd_in_path(args, 'git')
     
     if git_in_path:
-        if args.debug:
-            print(f"[DEBUG] Git is in PATH")
+        if args.debug: Logger.debug(f"Git is in PATH")
             
         if in_package: 
             ver_string = f"{__version__.__version__}"
@@ -53,26 +52,23 @@ def main(args, in_package=False):
             ver_string = f"{__version__.__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
             
     else:
-        if args.debug:
-            print(f"[DEBUG] Git is not in PATH")
+        if args.debug: Logger.debug(f"Git is not in PATH")
         
         ver_string = f"{__version__.__version__}"
 
-    print(
-        f"IPA Permasigner | Version {ver_string}")
-    print("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
+    print(Colors.bold + f"Permasigner | Version {ver_string}")
+    print(Colors.bold + "Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
     print()
 
     # Check if script is running on Windows, if so, fail
     if sys.platform == "windows":
-        print("[-] Script must be ran on macOS or Linux.")
+        Logger.error(f"Script must be ran on macOS or Linux.")
         exit(1)
 
     # Check if codesign is added on Linux or iOS
     if args.codesign:
         if not Utils.is_macos():
-            print(
-                "[-] Codesign can only be used on macOS, remove the argument to use ldid instead.")
+            Logger.error(f"Codesign can only be used on macOS, remove the argument to use ldid instead.")
             exit(1)
 
     # Auto download ldid
@@ -80,31 +76,26 @@ def main(args, in_package=False):
         if Path(f"{data_dir}/ldid").exists():
             if Utils.is_linux() and platform.machine() == "x86_64":
                 if not LdidHash.check_linux_64(args, data_dir):
-                    print(
-                        "[*] ldid is outdated or malformed, downloading latest version...")
+                    Logger.log(f"ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{data_dir}/ldid")
                     Ldid.download_linux_64(args)
             elif Utils.is_linux() and platform.machine() == "aarch64":
                 if not LdidHash.check_linux_arm64(args, data_dir):
-                    print(
-                        "[*] ldid is outdated or malformed, downloading latest version...")
+                    Logger.log(f"ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{data_dir}/ldid")
                     Ldid.download_linux_arm64(args)
             elif Utils.is_macos() and platform.machine() == "x86_64":
                 if not LdidHash.check_macos_64(args, data_dir):
-                    print(
-                        "[*] ldid is outdated or malformed, downloading latest version...")
+                    Logger.log(f"ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{data_dir}/ldid")
                     Ldid.download_macos_64(args)
             elif Utils.is_macos() and platform.machine() == "arm64":
                 if not LdidHash.check_macos_arm64(args, data_dir):
-                    print(
-                        "[*] ldid is outdated or malformed, downloading latest version...")
+                    Logger.log(f"ldid is outdated or malformed, downloading latest version...")
                     os.remove(f"{data_dir}/ldid")
                     Ldid.download_macos_arm64(args)
         else:
-            print(
-                "[*] ldid binary is not found, downloading latest binary.")
+            Logger.log("ldid binary is not found, downloading latest binary.")
             if Utils.is_linux() and platform.machine() == "x86_64":
                 Ldid.download_linux_64(args)
             elif Utils.is_linux() and platform.machine() == "aarch64":
@@ -118,26 +109,22 @@ def main(args, in_package=False):
     if not dpkg_in_path and Utils.is_linux():
         if not Path(f"{os.getcwd()}/dpkg-deb").exists():
             if platform.machine() == "x86_64":
-                if args.debug:
-                    print(f"[DEBUG] On Linux x86_64, dpkg-deb not found...")
+                if args.debug: Logger.debug(f"On Linux x86_64, dpkg-deb not found...")
 
-                print("[*] dpkg-deb not found, downloading.")
+                Logger.log(f"dpkg-deb not found, downloading.")
                 DpkgDeb.download_linux_64(args)
                 print()
             elif platform.machine() == "aarch64":
-                if args.debug:
-                    print(f"[DEBUG] On Linux aarch64, dpkg-deb not found...")
+                if args.debug: Logger.debug(f"On Linux aarch64, dpkg-deb not found...")
 
-                print("[*] dpkg-deb not found, downloading.")
+                Logger.log(f"dpkg-deb not found, downloading.")
                 DpkgDeb.download_linux_arm64(args)
                 print()
 
     if Utils.is_macos():
         if not subprocess.getstatusoutput("which dpkg")[0] == 0:
-            if args.debug:
-                print(f"[DEBUG] On macOS x86_64, dpkg not found...")
-            print(
-                "[-] dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+            if args.debug: Logger.debug(f"On macOS x86_64, dpkg not found...")
+            Logger.error("dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
             exit(1)
 
     # Prompt the user if they'd like to use an external IPA or a local IPA
@@ -146,7 +133,7 @@ def main(args, in_package=False):
             "[?] Would you like to use an external or a local IPA? [E, L] ").lower()
 
     with tempfile.TemporaryDirectory() as tmpfolder:
-        print("[*] Created temporary directory.")
+        Logger.log(f"Created temporary directory.")
         print()
 
         # If the user's choice is external, download an IPA
@@ -155,24 +142,22 @@ def main(args, in_package=False):
             url = args.url
 
             if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
-                print(
-                    "[-] URL provided is not an IPA, make sure to provide a direct link.")
+                Logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                 exit(1)
 
             res = requests.get(url, stream=True)
 
             try:
                 if res.status_code == 200:
-                    print(f"[*] Downloading file...")
+                    Logger.log(f"Downloading file...")
 
                     with open(f"{tmpfolder}/app.ipa", "wb") as f:
                         f.write(res.content)
                 else:
-                    print(
-                        f"[-] URL provided is not reachable. Status code: {res.status_code}")
+                    Logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
                     exit(1)
             except requests.exceptions.RequestException as err:
-                print(f"[-] URL provided is not reachable. Error: {err}")
+                Logger.error(f"URL provided is not reachable. Error: {err}")
                 exit(1)
         elif args.path:
             path = args.path
@@ -181,36 +166,32 @@ def main(args, in_package=False):
             if Path(path).exists():
                 copy(path, f"{tmpfolder}/app.ipa")
             else:
-                print(
-                    "[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
+                priLogger.errornt("That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
         elif option == "e":
             url = input("[?] Paste in the *direct* path to an IPA online: ")
 
             if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
-                print(
-                    "[-] URL provided is not an IPA, make sure to provide a direct link.")
+                Logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                 exit(1)
 
             res = requests.get(url, stream=True)
 
             try:
                 if res.status_code == 200:
-                    print(f"[*] Downloading file...")
+                    Logger.log(f"Downloading file...")
 
                     with open(f"{tmpfolder}/app.ipa", "wb") as f:
                         f.write(res.content)
                 else:
-                    print(
-                        f"[-] URL provided is not reachable. Status code: {res.status_code}")
+                    Logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
                     exit(1)
             except requests.exceptions.RequestException as err:
-                print(f"[-] URL provided is not reachable. Error: {err}")
+                Logger.error(f"URL provided is not reachable. Error: {err}")
                 exit(1)
         elif option == "l":
             if os.environ.get('IS_DOCKER_CONTAINER', False):
-                print(
-                    "[*] Running in Docker container, please place an IPA in the ipas folder, then put the name of the file below.")
+                Logger.info("Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.")
                 ipa_name = input(
                     '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ')
                 path = f"/usr/src/permasigner/ipas/{ipa_name}"
@@ -223,23 +204,22 @@ def main(args, in_package=False):
             if Path(path).exists():
                 copy(path, f"{tmpfolder}/app.ipa")
             else:
-                print(
-                    "[-] That file does not exist! Make sure you're using a direct path to the IPA file.")
+                Logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
         else:
-            print("[-] That is not a valid option!")
+            Logger.error(f"That is not a valid option!")
             exit(1)
         print()
 
         # Unzip the IPA file
-        print("[*] Unzipping IPA...")
+        Logger.log(f"Unzipping IPA...")
         with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
             os.makedirs(f"{tmpfolder}/app", exist_ok=False)
             f.extractall(f"{tmpfolder}/app")
         print()
 
         # Read data from the plist
-        print("[*] Reading plist...")
+        Logger.log(f"Reading plist...")
 
         if Path(f"{tmpfolder}/app/Payload").exists():
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
@@ -247,7 +227,7 @@ def main(args, in_package=False):
                     app_dir = fname
             print("Found app directory!")
         else:
-            print("[-] IPA is not valid!")
+            Logger.error(f"IPA is not valid!")
             exit(1)
 
         pre_app_path = os.path.join(f"{tmpfolder}/app/Payload", app_dir)
@@ -279,7 +259,7 @@ def main(args, in_package=False):
         print()
 
         # Get the deb file ready
-        print("[*] Preparing deb file...")
+        Logger.log(f"Preparing deb file...")
         print("Making directories...")
         os.makedirs(f"{tmpfolder}/deb/Applications", exist_ok=False)
         os.makedirs(f"{tmpfolder}/deb/DEBIAN", exist_ok=False)
@@ -303,7 +283,7 @@ def main(args, in_package=False):
         print()
 
         # Sign the app
-        print("[*] Signing app...")
+        Logger.log(f"Signing app...")
         Copy.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, in_package)
         frameworks_path = os.path.join(full_app_path, 'Frameworks')
         if in_package:
@@ -324,9 +304,7 @@ def main(args, in_package=False):
                 ldid_cmd = 'ldid'
             else:
                 ldid_cmd = f'{data_dir}/ldid'
-            if args.debug:
-                print(
-                    f"[DEBUG] Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
+            if args.debug: Logger.debug(f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
@@ -334,7 +312,7 @@ def main(args, in_package=False):
         print()
 
         # Package the deb file
-        print("[*] Packaging the deb file...")
+        Logger.log(f"Packaging the deb file...")
         if args.output:
             path_to_deb = args.output
         elif in_package:
@@ -348,13 +326,12 @@ def main(args, in_package=False):
 
         if dpkg_in_path:
             if args.debug:
-                print(f"[DEBUG] Path to deb file: {path_to_deb}")
-                print(f"[DEBUG] Running command: {dpkg_cmd}")
+                Logger.debug(f"Path to deb file: {path_to_deb}")
+                Logger.debug(f"Running command: {dpkg_cmd}")
 
             subprocess.run(f"{dpkg_cmd}".split(), stdout=DEVNULL)
         else:
-            if args.debug:
-                print(f"[DEBUG] Running command: ./{dpkg_cmd}")
+            if args.debug: Logger.debug(f"Running command: ./{dpkg_cmd}")
 
             subprocess.run(f"{data_dir}/{dpkg_cmd}".split(), stdout=DEVNULL)
 
@@ -386,9 +363,7 @@ def main(args, in_package=False):
                                        capture_output=True)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
-                        if args.debug:
-                            print(
-                                f"[DEBUG] Running command: sudo dpkg -i {path_to_deb}")
+                        if args.debug: Logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
 
                         subprocess.run(
                             ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
@@ -397,9 +372,7 @@ def main(args, in_package=False):
                             ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
                     else:
                         print("User is not in sudoers, using su instead")
-                        if args.debug:
-                            print(
-                                f"[DEBUG] Running command: su root -c 'dpkg -i {path_to_deb}")
+                        if args.debug: Logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
 
                         subprocess.run(
                             f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)
@@ -409,15 +382,14 @@ def main(args, in_package=False):
 
     # Done!!!
     print()
-    print("[*] We are finished!")
+    Logger.log(f"We are finished!")
 
     if is_installed:
-        print(
-            "[*] The application was installed to your device, no further steps are required!")
+        Logger.log(f"The application was installed to your device, no further steps are required!")
     else:
-        print("[*] Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
+        Logger.log(f"Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
 
-    print("[*] The app will continue to work when rebooted to stock.")
-    print("[*] Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)")
+    Logger.log(f"The app will continue to work when rebooted to stock.")
+    Logger.log(f"Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)")
     print("    https://patreon.com/nebulalol")
-    print(f"[*] Output file: {path_to_deb}")
+    Logger.log(f"Output file: {path_to_deb}")

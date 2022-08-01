@@ -7,14 +7,13 @@ from paramiko.ssh_exception import AuthenticationException, SSHException, NoVali
 from scp import SCPClient
 from subprocess import DEVNULL, PIPE
 
+from .logger import Logger
 
 class Installer:
-
     def install_deb(args, path_to_deb):
-        print(f'[*] Installing {path_to_deb} to the device')
+        Logger.log(f'Installing {path_to_deb} to the device')
         print("Relaying TCP connection")
-        if args.debug:
-            print("[DEBUG] Running command: ./utils/tcprelay.py -t 22:2222")
+        if args.debug: Logger.debug(f"Running command: ./utils/tcprelay.py -t 22:2222")
 
         relay = subprocess.Popen(
             './utils/tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
@@ -37,14 +36,11 @@ class Installer:
                 with SCPClient(client.get_transport()) as scp:
                     print(f"Sending {path_to_deb} to device")
                     filename = path_to_deb.split("/")[-1]
-                    if args.debug:
-                        print(
-                            f"[DEBUG] Copying via scp from {path_to_deb} to /var/mobile/Documents/")
+                    if args.debug: Logger.debug(f"Copying via scp from {path_to_deb} to /var/mobile/Documents/")
 
                     scp.put(f'{path_to_deb}',
                             remote_path='/var/mobile/Documents')
-                    if args.debug:
-                        print(f"[DEBUG] Running command: sudo -nv")
+                    if args.debug: Logger.debug(f"Running command: sudo -nv")
 
                     stdin, stdout, stderr = client.exec_command('sudo -nv')
                     status = stdout.channel.recv_exit_status()
@@ -53,8 +49,7 @@ class Installer:
                     if "password" in out:
                         print("User is in sudoers, using sudo")
                         command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
-                        if args.debug:
-                            print(f"[DEBUG] Running command: {command}")
+                        if args.debug: Logger.debug(f"Running command: {command}")
 
                         stdin, stdout, stderr = client.exec_command(
                             f"{command}", get_pty=True)
@@ -63,9 +58,7 @@ class Installer:
                         print("Installing... this may take some time")
                         print(stdout.read().decode())
 
-                        if args.debug:
-                            print(
-                                f"[DEBUG] Running command: sudo apt-get install -f")
+                        if args.debug: Logger.debug(f"Running command: sudo apt-get install -f")
                         # for elucubratus bootstrap
                         streams = client.exec_command(
                             'sudo apt-get install -f', get_pty=True)
@@ -75,16 +68,13 @@ class Installer:
                     elif status == 0:
                         print('User has nopasswd set')
                         command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
-                        if args.debug:
-                            print(f"[DEBUG] Running command: {command}")
+                        if args.debug: Logger.debug(f"Running command: {command}")
 
                         output = client.exec_command(f'{command}')[1]
 
                         print("Installing... this may take some time")
                         print(output.read().decode())
-                        if args.debug:
-                            print(
-                                f"[DEBUG] Running command: sudo apt-get install -f")
+                        if args.debug: Logger.debug(f"Running command: sudo apt-get install -f")
 
                         output = client.exec_command(
                             'sudo apt-get install -f')[1]
@@ -92,8 +82,7 @@ class Installer:
                     else:
                         print('Using su command')
                         command = f"su root -c 'dpkg -i /var/mobile/Documents/{filename}'"
-                        if args.debug:
-                            print(f"[DEBUG] Running command: {command}")
+                        if args.debug: Logger.debug(f"Running command: {command}")
 
                         streams = client.exec_command(
                             f"{command}", get_pty=True)
@@ -114,14 +103,12 @@ class Installer:
                         else:
                             print("Installing... this may take some time")
                             print(streams[1].read().decode())
-                            if args.debug:
-                                print(
-                                    f"[DEBUG] Running command: sudo apt-get install -f")
+                            if args.debug: Logger.debug(f"Running command: sudo apt-get install -f")
 
                             output = client.exec_command(
                                 'sudo apt-get install -f')[1]
                             print(output.read().decode())
         except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
-            print(e)
+            Logger.error(e)
         finally:
             relay.kill()
