@@ -42,4 +42,5 @@ setuptools.setup(
     author='Nebula',
     install_requires=parse_requirements('requirements.txt'),
     author_email='me@itsnebula.net',
+    zip_safe=False,
 )

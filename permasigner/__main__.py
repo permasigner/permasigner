@@ -12,6 +12,7 @@ import platform
 import argparse
 from glob import glob
 from subprocess import DEVNULL
+import pkgutil
 
 from .copy import Copy
 from .hash import LdidHash
@@ -283,10 +284,10 @@ def main(args, in_package=False):
         os.makedirs(f"{tmpfolder}/deb/Applications", exist_ok=False)
         os.makedirs(f"{tmpfolder}/deb/DEBIAN", exist_ok=False)
         print("Copying deb file scripts and control...")
-        Copy.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name)
-        Copy.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name)
+        Copy.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name, in_package)
+        Copy.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name, in_package)
         Copy.copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name,
-                          app_bundle, app_version, app_min_ios, app_author)
+                          app_bundle, app_version, app_min_ios, app_author, in_package)
         print("Copying app files...")
         full_app_path = os.path.join(f"{tmpfolder}/deb/Applications", app_dir)
         copytree(pre_app_path, full_app_path)
@@ -303,12 +304,17 @@ def main(args, in_package=False):
 
         # Sign the app
         print("[*] Signing app...")
-        Copy.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle)
+        Copy.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, in_package)
         frameworks_path = os.path.join(full_app_path, 'Frameworks')
+        if in_package:
+            cert_path = Utils.get_resource_path(__name__, "data/certificate.p12")
+        else:
+            cert_path = "data/certificate.p12"
+        
         if args.codesign:
             print("Signing with codesign as it was specified...")
             subprocess.run(
-                ['security', 'import', './data/certificate.p12', '-P', 'password', '-A'], stdout=DEVNULL)
+                ['security', 'import', cert_path, '-P', 'password', '-A'], stdout=DEVNULL)
 
             subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
                             '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
@@ -320,10 +326,10 @@ def main(args, in_package=False):
                 ldid_cmd = f'{data_dir}/ldid'
             if args.debug:
                 print(
-                    f"[DEBUG] Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -Kdata/certificate.p12 -Upassword '{full_app_path}'")
+                    f"[DEBUG] Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
-                            '-Kdata/certificate.p12', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+                            f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
 
         print()
 
@@ -332,6 +338,7 @@ def main(args, in_package=False):
         if args.output:
             path_to_deb = args.output
         elif in_package:
+            os.makedirs(f"{Utils.get_home_data_directory(args)}/.permasigner/output", exist_ok=True)
             path_to_deb = f"{Utils.get_home_data_directory(args)}/.permasigner/output/{app_name.replace(' ', '')}.deb"
         else:
             os.makedirs("output", exist_ok=True)

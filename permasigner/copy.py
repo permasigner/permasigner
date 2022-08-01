@@ -1,5 +1,7 @@
+import pkgutil
+
 class Copy:
-    def copy_postinst(file_path, app_name):
+    def copy_postinst(file_path, app_name, in_package):
         """Copy postinst file.
 
         Args:
@@ -8,8 +10,11 @@ class Copy:
         """
 
         # Read the file
-        with open("data/postinst", 'r') as file:
-            filedata = file.read()
+        if in_package:
+            filedata = pkgutil.get_data(__name__, "data/postinst").decode('utf_8')
+        else:
+            with open("permasigner/data/postinst", 'r') as file:
+                filedata = file.read()
 
         # Replace the target string
         filedata = filedata.replace("{APP_NAME}", app_name)
@@ -18,7 +23,7 @@ class Copy:
         with open(file_path, 'w') as file:
             file.write(filedata)
 
-    def copy_postrm(file_path, app_name):
+    def copy_postrm(file_path, app_name, in_package):
         """Copy postrm file.
 
         Args:
@@ -27,8 +32,11 @@ class Copy:
         """
 
         # Read the file
-        with open('data/postrm', 'r') as file:
-            filedata = file.read()
+        if in_package:
+            filedata = pkgutil.get_data(__name__, "data/postrm").decode('utf_8')
+        else:
+            with open('permasigner/data/postrm', 'r') as file:
+                filedata = file.read()
 
         # Replace the target string
         filedata = filedata.replace("{APP_NAME}", app_name)
@@ -37,7 +45,7 @@ class Copy:
         with open(file_path, 'w') as file:
             file.write(filedata)
 
-    def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_author):
+    def copy_control(file_path, app_name, app_bundle, app_version, app_min_ios, app_author, in_package):
         """Copy control file.
 
         Args:
@@ -50,8 +58,11 @@ class Copy:
         """
 
         # Read the file
-        with open('data/control', 'r') as file:
-            filedata = file.read()
+        if in_package:
+            filedata = pkgutil.get_data(__name__, "data/control").decode('utf_8')
+        else:
+            with open('permasigner/data/control', 'r') as file:
+                filedata = file.read()
 
         # Replace the target strings
         filedata = filedata.replace("{APP_NAME}", app_name)
@@ -64,7 +75,7 @@ class Copy:
         with open(file_path, 'w') as file:
             file.write(filedata)
 
-    def copy_entitlements(file_path, app_bundle):
+    def copy_entitlements(file_path, app_bundle, in_package):
         """Copy entitlements file.
 
         Args:
@@ -73,8 +84,11 @@ class Copy:
         """
 
         # Read the file
-        with open('data/entitlements.plist', 'r') as file:
-            filedata = file.read()
+        if in_package:
+            filedata = pkgutil.get_data(__name__, "data/entitlements.plist").decode('utf_8')
+        else:
+            with open('permasigner/data/entitlements.plist', 'r') as file:
+                filedata = file.read()
 
         # Replace the target string
         filedata = filedata.replace("{APP_BUNDLE}", app_bundle)
