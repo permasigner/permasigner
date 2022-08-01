@@ -7,11 +7,11 @@ from paramiko.ssh_exception import AuthenticationException, SSHException, NoVali
 from scp import SCPClient
 from subprocess import DEVNULL, PIPE
 
-from .logger import Logger
+from .logger import Logger, Colors
 
 class Installer:
     def install_deb(args, path_to_deb):
-        Logger.log(f'Installing {path_to_deb} to the device')
+        Logger.log(f'Installing {path_to_deb} to the device', color=Colors.pink)
         print("Relaying TCP connection")
         if args.debug: Logger.debug(f"Running command: ./utils/tcprelay.py -t 22:2222")
 
