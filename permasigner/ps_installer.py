@@ -7,7 +7,7 @@ from paramiko.ssh_exception import AuthenticationException, SSHException, NoVali
 from scp import SCPClient
 from subprocess import DEVNULL, PIPE
 
-from .logger import Logger, Colors
+from .ps_logger import Logger, Colors
 
 
 class Installer:

@@ -14,17 +14,17 @@ from glob import glob
 from subprocess import DEVNULL
 import pkgutil
 
-from .copier import Copier
-from .hash import LdidHash
-from .downloader import DpkgDeb, Ldid
+from .ps_copier import Copier
+from .ps_hash import LdidHash
+from .ps_downloader import DpkgDeb, Ldid
 from . import __version__
-from .utils import Utils
-from .logger import Logger, Colors
+from .ps_utils import Utils
+from .ps_logger import Logger, Colors
 
 
 if not Utils.is_ios():
-    from .usbmux import USBMux
-    from .installer import Installer
+    from .ps_usbmux import USBMux
+    from .ps_installer import Installer
 
 
 """ Main Function """

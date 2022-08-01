@@ -1,8 +1,8 @@
 import os
 import hashlib
 import requests
-from .downloader import Ldid
-from .logger import Logger
+from .ps_downloader import Ldid
+from .ps_logger import Logger
 
 
 class Hash:

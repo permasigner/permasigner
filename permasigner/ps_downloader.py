@@ -3,8 +3,8 @@ import subprocess
 import os
 from shutil import copy, rmtree, move
 
-from .utils import Utils
-from .logger import Logger
+from .ps_utils import Utils
+from .ps_logger import Logger
 
 
 class DpkgDeb:

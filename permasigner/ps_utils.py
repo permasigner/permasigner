@@ -4,7 +4,7 @@ import platform
 import os
 import importlib
 
-from .logger import Logger
+from .ps_logger import Logger
 
 
 class Utils:
