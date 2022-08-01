@@ -8,7 +8,7 @@ from .ps_logger import Logger
 
 
 class DpkgDeb:
-    def download_linux_64(args, is_package):
+    def download_linux_64(args):
         if args.debug:
             Logger.debug(f"Downloading dpkg-deb on Linux x86_64.")
 
