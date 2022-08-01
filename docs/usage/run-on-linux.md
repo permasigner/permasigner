@@ -5,7 +5,7 @@ description: Run Permasigner on Debian based Linux distros.
 ## Run from Package
 
 * Open a terminal using Ctrl + Shift + T on most Linux distros
-* Install [bzip2](https://command-not-found.com/bunzip2) using your package manager of choice; ex. `sudo apt install bzip2`
+* Install bzip2 and binutils using your package manager of choice; ex. `sudo apt install bzip2 binutils`
 * Install the package with `pip install permasigner` or `pip3 install permasigner`
    * If this fails, install python3 with your package manager of choice; ex. `sudo apt install python3`.
 * Run the script with `python -m permasigner` or `python3 -m permasigner`
@@ -16,7 +16,7 @@ description: Run Permasigner on Debian based Linux distros.
 ## Run from Source
 
 * Open a terminal using Ctrl + Shift + T on most Linux distros
-* Install [bzip2](https://command-not-found.com/bunzip2) using your package manager of choice; ex. `sudo apt install bzip2`
+* Install bzip2 and binutils using your package manager of choice; ex. `sudo apt install bzip2 binutils`
 * Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
    * If this fails, install git with your package manager of choice; ex. `sudo apt install git`.
 * Install all requirements with `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
