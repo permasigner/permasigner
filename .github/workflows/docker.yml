@@ -1,34 +1,10 @@
-name: CI docker image
+name: Build and publish Docker image
 
 on:
-  push:
-    paths-ignore:
-      - 'README.md'
-      - 'book.json'
-      - '.gitignore'
-      - '.pep8'
-      - 'Dockerfile.development'
-      - '.devcontainer/**'
-      - '.vscode/**'
-      - '.github/**'
-      - '!.github/workflows/docker.yml'
-      - 'docs/**'
-    branches:
-      - "main"
-  pull_request:
-    paths-ignore:
-      - 'README.md'
-      - 'book.json'
-      - '.gitignore'
-      - '.pep8'
-      - 'Dockerfile.development'
-      - '.devcontainer/**'
-      - '.vscode/**'
-      - '.github/**'
-      - '!.github/workflows/docker.yml'
-      - 'docs/**'
-    branches:
-      - "main"
+  release:
+    types: [published]
+
+  workflow_dispatch:
 
 jobs:
   docker:
