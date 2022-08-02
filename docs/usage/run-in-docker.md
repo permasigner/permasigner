@@ -5,7 +5,6 @@ description: Run Permasigner in the official Docker container.
 **TLDR:** The Docker command is:
 *  \[Windows] `docker run -it --rm -v ${pwd}/output:/usr/src/permasigner/output -v ${pwd}/ipas:/usr/src/permasigner/ipas itsnebulalol/permasigner`
 *  \[Linux/macOS] `docker run -it --rm -v "$PWD/output":/usr/src/permasigner/output -v "$PWD/ipas":/usr/src/permasigner/ipas -e DEBUG=1 itsnebulalol/permasigner`
-	* while in the cloned permasigner directory. Make sure you pull first to get the latest updates.
 
   ---
 
