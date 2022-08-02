@@ -94,14 +94,21 @@ class DpkgDeb:
 
 
 class Ldid:
-    linux_64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_linux_x86_64"
-    linux_arm64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_linux_aarch64"
-    macos_64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macos_x86_64"
-    macos_arm64_url = "https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macos_arm64"
+    ldid_fork = "itsnebulalol"
+    
+    linux_64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_x86_64"
+    linux_arm64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_aarch64"
+    macos_64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_macos_x86_64"
+    macos_arm64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_macos_arm64"
 
     def download_linux_64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on Linux x86_64.")
+            
+        if args.ldidfork:
+            if args.debug:
+                Logger.debug(f"Using ldid fork {args.ldidfork}.")
+            Ldid.ldid_fork = args.ldid_fork
 
         res = requests.get(Ldid.linux_64_url, stream=True)
         try:
@@ -123,6 +130,11 @@ class Ldid:
     def download_linux_arm64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on Linux aarch64.")
+            
+        if args.ldidfork:
+            if args.debug:
+                Logger.debug(f"Using ldid fork {args.ldidfork}.")
+            Ldid.ldid_fork = args.ldid_fork
 
         res = requests.get(Ldid.linux_arm64_url, stream=True)
         try:
@@ -144,6 +156,11 @@ class Ldid:
     def download_macos_64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on macOS x86_64.")
+            
+        if args.ldidfork:
+            if args.debug:
+                Logger.debug(f"Using ldid fork {args.ldidfork}.")
+            Ldid.ldid_fork = args.ldid_fork
 
         res = requests.get(Ldid.macos_64_url, stream=True)
         try:
@@ -165,6 +182,11 @@ class Ldid:
     def download_macos_arm64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on macOS arm64.")
+            
+        if args.ldidfork:
+            if args.debug:
+                Logger.debug(f"Using ldid fork {args.ldidfork}.")
+            Ldid.ldid_fork = args.ldid_fork
 
         res = requests.get(Ldid.macos_arm64_url, stream=True)
         try:

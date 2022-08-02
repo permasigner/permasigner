@@ -17,3 +17,12 @@ description: Welcome to the Permasigner docs!
 
 * [Known Working Apps](information/known-working-apps.md)
 * [Optional Flags](information/optional-flags.md)
+
+## Contribution
+
+* [Getting Started](contribution/getting-started.md)
+* [Visual Studio Code Setup](contribution/visual-studio-code-setup.md)
+* [Develop on macOS/Linux](contribution/develop-on-macos-linux.md)
+* [Develop on Windows](contribution/develop-on-windows.md)
+* [Important Files](contribution/important-files.md)
+* [Committing and making a Pull Request](contribution/committing-and-making-a-pull-request.md)

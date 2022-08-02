@@ -7,8 +7,6 @@ from permasigner import __main__
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--codesign', action='store_true',
-                        help="uses codesign instead of ldid")
     parser.add_argument('-d', '--debug', action='store_true',
                         help="shows some debug info, only useful for testing")
     parser.add_argument('-u', '--url', type=str,
@@ -28,7 +26,9 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--minver', type=str,
                         help="specify new minimum app version (14.0 recommended)")
     parser.add_argument('-v', '--version', action='store_true',
-                        help='show current version',)
+                        help='show current version and exit',)
+    parser.add_argument('-l', '--ldidfork', type=str,
+                        help="specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])")
     args = parser.parse_args()
 
     if args.version:

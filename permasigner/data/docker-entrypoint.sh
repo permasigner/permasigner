@@ -22,6 +22,10 @@ if [ ! -z "$MINVER" ]; then
     ARGS="$ARGS -m $MINVER"
 fi
 
+if [ ! -z "$LDIDFORK" ]; then
+    ARGS="$ARGS -l $LDIDFORK"
+fi
+
 echo "Running Permasigner with args:$ARGS"
 echo ""
 python -u main.py $ARGS -n
