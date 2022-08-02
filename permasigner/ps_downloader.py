@@ -94,7 +94,7 @@ class DpkgDeb:
 
 
 class Ldid:
-    ldid_fork = "itsnebulalol" # Use my fork to make unc0ver users shut up
+    ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
 
     def download_linux_64(args):
         if args.debug:
