@@ -30,7 +30,7 @@ class LdidHash:
             Logger.debug(f"Checking ldid hash...")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 
@@ -53,7 +53,7 @@ class LdidHash:
             Logger.debug(f"Checking ldid hash...")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 
@@ -76,7 +76,7 @@ class LdidHash:
             Logger.debug(f"Checking ldid hash...")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 
@@ -99,7 +99,7 @@ class LdidHash:
             Logger.debug(f"Checking ldid hash...")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 

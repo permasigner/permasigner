@@ -101,7 +101,7 @@ class Ldid:
             Logger.debug(f"Downloading ldid on Linux x86_64.")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 
@@ -132,7 +132,7 @@ class Ldid:
             Logger.debug(f"Downloading ldid on Linux aarch64.")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 
@@ -163,7 +163,7 @@ class Ldid:
             Logger.debug(f"Downloading ldid on macOS x86_64.")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 
@@ -194,7 +194,7 @@ class Ldid:
             Logger.debug(f"Downloading ldid on macOS arm64.")
 
         if args.ldidfork:
-            ldid_fork = args.ldid_fork
+            ldid_fork = args.ldidfork
         else:
             ldid_fork = Ldid.ldid_fork
 
