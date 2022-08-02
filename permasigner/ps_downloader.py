@@ -95,7 +95,7 @@ class DpkgDeb:
 
 class Ldid:
     ldid_fork = "itsnebulalol"
-    
+
     linux_64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_x86_64"
     linux_arm64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_aarch64"
     macos_64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_macos_x86_64"
@@ -104,7 +104,7 @@ class Ldid:
     def download_linux_64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on Linux x86_64.")
-            
+
         if args.ldidfork:
             if args.debug:
                 Logger.debug(f"Using ldid fork {args.ldidfork}.")
@@ -130,7 +130,7 @@ class Ldid:
     def download_linux_arm64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on Linux aarch64.")
-            
+
         if args.ldidfork:
             if args.debug:
                 Logger.debug(f"Using ldid fork {args.ldidfork}.")
@@ -156,7 +156,7 @@ class Ldid:
     def download_macos_64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on macOS x86_64.")
-            
+
         if args.ldidfork:
             if args.debug:
                 Logger.debug(f"Using ldid fork {args.ldidfork}.")
@@ -182,7 +182,7 @@ class Ldid:
     def download_macos_arm64(args):
         if args.debug:
             Logger.debug(f"Downloading ldid on macOS arm64.")
-            
+
         if args.ldidfork:
             if args.debug:
                 Logger.debug(f"Using ldid fork {args.ldidfork}.")
