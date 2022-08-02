@@ -28,7 +28,7 @@ class LdidHash:
     def check_linux_64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
-            
+
         if args.ldidfork:
             ldid_fork = args.ldid_fork
         else:
@@ -51,7 +51,7 @@ class LdidHash:
     def check_linux_arm64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
-            
+
         if args.ldidfork:
             ldid_fork = args.ldid_fork
         else:
@@ -74,7 +74,7 @@ class LdidHash:
     def check_macos_64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
-            
+
         if args.ldidfork:
             ldid_fork = args.ldid_fork
         else:
@@ -97,7 +97,7 @@ class LdidHash:
     def check_macos_arm64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
-            
+
         if args.ldidfork:
             ldid_fork = args.ldid_fork
         else:
