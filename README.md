@@ -16,7 +16,10 @@
     <img src="https://img.shields.io/github/commit-activity/w/itsnebulalol/permasigner.svg" alt="Commits">
   </a>
   <a href="https://dsc.gg/permasigner" target="_blank">
-    <img src="https://img.shields.io/discord/1001905994458206229?label=discord" alt="Commits">
+    <img src="https://img.shields.io/discord/1001905994458206229?label=discord" alt="Discord">
+  </a>
+  <a href="https://github.com/itsnebulalol/permasigner/actions" target="_blank">
+    <img src="https://img.shields.io/github/workflow/status/itsnebulalol/permasigner/Test%20script/main.svg" alt="Test status">
   </a>
 </p>
 
