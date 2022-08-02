@@ -4,6 +4,13 @@ on:
   push:
     paths-ignore:
       - 'README.md'
+      - 'book.json'
+      - '.gitignore'
+      - 'Dockerfile'
+      - 'Dockerfile.*'
+      - '.devcontainer/**'
+      - '.vscode/**'
+      - '.github/**'
       - 'docs/**'
     branches:
       - "main"

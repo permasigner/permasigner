@@ -4,12 +4,26 @@ on:
   push:
     paths-ignore:
       - 'README.md'
+      - 'book.json'
+      - '.gitignore'
+      - 'Dockerfile'
+      - 'Dockerfile.*'
+      - '.devcontainer/**'
+      - '.vscode/**'
+      - '.github/**'
       - 'docs/**'
     branches:
       - "main"
   pull_request:
     paths-ignore:
       - 'README.md'
+      - 'book.json'
+      - '.gitignore'
+      - 'Dockerfile'
+      - 'Dockerfile.*'
+      - '.devcontainer/**'
+      - '.vscode/**'
+      - '.github/**'
       - 'docs/**'
     branches:
       - "main"
@@ -25,7 +39,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: '3.9'
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

@@ -4,12 +4,26 @@ on:
   push:
     paths-ignore:
       - 'README.md'
+      - 'book.json'
+      - '.gitignore'
+      - 'Dockerfile'
+      - 'Dockerfile.*'
+      - '.devcontainer/**'
+      - '.vscode/**'
+      - '.github/**'
       - 'docs/**'
     branches:
       - "main"
   pull_request:
     paths-ignore:
       - 'README.md'
+      - 'book.json'
+      - '.gitignore'
+      - 'Dockerfile'
+      - 'Dockerfile.*'
+      - '.devcontainer/**'
+      - '.vscode/**'
+      - '.github/**'
       - 'docs/**'
     branches:
       - "main"
@@ -72,7 +86,7 @@ jobs:
           path: |
             ~/__cache
           key: ${{ runner.os }}-procursus
-          
+
       # Checkout the latest code from the repo
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -101,7 +115,7 @@ jobs:
       - name: Add Procursus to PATH
         run: |
           echo '/opt/procursus/sbin:/opt/procursus/bin' >> $GITHUB_PATH
-          
+
       - name: Setup Procursus Bootstrap (cache)
         if: steps.procache.outputs.cache-hit == 'true'
         run: |
