@@ -15,10 +15,10 @@ class Installer:
         Logger.log(f'Installing {path_to_deb} to the device', color=Colors.pink)
         print("Relaying TCP connection")
         if args.debug:
-            Logger.debug(f"Running command: ./utils/tcprelay.py -t 22:2222")
+            Logger.debug(f"Running command: ./permasigner/ps_tcprelay.py -t 22:2222")
 
         relay = subprocess.Popen(
-            './utils/tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
+            './permasigner/ps_tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
         time.sleep(1)
         try:
             password = getpass(
