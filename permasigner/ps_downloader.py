@@ -107,9 +107,9 @@ class Ldid:
             ldid_fork = args.ldid_fork
         else:
             ldid_fork = Ldid.ldid_fork
-            
+
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_x86_64"
-            
+
         if args.debug:
             Logger.debug(f"Using ldid fork {ldid_fork}.")
 
@@ -138,9 +138,9 @@ class Ldid:
             ldid_fork = args.ldid_fork
         else:
             ldid_fork = Ldid.ldid_fork
-            
+
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_aarch64"
-            
+
         if args.debug:
             Logger.debug(f"Using ldid fork {ldid_fork}.")
 
@@ -169,9 +169,9 @@ class Ldid:
             ldid_fork = args.ldid_fork
         else:
             ldid_fork = Ldid.ldid_fork
-            
+
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_macos_x86_64"
-            
+
         if args.debug:
             Logger.debug(f"Using ldid fork {ldid_fork}.")
 
@@ -200,9 +200,9 @@ class Ldid:
             ldid_fork = args.ldid_fork
         else:
             ldid_fork = Ldid.ldid_fork
-            
+
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_macos_arm64"
-            
+
         if args.debug:
             Logger.debug(f"Using ldid fork {ldid_fork}.")
 
