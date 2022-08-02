@@ -28,8 +28,13 @@ class LdidHash:
     def check_linux_64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
+            
+        if args.ldidfork:
+            ldid_fork = args.ldid_fork
+        else:
+            ldid_fork = Ldid.ldid_fork
 
-        remote_hash = Hash.get_hash(None, Ldid.linux_64_url)
+        remote_hash = Hash.get_hash(None, f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_x86_64")
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
@@ -46,8 +51,13 @@ class LdidHash:
     def check_linux_arm64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
+            
+        if args.ldidfork:
+            ldid_fork = args.ldid_fork
+        else:
+            ldid_fork = Ldid.ldid_fork
 
-        remote_hash = Hash.get_hash(None, Ldid.linux_arm64_url)
+        remote_hash = Hash.get_hash(None, f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_aarch64")
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
@@ -64,8 +74,13 @@ class LdidHash:
     def check_macos_64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
+            
+        if args.ldidfork:
+            ldid_fork = args.ldid_fork
+        else:
+            ldid_fork = Ldid.ldid_fork
 
-        remote_hash = Hash.get_hash(None, Ldid.macos_64_url)
+        remote_hash = Hash.get_hash(None, f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_macos_x86_64")
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
@@ -82,8 +97,13 @@ class LdidHash:
     def check_macos_arm64(args, data_dir):
         if args.debug:
             Logger.debug(f"Checking ldid hash...")
+            
+        if args.ldidfork:
+            ldid_fork = args.ldid_fork
+        else:
+            ldid_fork = Ldid.ldid_fork
 
-        remote_hash = Hash.get_hash(None, Ldid.macos_arm64_url)
+        remote_hash = Hash.get_hash(None, f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_macos_arm64")
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
