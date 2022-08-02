@@ -1,6 +1,6 @@
 requests==2.28.1
 toml==0.10.2
-urllib3==1.26.10
+urllib3==1.26.11
 pycodestyle==2.9.0
 idna==3.3
 charset-normalizer==2.1.0
