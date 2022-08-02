@@ -4,6 +4,15 @@ on:
   push:
     paths-ignore:
       - 'README.md'
+      - 'book.json'
+      - '.gitignore'
+      - 'Dockerfile'
+      - 'Dockerfile.*'
+      - '.devcontainer/**'
+      - '.vscode/**'
+      - '.github/**'
+      - '!.github/workflows/lint.yml'
+      - 'docs/**'
     branches:
       - "main"
 

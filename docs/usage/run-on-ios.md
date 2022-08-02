@@ -6,10 +6,9 @@ description: Run Permasigner on a jailbroken iDevice using the Procursus bootstr
 
 ## Run from Package
 
-* Open a terminal using Ctrl + Shift + T on most Linux distros
-* Install bzip2 using your package manager of choice; ex. `sudo apt install bzip2` or Sileo
-* Install the package with `python3 -m pip install permasigner`
-   * If this fails, install python3 with your package manager of choice; ex. `sudo apt install python3` or Sileo.
+* Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
+* Install permasigner with `python3 -m pip install permasigner`
+   * If this fails, install python3 with `sudo apt install python3` and install pip with `python3 -m ensurepip`.
 * Run the script with `python3 -m permasigner`
 * Install the newly created deb file
    * Find it in Filza at `/var/mobile/.permasigner/output`
@@ -31,7 +30,7 @@ description: Run Permasigner on a jailbroken iDevice using the Procursus bootstr
 * Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
    * If this fails, install git with `sudo apt install git`.
 * Install all requirements with `python3 -m pip install -r requirements.txt`
-   * If this fails, install python3 with `sudo apt install python3`.
+   * If this fails, install python3 with `sudo apt install python3` and pip with `python3 -m ensurepip`.
 
 {% hint style="info" %}
 If you have extra entitlements, add them in `data/entitlements.xml`. If you don't know what this means, you can keep it as is.

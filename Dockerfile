@@ -17,4 +17,4 @@ RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
 
 ENV IS_DOCKER_CONTAINER Yes
-ENTRYPOINT [ "data/docker-entrypoint.sh" ]
+ENTRYPOINT [ "permasigner/data/docker-entrypoint.sh" ]
