@@ -191,7 +191,7 @@ def main(args, in_package=False):
                 exit(1)
         elif option == "l":
             if os.environ.get('IS_DOCKER_CONTAINER', False):
-                Logger.info("Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.")
+                Logger.log("Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.")
                 ipa_name = input(Colors.orange + '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ' + Colors.reset)
                 path = f"/usr/src/permasigner/ipas/{ipa_name}"
             else:
