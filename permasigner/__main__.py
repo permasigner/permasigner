@@ -166,7 +166,7 @@ def main(args, in_package=False):
             if Path(path).exists():
                 copy(path, f"{tmpfolder}/app.ipa")
             else:
-                priLogger.errornt("That file does not exist! Make sure you're using a direct path to the IPA file.")
+                Logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
                 exit(1)
         elif option == "e":
             url = Logger.ask("Paste in the *direct* path to an IPA online: ")
