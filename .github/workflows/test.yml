@@ -6,11 +6,13 @@ on:
       - 'README.md'
       - 'book.json'
       - '.gitignore'
+      - '.pep8'
       - 'Dockerfile'
       - 'Dockerfile.*'
       - '.devcontainer/**'
       - '.vscode/**'
       - '.github/**'
+      - '!.github/workflows/test.yml'
       - 'docs/**'
     branches:
       - "main"
@@ -19,11 +21,13 @@ on:
       - 'README.md'
       - 'book.json'
       - '.gitignore'
+      - '.pep8'
       - 'Dockerfile'
       - 'Dockerfile.*'
       - '.devcontainer/**'
       - '.vscode/**'
       - '.github/**'
+      - '!.github/workflows/test.yml'
       - 'docs/**'
     branches:
       - "main"
@@ -40,11 +44,11 @@ jobs:
     steps:
       # Checkout the latest code from the repo
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Setup which version of Python to use
       - name: Set Up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -80,7 +84,7 @@ jobs:
         python-version: [3.7, 3.8, 3.9]
 
     steps:
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: procache
         with:
           path: |
@@ -89,11 +93,11 @@ jobs:
 
       # Checkout the latest code from the repo
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Setup which version of Python to use
       - name: Set Up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 

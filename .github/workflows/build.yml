@@ -6,11 +6,13 @@ on:
       - 'README.md'
       - 'book.json'
       - '.gitignore'
+      - '.pep8'
       - 'Dockerfile'
       - 'Dockerfile.*'
       - '.devcontainer/**'
       - '.vscode/**'
       - '.github/**'
+      - '!.github/workflows/build.yml'
       - 'docs/**'
     branches:
       - "main"
@@ -19,11 +21,13 @@ on:
       - 'README.md'
       - 'book.json'
       - '.gitignore'
+      - '.pep8'
       - 'Dockerfile'
       - 'Dockerfile.*'
       - '.devcontainer/**'
       - '.vscode/**'
       - '.github/**'
+      - '!.github/workflows/build.yml'
       - 'docs/**'
     branches:
       - "main"

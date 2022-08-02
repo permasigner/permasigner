@@ -11,6 +11,7 @@ on:
       - '.devcontainer/**'
       - '.vscode/**'
       - '.github/**'
+      - '!.github/workflows/lint.yml'
       - 'docs/**'
     branches:
       - "main"
