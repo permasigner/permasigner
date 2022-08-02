@@ -104,7 +104,7 @@ def main(args, in_package=False):
 
     # Auto download dpkg-deb on Linux
     if not dpkg_in_path and Utils.is_linux():
-        if not Path(f"{os.getcwd()}/dpkg-deb").exists():
+        if not Path(f"{data_dir}/dpkg-deb").exists():
             if platform.machine() == "x86_64":
                 if args.debug:
                     Logger.debug(f"On Linux x86_64, dpkg-deb not found...")
