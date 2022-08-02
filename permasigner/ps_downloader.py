@@ -94,7 +94,7 @@ class DpkgDeb:
 
 
 class Ldid:
-    ldid_fork = "itsnebulalol"
+    ldid_fork = "ProcursusTeam"
 
     linux_64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_x86_64"
     linux_arm64_url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/ldid_linux_aarch64"
