@@ -94,9 +94,9 @@ class DpkgDeb:
 
 
 class Ldid:
-    #if Utils.is_macos():
+    # if Utils.is_macos():
     #    ldid_fork = "itsnebulalol"
-    #else:
+    # else:
     ldid_fork = "ProcursusTeam"
 
     def download_linux_64(args):
