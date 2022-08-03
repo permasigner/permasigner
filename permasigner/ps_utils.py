@@ -80,4 +80,3 @@ class Utils:
         parts = resource.split('/')
         parts.insert(0, os.path.dirname(mod.__file__))
         return f"{os.path.join(*parts)}"
-
