@@ -18,9 +18,7 @@ from . import __version__
 from .ps_utils import Utils
 from .ps_logger import Logger, Colors
 
-
 if not Utils.is_ios():
-    from .ps_usbmux import USBMux
     from .ps_installer import Installer
 
 
