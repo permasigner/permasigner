@@ -23,28 +23,15 @@ import select
 import sys
 import ps_usbmux as usbmux
 from optparse import OptionParser
-
-if sys.version_info > (3, 0):
-    python3 = True
-else:
-    python3 = False
-
-if python3:
-    import socketserver
-else:
-    import SocketServer as socketserver
+import socketserver
 
 
 class SocketRelay(object):
     def __init__(self, a, b, maxbuf=65535):
         self.a = a
         self.b = b
-        if python3:
-            self.atob = b''
-            self.btoa = b''
-        else:
-            self.atob = ''
-            self.btoa = ''
+        self.atob = b''
+        self.btoa = b''
         self.maxbuf = maxbuf
 
     def handle(self):
@@ -83,7 +70,7 @@ class SocketRelay(object):
 
 class TCPRelay(socketserver.BaseRequestHandler):
     def handle(self):
-        print("Incoming connection to %d" % self.server.server_address[1])
+        print(f"Incoming connection to {self.server.server_address[1]}")
         mux = usbmux.USBMux(options.sockpath)
         print("Waiting for devices...")
         if not mux.devices:
@@ -93,12 +80,12 @@ class TCPRelay(socketserver.BaseRequestHandler):
             self.request.close()
             return
         dev = mux.devices[0]
-        print("Connecting to device %s" % str(dev))
-        dsock = mux.connect(dev, self.server.rport)
+        print(f"Connecting to device {str(dev)}")
+        dsock = mux.connect(dev, server.rport)
         lsock = self.request
         print("Connection established, relaying data")
         try:
-            fwd = SocketRelay(dsock, lsock, self.server.bufsize * 1024)
+            fwd = SocketRelay(dsock, lsock, server.bufsize * 1024)
             fwd.handle()
         finally:
             dsock.close()
@@ -153,7 +140,7 @@ for arg in args:
 servers = []
 
 for rport, lport in ports:
-    print("Forwarding local port %d to remote port %d" % (lport, rport))
+    print(f"Forwarding local port {lport} to remote port {rport}")
     server = serverclass((HOST, lport), TCPRelay)
     server.rport = rport
     server.bufsize = options.bufsize
