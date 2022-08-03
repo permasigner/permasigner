@@ -9,10 +9,7 @@ import sys
 import subprocess
 import tempfile
 import platform
-import argparse
-from glob import glob
 from subprocess import DEVNULL
-import pkgutil
 
 from .ps_copier import Copier
 from .ps_hash import LdidHash
@@ -41,9 +38,6 @@ def main(args, in_package=False):
     ldid_in_path = Utils.cmd_in_path(args, 'ldid')
     dpkg_in_path = Utils.cmd_in_path(args, 'dpkg-deb')
     git_in_path = Utils.cmd_in_path(args, 'git')
-
-    ldid_arch = Utils.get_ldid_arch()
-    dpkg_arch = Utils.get_dpkg_arch()
 
     if git_in_path:
         if args.debug:
@@ -74,13 +68,13 @@ def main(args, in_package=False):
     # Auto download ldid
     if not ldid_in_path:
         if Path(f"{data_dir}/ldid").exists():
-            if not LdidHash.check_hash(args, data_dir, ldid_arch):
+            if not LdidHash.check_hash(args, data_dir):
                 Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
                 os.remove(f"{data_dir}/ldid")
-                Ldid.download(args, ldid_arch)
+                Ldid.download(args)
         else:
             Logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
-            Ldid.download(args, ldid_arch)
+            Ldid.download(args)
 
     # Auto download dpkg-deb on Linux
     if not dpkg_in_path and Utils.is_linux():
@@ -88,7 +82,7 @@ def main(args, in_package=False):
             if args.debug:
                 Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
                 Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-                DpkgDeb.download(args, dpkg_arch)
+                DpkgDeb.download(args)
                 print()
 
     if Utils.is_macos():
@@ -255,7 +249,6 @@ def main(args, in_package=False):
         # Sign the app
         Logger.log(f"Signing app...", color=Colors.pink)
         Copier.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, in_package)
-        frameworks_path = os.path.join(full_app_path, 'Frameworks')
         if in_package:
             cert_path = Utils.get_resource_path(__name__, "data/certificate.p12")
         else:

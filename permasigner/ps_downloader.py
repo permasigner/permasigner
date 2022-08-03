@@ -1,6 +1,7 @@
 import requests
 import subprocess
 import os
+import platform
 from shutil import copy, rmtree, move
 
 from .ps_utils import Utils
@@ -8,7 +9,14 @@ from .ps_logger import Logger
 
 
 class DpkgDeb:
-    def download(args, arch):
+    def get_arch():
+        if platform.machine() == "x86_64":
+            return "amd64"
+        elif platform.machine() == "aarch64":
+            return "arm64"
+
+    def download(args):
+        arch = DpkgDeb.get_arch()
         if args.debug:
             Logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
 
@@ -54,7 +62,18 @@ class DpkgDeb:
 class Ldid:
     ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
 
-    def download(args, arch):
+    def get_arch():
+        if Utils.is_linux() and platform.machine() == "x86_64":
+            return "ldid_linux_x86_64"
+        elif Utils.is_linux() and platform.machine() == "aarch64":
+            return "ldid_linux_aarch64"
+        elif Utils.is_macos() and platform.machine() == "x86_64":
+            return "ldid_macos_x86_64"
+        elif Utils.is_macos() and platform.machine() == "arm64":
+            return "ldid_macos_aarch64"
+
+    def download(args):
+        arch = Ldid.get_arch()
         if args.debug:
             Logger.debug(f"Downloading {arch}")
 

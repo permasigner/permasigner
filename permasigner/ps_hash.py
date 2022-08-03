@@ -8,7 +8,7 @@ from .ps_logger import Logger
 class Hash:
     def get_hash(filePath, url):
         m = hashlib.md5()
-        if url == None:
+        if url is None:
             with open(filePath, 'rb') as fh:
                 m = hashlib.md5()
                 while True:
@@ -25,7 +25,8 @@ class Hash:
 
 
 class LdidHash:
-    def check_hash(args, data_dir, arch):
+    def check_hash(args, data_dir):
+        arch = Ldid.get_arch()
         if args.debug:
             Logger.debug(f"Checking {arch} hash...")
 
