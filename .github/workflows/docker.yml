@@ -15,20 +15,6 @@ on:
       - 'docs/**'
     branches:
       - "main"
-  pull_request:
-    paths-ignore:
-      - 'README.md'
-      - 'book.json'
-      - '.gitignore'
-      - '.pep8'
-      - 'Dockerfile.development'
-      - '.devcontainer/**'
-      - '.vscode/**'
-      - '.github/**'
-      - '!.github/workflows/docker.yml'
-      - 'docs/**'
-    branches:
-      - "main"
 
 jobs:
   docker:
