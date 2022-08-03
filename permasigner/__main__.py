@@ -9,10 +9,7 @@ import sys
 import subprocess
 import tempfile
 import platform
-import argparse
-from glob import glob
 from subprocess import DEVNULL
-import pkgutil
 
 from .ps_copier import Copier
 from .ps_hash import LdidHash
@@ -71,53 +68,21 @@ def main(args, in_package=False):
     # Auto download ldid
     if not ldid_in_path:
         if Path(f"{data_dir}/ldid").exists():
-            if Utils.is_linux() and platform.machine() == "x86_64":
-                if not LdidHash.check_linux_64(args, data_dir):
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    Ldid.download_linux_64(args)
-            elif Utils.is_linux() and platform.machine() == "aarch64":
-                if not LdidHash.check_linux_arm64(args, data_dir):
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    Ldid.download_linux_arm64(args)
-            elif Utils.is_macos() and platform.machine() == "x86_64":
-                if not LdidHash.check_macos_64(args, data_dir):
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    Ldid.download_macos_64(args)
-            elif Utils.is_macos() and platform.machine() == "arm64":
-                if not LdidHash.check_macos_arm64(args, data_dir):
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    Ldid.download_macos_arm64(args)
+            if not LdidHash.check_hash(args, data_dir):
+                Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
+                os.remove(f"{data_dir}/ldid")
+                Ldid.download(args)
         else:
             Logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
-            if Utils.is_linux() and platform.machine() == "x86_64":
-                Ldid.download_linux_64(args)
-            elif Utils.is_linux() and platform.machine() == "aarch64":
-                Ldid.download_linux_arm64(args)
-            elif Utils.is_macos() and platform.machine() == "x86_64":
-                Ldid.download_macos_64(args)
-            elif Utils.is_macos() and platform.machine() == "arm64":
-                Ldid.download_macos_arm64(args)
+            Ldid.download(args)
 
     # Auto download dpkg-deb on Linux
     if not dpkg_in_path and Utils.is_linux():
         if not Path(f"{data_dir}/dpkg-deb").exists():
-            if platform.machine() == "x86_64":
-                if args.debug:
-                    Logger.debug(f"On Linux x86_64, dpkg-deb not found...")
-
+            if args.debug:
+                Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
                 Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-                DpkgDeb.download_linux_64(args)
-                print()
-            elif platform.machine() == "aarch64":
-                if args.debug:
-                    Logger.debug(f"On Linux aarch64, dpkg-deb not found...")
-
-                Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-                DpkgDeb.download_linux_arm64(args)
+                DpkgDeb.download(args)
                 print()
 
     if Utils.is_macos():
@@ -284,7 +249,6 @@ def main(args, in_package=False):
         # Sign the app
         Logger.log(f"Signing app...", color=Colors.pink)
         Copier.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, in_package)
-        frameworks_path = os.path.join(full_app_path, 'Frameworks')
         if in_package:
             cert_path = Utils.get_resource_path(__name__, "data/certificate.p12")
         else:
