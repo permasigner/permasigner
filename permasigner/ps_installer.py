@@ -58,6 +58,7 @@ class Installer:
 
                         stdin, stdout, stderr = client.exec_command(
                             f"{command}", get_pty=True)
+                        time.sleep(0.2)
                         stdin.write(f'{password}\n')
                         stdin.flush()
                         print("Installing... this may take some time")
@@ -68,6 +69,7 @@ class Installer:
                         # for elucubratus bootstrap
                         streams = client.exec_command(
                             'sudo apt-get install -f', get_pty=True)
+                        time.sleep(0.2)
                         streams[0].write(f'{password}\n')
                         streams[0].flush()
                         print(streams[1].read().decode())
