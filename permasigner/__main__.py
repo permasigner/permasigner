@@ -41,6 +41,9 @@ def main(args, in_package=False):
     ldid_in_path = Utils.cmd_in_path(args, 'ldid')
     dpkg_in_path = Utils.cmd_in_path(args, 'dpkg-deb')
     git_in_path = Utils.cmd_in_path(args, 'git')
+    
+    ldid_arch = Utils.get_ldid_arch()
+    dpkg_arch = Utils.get_dpkg_arch()
 
     if git_in_path:
         if args.debug:
@@ -71,55 +74,23 @@ def main(args, in_package=False):
     # Auto download ldid
     if not ldid_in_path:
         if Path(f"{data_dir}/ldid").exists():
-            if Utils.is_linux() and platform.machine() == "x86_64":
-                if not LdidHash.check_linux_64(args, data_dir):
+                if not LdidHash.check_hash(args, data_dir, ldid_arch):
                     Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
                     os.remove(f"{data_dir}/ldid")
-                    Ldid.download_linux_64(args)
-            elif Utils.is_linux() and platform.machine() == "aarch64":
-                if not LdidHash.check_linux_arm64(args, data_dir):
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    Ldid.download_linux_arm64(args)
-            elif Utils.is_macos() and platform.machine() == "x86_64":
-                if not LdidHash.check_macos_64(args, data_dir):
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    Ldid.download_macos_64(args)
-            elif Utils.is_macos() and platform.machine() == "arm64":
-                if not LdidHash.check_macos_arm64(args, data_dir):
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    Ldid.download_macos_arm64(args)
+                    Ldid.download(args, ldid_arch) 
         else:
             Logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
-            if Utils.is_linux() and platform.machine() == "x86_64":
-                Ldid.download_linux_64(args)
-            elif Utils.is_linux() and platform.machine() == "aarch64":
-                Ldid.download_linux_arm64(args)
-            elif Utils.is_macos() and platform.machine() == "x86_64":
-                Ldid.download_macos_64(args)
-            elif Utils.is_macos() and platform.machine() == "arm64":
-                Ldid.download_macos_arm64(args)
+            Ldid.download(args, ldid_arch)
 
     # Auto download dpkg-deb on Linux
     if not dpkg_in_path and Utils.is_linux():
         if not Path(f"{data_dir}/dpkg-deb").exists():
-            if platform.machine() == "x86_64":
-                if args.debug:
-                    Logger.debug(f"On Linux x86_64, dpkg-deb not found...")
-
+            if args.debug:
+                Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
                 Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-                DpkgDeb.download_linux_64(args)
+                DpkgDeb.download(args, dpkg_arch)
                 print()
-            elif platform.machine() == "aarch64":
-                if args.debug:
-                    Logger.debug(f"On Linux aarch64, dpkg-deb not found...")
-
-                Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-                DpkgDeb.download_linux_arm64(args)
-                print()
-
+            
     if Utils.is_macos():
         if not subprocess.getstatusoutput("which dpkg")[0] == 0:
             if args.debug:
