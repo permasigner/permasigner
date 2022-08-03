@@ -80,7 +80,7 @@ class Utils:
         parts = resource.split('/')
         parts.insert(0, os.path.dirname(mod.__file__))
         return f"{os.path.join(*parts)}"
-    
+
     def get_ldid_arch():
         if Utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
@@ -90,7 +90,7 @@ class Utils:
             return "ldid_macos_x86_64"
         elif Utils.is_macos() and platform.machine() == "arm64":
             return "ldid_macos_aarch64"
-        
+
     def get_dpkg_arch():
         if Utils.is_linux() and platform.machine() == "x86_64":
             return "amd64"
