@@ -21,7 +21,7 @@
 
 import select
 import sys
-import usbmux
+import ps_usbmux as usbmux
 from optparse import OptionParser
 
 if sys.version_info > (3, 0):
