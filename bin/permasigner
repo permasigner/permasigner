@@ -9,6 +9,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true',
                         help="shows some debug info, only useful for testing")
+    parser.add_argument('-c', '--codesign', action='store_true',
+                        help="uses codesign instead of ldid")
     parser.add_argument('-u', '--url', type=str,
                         help="the direct URL of the IPA to be signed")
     parser.add_argument('-p', '--path', type=str,

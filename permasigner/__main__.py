@@ -64,6 +64,12 @@ def main(args, in_package=False):
     if sys.platform == "windows":
         Logger.error(f"Script must be ran on macOS or Linux.")
         exit(1)
+        
+    # Check if codesign arg is added on Linux or iOS
+    if args.codesign:
+        if not utils.is_macos():
+            Logger.error(f"Codesign can only be used on macOS, remove the argument to use ldid instead.")
+            exit(1)
 
     # Auto download ldid
     if not ldid_in_path:
@@ -257,17 +263,25 @@ def main(args, in_package=False):
         else:
             cert_path = "permasigner/data/certificate.p12"
 
-        print("Signing with ldid...")
-        if utils.is_ios():
-            ldid_cmd = 'ldid'
-        else:
-            ldid_cmd = f'{data_dir}/ldid'
-        if args.debug:
-            Logger.debug(
-                f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
+        if args.codesign:
+            print("Signing with codesign as it was specified...")
+            subprocess.run(
+                ['security', 'import', cert_path, '-P', 'password', '-A'], stdout=DEVNULL)
 
-        subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
-                        f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+            subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
+                            '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
+        else:
+            print("Signing with ldid...")
+            if utils.is_ios():
+                ldid_cmd = 'ldid'
+            else:
+                ldid_cmd = f'{data_dir}/ldid'
+            if args.debug:
+                Logger.debug(
+                    f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
+
+            subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
+                            f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
 
         print()
 
