@@ -24,27 +24,32 @@ class Hash:
             return m.hexdigest()
 
 
-class LdidHash:
-    def check_hash(args, data_dir):
-        arch = Ldid.get_arch()
-        if args.debug:
+class LdidHash(object):
+    def __init__(self, args):
+        self.args = args
+        
+    def check_hash(self, data_dir):
+        ldid = Ldid(self.args)
+        arch = ldid.get_arch()
+        
+        if self.args.debug:
             Logger.debug(f"Checking {arch} hash...")
 
-        if args.ldidfork:
-            ldid_fork = args.ldidfork
+        if self.args.ldidfork:
+            ldid_fork = self.args.ldidfork
         else:
-            ldid_fork = Ldid.ldid_fork
+            ldid_fork = ldid.ldid_fork
 
         remote_hash = Hash.get_hash(None, f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{arch}")
         local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
 
         if remote_hash == local_hash:
-            if args.debug:
+            if self.args.debug:
                 Logger.debug(f"ldid hash successfully verified.")
 
             return True
         else:
-            if args.debug:
+            if self.args.debug:
                 Logger.debug(f"ldid hash failed to verify.")
 
             return False

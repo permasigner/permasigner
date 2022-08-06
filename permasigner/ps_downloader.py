@@ -8,15 +8,18 @@ from .ps_utils import Utils
 from .ps_logger import Logger
 
 
-class DpkgDeb:
-    def get_arch():
+class DpkgDeb(object):
+    def __init__(self, args):
+        self.args = args
+    
+    def get_arch(self):
         if platform.machine() == "x86_64":
             return "amd64"
         elif platform.machine() == "aarch64":
             return "arm64"
 
-    def download(args):
-        arch = DpkgDeb.get_arch()
+    def download(self):
+        arch = self.get_arch()
         if args.debug:
             Logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
 
@@ -26,7 +29,7 @@ class DpkgDeb:
             if res.status_code == 200:
                 with open(f"dpkg.deb", "wb") as f:
                     f.write(res.content)
-                    if args.debug:
+                    if self.args.debug:
                         Logger.debug(f"Wrote file.")
             else:
                 Logger.error(f"dpkg download URL is not reachable. Status code: {res.status_code}")
@@ -36,14 +39,14 @@ class DpkgDeb:
             exit(1)
 
         subprocess.run(f"ar x dpkg.deb".split(), stdout=subprocess.DEVNULL)
-        if args.debug:
+        if self.args.debug:
             Logger.debug(f"Extracted with ar.")
         subprocess.run(f"tar -xf data.tar.xz".split(),
                        stdout=subprocess.DEVNULL)
-        if args.debug:
+        if self.args.debug:
             Logger.debug(f"Extracted with tar.")
         copy("usr/bin/dpkg-deb", "dpkg-deb")
-        if args.debug:
+        if self.args.debug:
             Logger.debug(f"Copied.")
         subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
         os.remove("data.tar.xz")
@@ -55,14 +58,16 @@ class DpkgDeb:
         rmtree("usr")
         rmtree("var")
         move("dpkg-deb", f"{Utils.get_home_data_directory(args)}/.permasigner/dpkg-deb")
-        if args.debug:
+        if self.args.debug:
             Logger.debug(f"Cleaned up.")
 
 
-class Ldid:
-    ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
+class Ldid(object):
+    def __init__(self, args):
+        self.args = args
+        self.ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
 
-    def get_arch():
+    def get_arch(self):
         if Utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
         elif Utils.is_linux() and platform.machine() == "aarch64":
@@ -70,21 +75,21 @@ class Ldid:
         elif Utils.is_macos() and platform.machine() == "x86_64":
             return "ldid_macos_x86_64"
         elif Utils.is_macos() and platform.machine() == "arm64":
-            return "ldid_macos_aarch64"
+            return "ldid_macos_arm64"
 
-    def download(args):
-        arch = Ldid.get_arch()
-        if args.debug:
+    def download(self):
+        arch = self.get_arch()
+        if self.args.debug:
             Logger.debug(f"Downloading {arch}")
 
-        if args.ldidfork:
-            ldid_fork = args.ldidfork
+        if self.args.ldidfork:
+            ldid_fork = self.args.ldidfork
         else:
-            ldid_fork = Ldid.ldid_fork
+            ldid_fork = self.ldid_fork
 
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{arch}"
 
-        if args.debug:
+        if self.args.debug:
             Logger.debug(f"Using ldid fork {ldid_fork}.")
 
         res = requests.get(url, stream=True)
@@ -92,7 +97,7 @@ class Ldid:
             if res.status_code == 200:
                 with open(f"ldid", "wb") as f:
                     f.write(res.content)
-                    if args.debug:
+                    if self.args.debug:
                         Logger.debug(f"Wrote file.")
             else:
                 Logger.error(f"ldid download URL is not reachable. Status code: {res.status_code}")
@@ -102,4 +107,4 @@ class Ldid:
             exit(1)
 
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        move("ldid", f"{Utils.get_home_data_directory(args)}/.permasigner/ldid")
+        move("ldid", f"{Utils.get_home_data_directory(self.args)}/.permasigner/ldid")

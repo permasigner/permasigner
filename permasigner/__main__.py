@@ -65,14 +65,16 @@ def main(args, in_package=False):
 
     # Auto download ldid
     if not ldid_in_path:
+        ldid = Ldid(args)
         if Path(f"{data_dir}/ldid").exists():
-            if not LdidHash.check_hash(args, data_dir):
+            ldid_hash = LdidHash(args)
+            if not ldid_hash.check_hash(data_dir):
                 Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
                 os.remove(f"{data_dir}/ldid")
-                Ldid.download(args)
+                ldid.download()
         else:
             Logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
-            Ldid.download(args)
+            ldid.download()
 
     # Auto download dpkg-deb on Linux
     if not dpkg_in_path and Utils.is_linux():
@@ -80,7 +82,8 @@ def main(args, in_package=False):
             if args.debug:
                 Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
                 Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-                DpkgDeb.download(args)
+                dpkg_downloader = DpkgDeb(args)
+                dpkg_downloader.download()
                 print()
 
     if Utils.is_macos():
