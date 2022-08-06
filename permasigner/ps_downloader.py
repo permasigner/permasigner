@@ -20,7 +20,7 @@ class DpkgDeb(object):
 
     def download(self):
         utils = Utils(self.args)
-        
+
         arch = self.get_arch()
         if args.debug:
             Logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
@@ -71,7 +71,7 @@ class Ldid(object):
 
     def get_arch(self):
         utils = Utils(self.args)
-        
+
         if utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
         elif utils.is_linux() and platform.machine() == "aarch64":
@@ -83,7 +83,7 @@ class Ldid(object):
 
     def download(self):
         utils = Utils(self.args)
-        
+
         arch = self.get_arch()
         if self.args.debug:
             Logger.debug(f"Downloading {arch}")
