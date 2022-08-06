@@ -59,7 +59,7 @@ class DpkgDeb(object):
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
-        move("dpkg-deb", f"{utils.get_home_data_directory(args)}/.permasigner/dpkg-deb")
+        move("dpkg-deb", f"{utils.get_home_data_directory()}/.permasigner/dpkg-deb")
         if self.args.debug:
             Logger.debug(f"Cleaned up.")
 
@@ -113,4 +113,4 @@ class Ldid(object):
             exit(1)
 
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        move("ldid", f"{utils.get_home_data_directory(self.args)}/.permasigner/ldid")
+        move("ldid", f"{utils.get_home_data_directory()}/.permasigner/ldid")
