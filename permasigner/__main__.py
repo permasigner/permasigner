@@ -64,7 +64,7 @@ def main(args, in_package=False):
     if sys.platform == "windows":
         Logger.error(f"Script must be ran on macOS or Linux.")
         exit(1)
-        
+
     # Check if codesign arg is added on Linux or iOS
     if args.codesign:
         if not utils.is_macos():
