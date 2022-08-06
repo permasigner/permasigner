@@ -350,57 +350,58 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, TCPServer):
     pass
 
 
-HOST = "localhost"
+if __name__ == '__main__':
+    HOST = "localhost"
 
-parser = OptionParser(
-    usage="usage: %prog [OPTIONS] RemotePort[:LocalPort] [RemotePort[:LocalPort]]...")
-parser.add_option("-t", "--threaded", dest='threaded', action='store_true', default=False,
-                  help="use threading to handle multiple connections at once")
-parser.add_option("-b", "--bufsize", dest='bufsize', action='store', metavar='KILOBYTES', type='int', default=128,
-                  help="specify buffer size for socket forwarding")
-parser.add_option("-s", "--socket", dest='sockpath', action='store', metavar='PATH', type='str', default=None,
-                  help="specify the path of the usbmuxd socket")
+    parser = OptionParser(
+        usage="usage: %prog [OPTIONS] RemotePort[:LocalPort] [RemotePort[:LocalPort]]...")
+    parser.add_option("-t", "--threaded", dest='threaded', action='store_true', default=False,
+                      help="use threading to handle multiple connections at once")
+    parser.add_option("-b", "--bufsize", dest='bufsize', action='store', metavar='KILOBYTES', type='int', default=128,
+                      help="specify buffer size for socket forwarding")
+    parser.add_option("-s", "--socket", dest='sockpath', action='store', metavar='PATH', type='str', default=None,
+                      help="specify the path of the usbmuxd socket")
 
-options, args = parser.parse_args()
+    options, args = parser.parse_args()
 
-serverclass = TCPServer
-if options.threaded:
-    serverclass = ThreadedTCPServer
+    serverclass = TCPServer
+    if options.threaded:
+        serverclass = ThreadedTCPServer
 
-if len(args) == 0:
-    parser.print_help()
-    sys.exit(1)
-
-ports = []
-
-for arg in args:
-    try:
-        if ':' in arg:
-            rport, lport = arg.split(":")
-            rport = int(rport)
-            lport = int(lport)
-            ports.append((rport, lport))
-        else:
-            ports.append((int(arg), int(arg)))
-    except:
+    if len(args) == 0:
         parser.print_help()
         sys.exit(1)
 
-servers = []
+    ports = []
 
-for rport, lport in ports:
-    print(f"Forwarding local port {lport} to remote port {rport}")
-    server = serverclass((HOST, lport), TCPRelay)
-    server.rport = rport
-    server.bufsize = options.bufsize
-    servers.append(server)
+    for arg in args:
+        try:
+            if ':' in arg:
+                rport, lport = arg.split(":")
+                rport = int(rport)
+                lport = int(lport)
+                ports.append((rport, lport))
+            else:
+                ports.append((int(arg), int(arg)))
+        except:
+            parser.print_help()
+            sys.exit(1)
 
-alive = True
+    servers = []
 
-while alive:
-    try:
-        rl, wl, xl = select.select(servers, [], [])
-        for server in rl:
-            server.handle_request()
-    except:
-        alive = False
+    for rport, lport in ports:
+        print(f"Forwarding local port {lport} to remote port {rport}")
+        server = serverclass((HOST, lport), TCPRelay)
+        server.rport = rport
+        server.bufsize = options.bufsize
+        servers.append(server)
+
+    alive = True
+
+    while alive:
+        try:
+            rl, wl, xl = select.select(servers, [], [])
+            for server in rl:
+                server.handle_request()
+        except:
+            alive = False

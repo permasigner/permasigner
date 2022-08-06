@@ -27,6 +27,7 @@ def main(args, in_package=False):
 
     if not utils.is_ios():
         from .ps_installer import Installer
+        from .ps_tcprelay import USBMux
 
     data_dir = f"{utils.get_home_data_directory()}/.permasigner"
     os.makedirs(data_dir, exist_ok=True)
