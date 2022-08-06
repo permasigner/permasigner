@@ -27,11 +27,11 @@ class Hash:
 class LdidHash(object):
     def __init__(self, args):
         self.args = args
-        
+
     def check_hash(self, data_dir):
         ldid = Ldid(self.args)
         arch = ldid.get_arch()
-        
+
         if self.args.debug:
             Logger.debug(f"Checking {arch} hash...")
 

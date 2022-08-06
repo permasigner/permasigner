@@ -11,7 +11,7 @@ from .ps_logger import Logger
 class DpkgDeb(object):
     def __init__(self, args):
         self.args = args
-    
+
     def get_arch(self):
         if platform.machine() == "x86_64":
             return "amd64"
