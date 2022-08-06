@@ -18,24 +18,26 @@ from . import __version__
 from .ps_utils import Utils
 from .ps_logger import Logger, Colors
 
-if not Utils.is_ios():
-    from .ps_installer import Installer
-
 
 """ Main Function """
 
 
 def main(args, in_package=False):
-    data_dir = f"{Utils.get_home_data_directory(args)}/.permasigner"
+    utils = Utils(args)
+    
+    if not utils.is_ios():
+        from .ps_installer import Installer
+        
+    data_dir = f"{utils.get_home_data_directory()}/.permasigner"
     os.makedirs(data_dir, exist_ok=True)
 
     if in_package:
         if args.debug:
             Logger.debug(f"Running from package, not cloned repo.")
 
-    ldid_in_path = Utils.cmd_in_path(args, 'ldid')
-    dpkg_in_path = Utils.cmd_in_path(args, 'dpkg-deb')
-    git_in_path = Utils.cmd_in_path(args, 'git')
+    ldid_in_path = utils.cmd_in_path('ldid')
+    dpkg_in_path = utils.cmd_in_path('dpkg-deb')
+    git_in_path = utils.cmd_in_path('git')
 
     if git_in_path:
         if args.debug:
@@ -77,7 +79,7 @@ def main(args, in_package=False):
             ldid.download()
 
     # Auto download dpkg-deb on Linux
-    if not dpkg_in_path and Utils.is_linux():
+    if not dpkg_in_path and utils.is_linux():
         if not Path(f"{data_dir}/dpkg-deb").exists():
             if args.debug:
                 Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
@@ -86,7 +88,7 @@ def main(args, in_package=False):
                 dpkg_downloader.download()
                 print()
 
-    if Utils.is_macos():
+    if utils.is_macos():
         if not subprocess.getstatusoutput("which dpkg")[0] == 0:
             if args.debug:
                 Logger.debug(f"On macOS x86_64, dpkg not found...")
@@ -251,12 +253,12 @@ def main(args, in_package=False):
         Logger.log(f"Signing app...", color=Colors.pink)
         Copier.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, in_package)
         if in_package:
-            cert_path = Utils.get_resource_path(__name__, "data/certificate.p12")
+            cert_path = utils.get_resource_path(__name__, "data/certificate.p12")
         else:
             cert_path = "permasigner/data/certificate.p12"
 
         print("Signing with ldid...")
-        if Utils.is_ios():
+        if utils.is_ios():
             ldid_cmd = 'ldid'
         else:
             ldid_cmd = f'{data_dir}/ldid'
@@ -274,8 +276,8 @@ def main(args, in_package=False):
         if args.output:
             path_to_deb = args.output
         elif in_package:
-            os.makedirs(f"{Utils.get_home_data_directory(args)}/.permasigner/output", exist_ok=True)
-            path_to_deb = f"{Utils.get_home_data_directory(args)}/.permasigner/output/{app_name.replace(' ', '')}.deb"
+            os.makedirs(f"{utils.get_home_data_directory()}/.permasigner/output", exist_ok=True)
+            path_to_deb = f"{utils.get_home_data_directory()}/.permasigner/output/{app_name.replace(' ', '')}.deb"
         else:
             os.makedirs("output", exist_ok=True)
             path_to_deb = f"output/{app_name.replace(' ', '')}.deb"
@@ -301,7 +303,7 @@ def main(args, in_package=False):
                 option = Logger.ask("Would you like install the application to your device (must be connected)? [y, n]: ").lower()
 
             if option == 'y' or args.install:
-                if Utils.is_macos() or Utils.is_linux():
+                if utils.is_macos() or utils.is_linux():
                     try:
                         mux = USBMux()
                         if not mux.devices:
@@ -315,7 +317,7 @@ def main(args, in_package=False):
                     except ConnectionRefusedError:
                         print("Did not find a connected device")
                         pass
-                elif Utils.is_ios():
+                elif utils.is_ios():
                     print("Checking if user is in sudoers")
                     p = subprocess.run('sudo -nv'.split(),
                                        capture_output=True)

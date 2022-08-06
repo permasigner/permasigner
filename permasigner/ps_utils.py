@@ -7,20 +7,25 @@ import importlib
 from .ps_logger import Logger
 
 
-class Utils:
-    def is_ios():
+class Utils(object):
+    def __init__(self, args):
+        self.args = args
+        
+    def is_ios(self):
         if not sys.platform == "darwin":
             return False
 
         return platform.machine().startswith("i")
 
-    def cmd_in_path(args, cmd):
-        if args.debug:
+    def cmd_in_path(self, cmd):
+        utils = Utils(self.args)
+        
+        if self.args.debug:
             Logger.debug(f"Checking if command {cmd} is in PATH...")
 
         if cmd == "ldid":
-            if Utils.is_ios():
-                if args.debug:
+            if utils.is_ios():
+                if self.args.debug:
                     Logger.debug(f"Checking for ldid on iOS")
 
                 if os.path.exists("/.bootstrapped"):
@@ -28,8 +33,8 @@ class Utils:
                     print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
                     exit(1)
 
-                if Utils.is_dpkg_installed("ldid"):
-                    if args.debug:
+                if utils.is_dpkg_installed("ldid"):
+                    if self.args.debug:
                         Logger.debug(f"ldid is installed via dpkg")
 
                     return True
@@ -43,29 +48,29 @@ class Utils:
 
         return subprocess.getstatusoutput(f"which {cmd}")[0] == 0
 
-    def is_macos():
+    def is_macos(self):
         if platform.machine().startswith("i"):
             return False
 
         return sys.platform == "darwin"
 
-    def is_linux():
+    def is_linux(self):
         return sys.platform == "linux"
 
-    def is_dpkg_installed(pkg):
+    def is_dpkg_installed(self, pkg):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
-    def get_home_data_directory(args):
+    def get_home_data_directory(self):
         if os.environ.get("XDG_DATA_HOME"):
-            if args.debug:
+            if self.args.debug:
                 Logger.debug(f"Using XDG_DATA_HOME: {os.environ.get('XDG_DATA_HOME')}")
             return os.environ.get("XDG_DATA_HOME")
         else:
-            if args.debug:
+            if self.args.debug:
                 Logger.debug(f"Using user home directory: {os.path.expanduser('~')}")
             return os.path.expanduser('~')
 
-    def get_resource_path(package, resource):
+    def get_resource_path(self, package, resource):
         spec = importlib.util.find_spec(package)
         if spec is None:
             return None

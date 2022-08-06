@@ -19,6 +19,8 @@ class DpkgDeb(object):
             return "arm64"
 
     def download(self):
+        utils = Utils(self.args)
+        
         arch = self.get_arch()
         if args.debug:
             Logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
@@ -57,7 +59,7 @@ class DpkgDeb(object):
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
-        move("dpkg-deb", f"{Utils.get_home_data_directory(args)}/.permasigner/dpkg-deb")
+        move("dpkg-deb", f"{utils.get_home_data_directory(args)}/.permasigner/dpkg-deb")
         if self.args.debug:
             Logger.debug(f"Cleaned up.")
 
@@ -68,16 +70,20 @@ class Ldid(object):
         self.ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
 
     def get_arch(self):
-        if Utils.is_linux() and platform.machine() == "x86_64":
+        utils = Utils(self.args)
+        
+        if utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
-        elif Utils.is_linux() and platform.machine() == "aarch64":
+        elif utils.is_linux() and platform.machine() == "aarch64":
             return "ldid_linux_aarch64"
-        elif Utils.is_macos() and platform.machine() == "x86_64":
+        elif utils.is_macos() and platform.machine() == "x86_64":
             return "ldid_macos_x86_64"
-        elif Utils.is_macos() and platform.machine() == "arm64":
+        elif utils.is_macos() and platform.machine() == "arm64":
             return "ldid_macos_arm64"
 
     def download(self):
+        utils = Utils(self.args)
+        
         arch = self.get_arch()
         if self.args.debug:
             Logger.debug(f"Downloading {arch}")
@@ -107,4 +113,4 @@ class Ldid(object):
             exit(1)
 
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        move("ldid", f"{Utils.get_home_data_directory(self.args)}/.permasigner/ldid")
+        move("ldid", f"{utils.get_home_data_directory(self.args)}/.permasigner/ldid")
