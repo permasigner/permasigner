@@ -24,10 +24,10 @@ from .ps_logger import Logger, Colors
 
 def main(args, in_package=False):
     utils = Utils(args)
-    
+
     if not utils.is_ios():
         from .ps_installer import Installer
-        
+
     data_dir = f"{utils.get_home_data_directory()}/.permasigner"
     os.makedirs(data_dir, exist_ok=True)
 

@@ -10,7 +10,7 @@ from .ps_logger import Logger
 class Utils(object):
     def __init__(self, args):
         self.args = args
-        
+
     def is_ios(self):
         if not sys.platform == "darwin":
             return False
@@ -19,7 +19,7 @@ class Utils(object):
 
     def cmd_in_path(self, cmd):
         utils = Utils(self.args)
-        
+
         if self.args.debug:
             Logger.debug(f"Checking if command {cmd} is in PATH...")
 
