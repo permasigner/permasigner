@@ -327,8 +327,8 @@ def main(args, in_package=False):
                             print("Did not find a connected device")
                         else:
                             print("Found a connected device")
-                            Installer.install_deb(args, path_to_deb)
-                            is_installed = True
+                            installer = Installer(args, path_to_deb)
+                            is_installed = installer.install_deb()
                     except ConnectionRefusedError:
                         print("Did not find a connected device")
                         pass
