@@ -67,27 +67,13 @@ class Utils(object):
     def get_home_data_directory(self):
         ps_home = os.environ.get("PERMASIGNER_HOME")
         if ps_home:
-            if self.args.debug:
-                Logger.debug(f"Using PERMASIGNER_HOME: {ps_home}")
             return ps_home
+        user_home = os.path.expanduser("~")
         if self.is_linux():
-            xdg_home = os.environ.get("XDG_DATA_HOME")
-            if xdg_home:
-                if self.args.debug:
-                    Logger.debug(f"Using XDG_DATA_HOME: {xdg_home}")
-                return os.path.join(xdg_home, 'permasigner')
-            else:
-                ps_home = os.path.join(os.path.expanduser('~'), '.local/share/permasigner')
-                if self.args.debug:
-                    Logger.debug(f"Using: {ps_home}")
-                return ps_home
+            xdg_data_home = os.environ.get("XDG_DATA_HOME", os.path.join(user_home, ".local", "share"))
+            return os.path.join(xdg_data_home, "permasigner")
         elif self.is_ios() or self.is_macos():
-            ps_home = os.path.join(os.path.expanduser('~'), 'Library/Application Support/permasigner')
-            if self.args.debug:
-                Logger.debug(f"Using: {ps_home}")
-            return ps_home
-        else:
-            return os.path.join(os.path.expanduser('~'), '.permasigner')
+            return os.path.join(user_home, "Library", "Application Support", "permasigner")
 
     def get_resource_path(self, package, resource):
         spec = importlib.util.find_spec(package)
