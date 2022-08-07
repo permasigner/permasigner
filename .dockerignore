@@ -1,0 +1,15 @@
+.devcontainer
+.dockerignore
+.gitignore
+.github
+.pep8
+.vscode
+.idea
+Dockerfile*
+MANIFEST.in
+Makefile
+bin/
+book.json
+README.md
+docs/
+setup.py

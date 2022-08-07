@@ -1,6 +1,7 @@
 #!/bin/sh
 
 ARGS=""
+export VERSION=$(cat githash)
 
 if [ ! -z "$URL" ]; then
     ARGS="$ARGS -u $URL"

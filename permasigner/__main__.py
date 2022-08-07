@@ -46,6 +46,8 @@ def main(args, in_package=False):
 
         if in_package:
             ver_string = f"{__version__.__version__}"
+        elif os.environ.get('IS_DOCKER_CONTAINER', False):
+            ver_string = os.environ.get('VERSION')
         elif "main" not in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
             ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
