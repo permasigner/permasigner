@@ -11,6 +11,7 @@ from .ps_logger import Logger
 class DpkgDeb(object):
     def __init__(self, args):
         self.args = args
+        self.utils = Utils(self.args)
 
     def get_arch(self):
         if platform.machine() == "x86_64":
@@ -19,10 +20,8 @@ class DpkgDeb(object):
             return "arm64"
 
     def download(self):
-        utils = Utils(self.args)
-
         arch = self.get_arch()
-        if args.debug:
+        if self.args.debug:
             Logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
 
         res = requests.get(
@@ -40,16 +39,18 @@ class DpkgDeb(object):
             Logger.error(f"dpkg download URL is not reachable. Error: {err}")
             exit(1)
 
+        if self.args.debug:
+            Logger.debug(f"Running command: ar x dpkg.deb")
         subprocess.run(f"ar x dpkg.deb".split(), stdout=subprocess.DEVNULL)
         if self.args.debug:
-            Logger.debug(f"Extracted with ar.")
+            Logger.debug(f"Running command: tar -xf data.tar.xz")
         subprocess.run(f"tar -xf data.tar.xz".split(),
                        stdout=subprocess.DEVNULL)
-        if self.args.debug:
-            Logger.debug(f"Extracted with tar.")
         copy("usr/bin/dpkg-deb", "dpkg-deb")
         if self.args.debug:
-            Logger.debug(f"Copied.")
+            Logger.debug(f"Copied dpkg-deb to project directory")
+        if self.args.debug:
+            Logger.debug(f"Running command: chmod +x dpkg-deb")
         subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
         os.remove("data.tar.xz")
         os.remove("control.tar.xz")
@@ -59,34 +60,32 @@ class DpkgDeb(object):
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
-        move("dpkg-deb", f"{utils.get_home_data_directory()}/.permasigner/dpkg-deb")
         if self.args.debug:
-            Logger.debug(f"Cleaned up.")
+            Logger.debug(f"Cleaned up extracted content")
+        move("dpkg-deb", f"{self.utils.get_home_data_directory()}/.permasigner/dpkg-deb")
+        if self.args.debug:
+            Logger.debug(f"Moved dpkg-deb to {self.utils.get_home_data_directory()}/.permasigner/")
 
 
 class Ldid(object):
     def __init__(self, args):
         self.args = args
         self.ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
+        self.utils = Utils(self.args)
 
     def get_arch(self):
-        utils = Utils(self.args)
 
-        if utils.is_linux() and platform.machine() == "x86_64":
+        if self.utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
-        elif utils.is_linux() and platform.machine() == "aarch64":
+        elif self.utils.is_linux() and platform.machine() == "aarch64":
             return "ldid_linux_aarch64"
-        elif utils.is_macos() and platform.machine() == "x86_64":
+        elif self.utils.is_macos() and platform.machine() == "x86_64":
             return "ldid_macos_x86_64"
-        elif utils.is_macos() and platform.machine() == "arm64":
+        elif self.utils.is_macos() and platform.machine() == "arm64":
             return "ldid_macos_arm64"
 
     def download(self):
-        utils = Utils(self.args)
-
         arch = self.get_arch()
-        if self.args.debug:
-            Logger.debug(f"Downloading {arch}")
 
         if self.args.ldidfork:
             ldid_fork = self.args.ldidfork
@@ -97,6 +96,7 @@ class Ldid(object):
 
         if self.args.debug:
             Logger.debug(f"Using ldid fork {ldid_fork}.")
+            Logger.debug(f"Downloading ldid from {url}")
 
         res = requests.get(url, stream=True)
         try:
@@ -111,6 +111,9 @@ class Ldid(object):
         except requests.exceptions.RequestException as err:
             Logger.error(f"ldid download URL is not reachable. Error: {err}")
             exit(1)
-
+        if self.args.debug:
+            Logger.debug("Running command: chmod +x ldid")
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        move("ldid", f"{utils.get_home_data_directory()}/.permasigner/ldid")
+        move("ldid", f"{self.utils.get_home_data_directory()}/.permasigner/ldid")
+        if self.args.debug:
+            Logger.debug(f"Moved ldid to {self.utils.get_home_data_directory()}/.permasigner/")
