@@ -9,9 +9,10 @@ from .ps_logger import Logger
 
 
 class DpkgDeb(object):
-    def __init__(self, args):
+    def __init__(self, args, data_dir):
         self.args = args
         self.utils = Utils(self.args)
+        self.data_dir = data_dir
 
     def get_arch(self):
         if platform.machine() == "x86_64":
@@ -62,16 +63,17 @@ class DpkgDeb(object):
         rmtree("var")
         if self.args.debug:
             Logger.debug(f"Cleaned up extracted content")
-        move("dpkg-deb", f"{self.utils.get_home_data_directory()}/.permasigner/dpkg-deb")
+        move("dpkg-deb", f"{self.data_dir}/dpkg-deb")
         if self.args.debug:
-            Logger.debug(f"Moved dpkg-deb to {self.utils.get_home_data_directory()}/.permasigner/")
+            Logger.debug(f"Moved dpkg-deb to {self.data_dir}/")
 
 
 class Ldid(object):
-    def __init__(self, args):
+    def __init__(self, args, data_dir):
         self.args = args
         self.ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
         self.utils = Utils(self.args)
+        self.data_dir = data_dir
 
     def get_arch(self):
 
@@ -114,6 +116,6 @@ class Ldid(object):
         if self.args.debug:
             Logger.debug("Running command: chmod +x ldid")
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        move("ldid", f"{self.utils.get_home_data_directory()}/.permasigner/ldid")
+        move("ldid", f"{self.data_dir}/ldid")
         if self.args.debug:
-            Logger.debug(f"Moved ldid to {self.utils.get_home_data_directory()}/.permasigner/")
+            Logger.debug(f"Moved ldid to {self.data_dir}/")

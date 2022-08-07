@@ -29,7 +29,7 @@ def main(args, in_package=False):
         from .ps_installer import Installer
         from .ps_tcprelay import USBMux
 
-    data_dir = f"{utils.get_home_data_directory()}/.permasigner"
+    data_dir = utils.get_home_data_directory()
     os.makedirs(data_dir, exist_ok=True)
 
     if in_package:
@@ -74,10 +74,10 @@ def main(args, in_package=False):
 
     # Auto download ldid
     if not ldid_in_path:
-        ldid = Ldid(args)
+        ldid = Ldid(args, data_dir)
         if Path(f"{data_dir}/ldid").exists():
-            ldid_hash = LdidHash(args)
-            if not ldid_hash.check_hash(data_dir):
+            ldid_hash = LdidHash(args, data_dir)
+            if not ldid_hash.check_hash():
                 Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
                 os.remove(f"{data_dir}/ldid")
                 ldid.download()
@@ -91,7 +91,7 @@ def main(args, in_package=False):
             if args.debug:
                 Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
             Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-            dpkg_downloader = DpkgDeb(args)
+            dpkg_downloader = DpkgDeb(args, data_dir)
             dpkg_downloader.download()
             print()
 
@@ -291,8 +291,8 @@ def main(args, in_package=False):
         if args.output:
             path_to_deb = args.output
         elif in_package:
-            os.makedirs(f"{utils.get_home_data_directory()}/.permasigner/output", exist_ok=True)
-            path_to_deb = f"{utils.get_home_data_directory()}/.permasigner/output/{app_name.replace(' ', '')}.deb"
+            os.makedirs(f"{data_dir}/output", exist_ok=True)
+            path_to_deb = f"{data_dir}/output/{app_name.replace(' ', '')}.deb"
         else:
             os.makedirs("output", exist_ok=True)
             path_to_deb = f"output/{app_name.replace(' ', '')}.deb"
@@ -304,12 +304,15 @@ def main(args, in_package=False):
                 Logger.debug(f"Path to deb file: {path_to_deb}")
                 Logger.debug(f"Running command: {dpkg_cmd}")
 
-            subprocess.run(f"{dpkg_cmd}".split(), stdout=DEVNULL)
+            subprocess.run(
+                ["dpkg-deb", "-Zxz", "--root-owner-group", "-b", f"{tmpfolder}/deb", f"{path_to_deb}"], stdout=DEVNULL)
         else:
             if args.debug:
-                Logger.debug(f"Running command: ./{dpkg_cmd}")
+                Logger.debug(f"Running command: {data_dir}/{dpkg_cmd}")
 
-            subprocess.run(f"{data_dir}/{dpkg_cmd}".split(), stdout=DEVNULL)
+            subprocess.run(
+                [f"{data_dir}/dpkg-deb", "-Zxz", "--root-owner-group", "-b", f"{tmpfolder}/deb", f"{path_to_deb}"],
+                stdout=DEVNULL)
 
         is_installed = False
         if not args.noinstall:

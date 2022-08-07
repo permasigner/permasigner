@@ -1,4 +1,3 @@
-import os
 import hashlib
 import requests
 from .ps_downloader import Ldid
@@ -25,11 +24,12 @@ class Hash:
 
 
 class LdidHash(object):
-    def __init__(self, args):
+    def __init__(self, args, data_dir):
         self.args = args
+        self.data_dir = data_dir
 
-    def check_hash(self, data_dir):
-        ldid = Ldid(self.args)
+    def check_hash(self):
+        ldid = Ldid(self.args, self.data_dir)
         arch = ldid.get_arch()
 
         if self.args.debug:
@@ -41,7 +41,7 @@ class LdidHash(object):
             ldid_fork = ldid.ldid_fork
 
         remote_hash = Hash.get_hash(None, f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{arch}")
-        local_hash = Hash.get_hash(f"{data_dir}/ldid", None)
+        local_hash = Hash.get_hash(f"{self.data_dir}/ldid", None)
 
         if remote_hash == local_hash:
             if self.args.debug:

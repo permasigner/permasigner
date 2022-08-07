@@ -11,7 +11,8 @@ class Utils(object):
     def __init__(self, args):
         self.args = args
 
-    def is_ios(self):
+    @staticmethod
+    def is_ios():
         if not sys.platform == "darwin":
             return False
 
@@ -48,27 +49,45 @@ class Utils(object):
 
         return subprocess.getstatusoutput(f"which {cmd}")[0] == 0
 
-    def is_macos(self):
+    @staticmethod
+    def is_macos():
         if platform.machine().startswith("i"):
             return False
 
         return sys.platform == "darwin"
 
-    def is_linux(self):
+    @staticmethod
+    def is_linux():
         return sys.platform == "linux"
 
-    def is_dpkg_installed(self, pkg):
+    @staticmethod
+    def is_dpkg_installed(pkg):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
     def get_home_data_directory(self):
-        if os.environ.get("XDG_DATA_HOME"):
+        ps_home = os.environ.get("PERMASIGNER_HOME")
+        if ps_home:
             if self.args.debug:
-                Logger.debug(f"Using XDG_DATA_HOME: {os.environ.get('XDG_DATA_HOME')}")
-            return os.environ.get("XDG_DATA_HOME")
+                Logger.debug(f"Using PERMASIGNER_HOME: {ps_home}")
+            return ps_home
+        if self.is_linux():
+            xdg_home = os.environ.get("XDG_DATA_HOME")
+            if xdg_home:
+                if self.args.debug:
+                    Logger.debug(f"Using XDG_DATA_HOME: {xdg_home}")
+                return os.path.join(xdg_home, 'permasigner')
+            else:
+                ps_home = os.path.join(os.path.expanduser('~'), '.local/share/permasigner')
+                if self.args.debug:
+                    Logger.debug(f"Using: {ps_home}")
+                return ps_home
+        elif self.is_ios() or self.is_macos():
+            ps_home = os.path.join(os.path.expanduser('~'), 'Library/Application Support/permasigner')
+            if self.args.debug:
+                Logger.debug(f"Using: {ps_home}")
+            return ps_home
         else:
-            if self.args.debug:
-                Logger.debug(f"Using user home directory: {os.path.expanduser('~')}")
-            return os.path.expanduser('~')
+            return os.path.join(os.path.expanduser('~'), '.permasigner')
 
     def get_resource_path(self, package, resource):
         spec = importlib.util.find_spec(package)
