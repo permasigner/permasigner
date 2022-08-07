@@ -46,7 +46,7 @@ def main(args, in_package=False):
 
         if in_package:
             ver_string = f"{__version__.__version__}"
-        elif not "main" in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
+        elif "main" not in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
             ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
             ver_string = f"{__version__.__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
@@ -90,10 +90,10 @@ def main(args, in_package=False):
         if not Path(f"{data_dir}/dpkg-deb").exists():
             if args.debug:
                 Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
-                Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
-                dpkg_downloader = DpkgDeb(args)
-                dpkg_downloader.download()
-                print()
+            Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
+            dpkg_downloader = DpkgDeb(args)
+            dpkg_downloader.download()
+            print()
 
     if utils.is_macos():
         if not subprocess.getstatusoutput("which dpkg")[0] == 0:
