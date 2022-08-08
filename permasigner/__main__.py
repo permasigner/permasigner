@@ -119,11 +119,11 @@ class Main(object):
                         rmtree(f"{tmpfolder}/app")
                     if os.path.exists(f"{tmpfolder}/deb"):
                         rmtree(f"{tmpfolder}/deb")
-                        
+
                     fname = os.path.basename(fpath)
                     Logger.log(f"Signing {fname}...", color=Colors.pink)
                     print()
-                
+
                     copy(fpath, f"{tmpfolder}/app.ipa")
                     path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
                     self.outputs.append(path_to_deb)
@@ -167,10 +167,10 @@ class Main(object):
             else:
                 Logger.error(f"That is not a valid option!")
                 exit(1)
-                
+
             if not self.args.folder:
                 print()
-            
+
             is_installed = False
             if not self.args.folder:
                 path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
