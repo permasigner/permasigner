@@ -19,7 +19,6 @@ from . import __version__
 from .ps_utils import Utils
 from .ps_logger import Logger, Colors
 
-
 """ Main Class """
 
 
@@ -37,6 +36,8 @@ class Main(object):
         if self.in_package:
             if self.args.debug:
                 Logger.debug(f"Running from package, not cloned repo.")
+
+        is_extracted = False
 
         ldid_in_path = self.utils.cmd_in_path('ldid')
         dpkg_in_path = self.utils.cmd_in_path('dpkg-deb')
@@ -61,7 +62,8 @@ class Main(object):
                 ver_string = f"{__version__.__version__}"
 
         print(Colors.bold + f"Permasigner | Version {ver_string}")
-        print(Colors.bold + "Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
+        print(
+            Colors.bold + "Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
         print()
 
         # Run checks
@@ -103,7 +105,33 @@ class Main(object):
                 path = path.strip().lstrip("'").rstrip("'")
 
                 if Path(path).exists():
-                    copy(path, f"{tmpfolder}/app.ipa")
+                    if path.endswith(".deb"):
+                        if dpkg_in_path:
+                            if self.args.debug:
+                                Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+
+                            subprocess.run(
+                                ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
+                        else:
+                            if self.args.debug:
+                                Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+
+                            subprocess.run(
+                                [f"{data_dir}/dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"],
+                                stdout=DEVNULL)
+
+                        os.makedirs(f"{tmpfolder}/app/Payload", exist_ok=False)
+                        for fname in os.listdir(path=f"{tmpfolder}/extractedDeb/Applications"):
+                            if fname.endswith(".app"):
+                                copytree(f"{tmpfolder}/extractedDeb/Applications/{fname}",
+                                         f"{tmpfolder}/app/Payload/{fname}")
+
+                        is_extracted = True
+                    elif path.endswith(".ipa"):
+                        copy(path, f"{tmpfolder}/app.ipa")
+                    else:
+                        Logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                        exit(1)
                 else:
                     Logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
                     exit(1)
@@ -147,7 +175,8 @@ class Main(object):
             elif option == "l":
                 if os.environ.get('IS_DOCKER_CONTAINER', False):
                     Logger.log(
-                        "Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.", color=Colors.orange)
+                        "Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.",
+                        color=Colors.orange)
                     ipa_name = input(Colors.orange + '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ' + Colors.reset)
                     path = f"/permasigner/ipas/{ipa_name}"
                 else:
@@ -156,7 +185,33 @@ class Main(object):
                 path = path.strip().lstrip("'").rstrip("'")
 
                 if Path(path).exists():
-                    copy(path, f"{tmpfolder}/app.ipa")
+                    if path.endswith(".deb"):
+                        if dpkg_in_path:
+                            if self.args.debug:
+                                Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+
+                            subprocess.run(
+                                ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
+                        else:
+                            if self.args.debug:
+                                Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+
+                            subprocess.run(
+                                [f"{data_dir}/dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"],
+                                stdout=DEVNULL)
+
+                        os.makedirs(f"{tmpfolder}/app/Payload", exist_ok=False)
+                        for fname in os.listdir(path=f"{tmpfolder}/extractedDeb/Applications"):
+                            if fname.endswith(".app"):
+                                copytree(f"{tmpfolder}/extractedDeb/Applications/{fname}",
+                                         f"{tmpfolder}/app/Payload/{fname}")
+
+                        is_extracted = True
+                    elif path.endswith(".ipa"):
+                        copy(path, f"{tmpfolder}/app.ipa")
+                    else:
+                        Logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                        exit(1)
                 else:
                     Logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
                     exit(1)
@@ -169,7 +224,7 @@ class Main(object):
 
             is_installed = False
             if not self.args.folder:
-                path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
+                path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir, is_extracted)
 
                 # Prompt to install on device
                 is_installed = self.prompt_install(path_to_deb)
@@ -178,13 +233,17 @@ class Main(object):
             Logger.log(f"We are finished!", color=Colors.green)
 
             if is_installed or not self.args.folder:
-                Logger.log(f"The application was installed to your device, no further steps are required!", color=Colors.green)
+                Logger.log(f"The application was installed to your device, no further steps are required!",
+                           color=Colors.green)
             else:
-                Logger.log(f"Copy the newly created deb from the output folder to your jailbroken iDevice and install it!", color=Colors.green)
+                Logger.log(
+                    f"Copy the newly created deb from the output folder to your jailbroken iDevice and install it!",
+                    color=Colors.green)
 
             Logger.log(f"The app will continue to work when rebooted to stock.", color=Colors.green)
-            Logger.log(f"Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)",
-                       color=Colors.green)
+            Logger.log(
+                f"Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)",
+                color=Colors.green)
             print(Colors.green + "    https://patreon.com/nebulalol" + Colors.reset)
             if self.args.folder:
                 final_outputs = ""
@@ -236,11 +295,11 @@ class Main(object):
             if not subprocess.getstatusoutput("which dpkg")[0] == 0:
                 if self.args.debug:
                     Logger.debug(f"On macOS x86_64, dpkg not found...")
-                Logger.error("dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
+                Logger.error(
+                    "dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
 
     def prompt_install(self, path_to_deb):
-
         if not self.utils.is_ios():
             from .ps_installer import Installer
             from .ps_tcprelay import USBMux
@@ -249,7 +308,8 @@ class Main(object):
         if not self.args.noinstall:
             option = 'n'
             if not self.args.install:
-                option = Logger.ask("Would you like install the application to your device (must be connected)? [y, n]: ").lower()
+                option = Logger.ask(
+                    "Would you like install the application to your device (must be connected)? [y, n]: ").lower()
 
             if option == 'y' or self.args.install:
                 if self.utils.is_macos() or self.utils.is_linux():
@@ -297,24 +357,24 @@ class Main(object):
 
         return is_installed
 
-    def run(self, tmpfolder, dpkg_in_path, data_dir):
+    def run(self, tmpfolder, dpkg_in_path, data_dir, is_extracted):
         # Unzip the IPA file
-        Logger.log(f"Unzipping IPA...", color=Colors.pink)
-        with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
-            os.makedirs(f"{tmpfolder}/app", exist_ok=False)
-            f.extractall(f"{tmpfolder}/app")
-        print()
+        if not is_extracted:
+            Logger.log(f"Unzipping IPA...", color=Colors.pink)
+            with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
+                os.makedirs(f"{tmpfolder}/app", exist_ok=False)
+                f.extractall(f"{tmpfolder}/app")
+            print()
 
         # Read data from the plist
         Logger.log(f"Reading plist...", color=Colors.pink)
-
         if Path(f"{tmpfolder}/app/Payload").exists():
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
                 if fname.endswith(".app"):
                     app_dir = fname
             print("Found app directory!")
         else:
-            Logger.error(f"IPA is not valid!")
+            Logger.error(f"IPA/deb is not valid!")
             exit(1)
 
         pre_app_path = os.path.join(f"{tmpfolder}/app/Payload", app_dir)
@@ -384,7 +444,8 @@ class Main(object):
                 ['security', 'import', cert_path, '-P', 'password', '-A'], stdout=DEVNULL)
 
             subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
-                            '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'], stdout=DEVNULL)
+                            '--force', '--deep', '--preserve-metadata=entitlements', f'{full_app_path}'],
+                           stdout=DEVNULL)
         else:
             print("Signing with ldid...")
             if self.utils.is_ios():

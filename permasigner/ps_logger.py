@@ -25,17 +25,22 @@ class Colors:
 
 
 class Logger:
+    @staticmethod
     def log(message, color=None):
         if color is None:
             print(f"[*] {message}")
         else:
             print(color + Colors.bold + "[*] " + Colors.reset + color + f"{message}" + Colors.reset)
 
+    @staticmethod
     def debug(message):
-        print(Colors.lightblue + Colors.bold + "[DEBUG] " + Colors.reset + Colors.lightblue + f"{message}" + Colors.reset)
+        print(
+            Colors.lightblue + Colors.bold + "[DEBUG] " + Colors.reset + Colors.lightblue + f"{message}" + Colors.reset)
 
+    @staticmethod
     def error(message):
         print(Colors.lightred + Colors.bold + "[!] " + Colors.reset + Colors.lightred + f"{message}" + Colors.reset)
 
+    @staticmethod
     def ask(message):
         return input(Colors.orange + Colors.bold + "[?] " + Colors.reset + Colors.orange + f"{message}" + Colors.reset)
