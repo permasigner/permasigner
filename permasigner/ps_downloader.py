@@ -9,9 +9,10 @@ from .ps_logger import Logger
 
 
 class DpkgDeb(object):
-    def __init__(self, args):
+    def __init__(self, args, data_dir):
         self.args = args
         self.utils = Utils(self.args)
+        self.data_dir = data_dir
 
     def get_arch(self):
         if platform.machine() == "x86_64":
@@ -47,10 +48,11 @@ class DpkgDeb(object):
         subprocess.run(f"tar -xf data.tar.xz".split(),
                        stdout=subprocess.DEVNULL)
         copy("usr/bin/dpkg-deb", "dpkg-deb")
+        
         if self.args.debug:
             Logger.debug(f"Copied dpkg-deb to project directory")
-        if self.args.debug:
             Logger.debug(f"Running command: chmod +x dpkg-deb")
+            
         subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
         os.remove("data.tar.xz")
         os.remove("control.tar.xz")
@@ -60,21 +62,21 @@ class DpkgDeb(object):
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
+        
         if self.args.debug:
             Logger.debug(f"Cleaned up extracted content")
-        move("dpkg-deb", f"{self.utils.get_home_data_directory()}/.permasigner/dpkg-deb")
-        if self.args.debug:
-            Logger.debug(f"Moved dpkg-deb to {self.utils.get_home_data_directory()}/.permasigner/")
-
+            Logger.debug(f"Moving dpkg-deb to {self.data_dir}")
+            
+        move("dpkg-deb", f"{self.data_dir}/dpkg-deb")
 
 class Ldid(object):
-    def __init__(self, args):
+    def __init__(self, args, data_dir):
         self.args = args
-        self.ldid_fork = "itsnebulalol"  # Use my fork to make unc0ver users shut up
+        self.ldid_fork = "itsnebulalol"
         self.utils = Utils(self.args)
+        self.data_dir = data_dir
 
     def get_arch(self):
-
         if self.utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
         elif self.utils.is_linux() and platform.machine() == "aarch64":
@@ -111,9 +113,10 @@ class Ldid(object):
         except requests.exceptions.RequestException as err:
             Logger.error(f"ldid download URL is not reachable. Error: {err}")
             exit(1)
+            
         if self.args.debug:
             Logger.debug("Running command: chmod +x ldid")
+            Logger.debug(f"Moving ldid to {self.data_dir}")
+        
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        move("ldid", f"{self.utils.get_home_data_directory()}/.permasigner/ldid")
-        if self.args.debug:
-            Logger.debug(f"Moved ldid to {self.utils.get_home_data_directory()}/.permasigner/")
+        move("ldid", f"{self.data_dir}/ldid")

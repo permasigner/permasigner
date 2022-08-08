@@ -61,14 +61,16 @@ class Utils(object):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
     def get_home_data_directory(self):
-        if os.environ.get("XDG_DATA_HOME"):
-            if self.args.debug:
-                Logger.debug(f"Using XDG_DATA_HOME: {os.environ.get('XDG_DATA_HOME')}")
-            return os.environ.get("XDG_DATA_HOME")
-        else:
-            if self.args.debug:
-                Logger.debug(f"Using user home directory: {os.path.expanduser('~')}")
-            return os.path.expanduser('~')
+        ps_home = os.environ.get("PERMASIGNER_HOME")
+        if ps_home:
+            return ps_home
+        
+        user_home = os.path.expanduser("~")
+        if self.is_linux():
+            xdg_data_home = os.environ.get("XDG_DATA_HOME", os.path.join(user_home, ".local", "share"))
+            return os.path.join(xdg_data_home, "permasigner")
+        elif self.is_ios() or self.is_macos():
+            return os.path.join(user_home, "Library", "Application Support", "permasigner")
 
     def get_resource_path(self, package, resource):
         spec = importlib.util.find_spec(package)

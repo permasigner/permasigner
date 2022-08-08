@@ -2,7 +2,7 @@
 
 import argparse
 
-from permasigner import __main__
+from permasigner.__main__ import Main
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -37,4 +37,5 @@ if __name__ == '__main__':
         print(f"Permasigner v{__version__.__version__}")
         exit(0)
 
-    __main__.main(args)
+    main = Main(args)
+    main.main()
