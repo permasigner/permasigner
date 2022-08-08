@@ -27,6 +27,10 @@ if [ ! -z "$LDIDFORK" ]; then
     ARGS="$ARGS -l $LDIDFORK"
 fi
 
+if [ ! -z "$FOLDER" ]; then
+    ARGS="$ARGS -f $FOLDER"
+fi
+
 echo "Running Permasigner with args:$ARGS"
 echo ""
 python -u main.py $ARGS -n

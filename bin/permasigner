@@ -31,6 +31,8 @@ if __name__ == '__main__':
                         help='show current version and exit',)
     parser.add_argument('-l', '--ldidfork', type=str,
                         help="specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])")
+    parser.add_argument('-f', '--folder', type=str,
+                        help="sign multiple IPAs from a direct path to a folder")
     args = parser.parse_args()
 
     if args.version:

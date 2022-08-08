@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import copy, copytree
+from shutil import copy, copytree, rmtree
 import plistlib
 import requests
 from urllib.parse import urlparse
@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import platform
 from subprocess import DEVNULL
+from glob import glob
 
 from .ps_copier import Copier
 from .ps_hash import LdidHash
@@ -27,6 +28,7 @@ class Main(object):
         self.args = args
         self.in_package = in_package
         self.utils = Utils(self.args)
+        self.outputs = []
 
     def main(self):
         if not self.utils.is_ios():
@@ -70,7 +72,7 @@ class Main(object):
         self.checks(ldid_in_path, dpkg_in_path, data_dir)
 
         # Prompt the user if they'd like to use an external IPA or a local IPA
-        if not (self.args.url or self.args.path):
+        if not (self.args.url or self.args.path or self.args.folder):
             option = Logger.ask("Would you like to use an external or a local IPA? [E, L] ").lower()
             print()
 
@@ -88,7 +90,6 @@ class Main(object):
                     exit(1)
 
                 res = requests.get(url, stream=True)
-
                 try:
                     if res.status_code == 200:
                         Logger.log(f"Downloading file...", color=Colors.pink)
@@ -110,15 +111,31 @@ class Main(object):
                 else:
                     Logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
                     exit(1)
+            elif self.args.folder:
+                for fpath in glob(f"{self.args.folder}/*.ipa"):
+                    if os.path.exists(f"{tmpfolder}/app.ipa"):
+                        os.remove(f"{tmpfolder}/app.ipa")
+                    if os.path.exists(f"{tmpfolder}/app"):
+                        rmtree(f"{tmpfolder}/app")
+                    if os.path.exists(f"{tmpfolder}/deb"):
+                        rmtree(f"{tmpfolder}/deb")
+                        
+                    fname = os.path.basename(fpath)
+                    Logger.log(f"Signing {fname}...", color=Colors.pink)
+                    print()
+                
+                    copy(fpath, f"{tmpfolder}/app.ipa")
+                    path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
+                    self.outputs.append(path_to_deb)
             elif option == "e":
                 url = Logger.ask("Paste in the *direct* path to an IPA online: ")
 
                 if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
                     Logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                     exit(1)
+                print()
 
                 res = requests.get(url, stream=True)
-
                 try:
                     if res.status_code == 200:
                         Logger.log(f"Downloading file...", color=Colors.pink)
@@ -150,18 +167,21 @@ class Main(object):
             else:
                 Logger.error(f"That is not a valid option!")
                 exit(1)
-            print()
+                
+            if not self.args.folder:
+                print()
+            
+            is_installed = False
+            if not self.args.folder:
+                path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
 
-            path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
-
-            # Prompt to install on device
-            is_installed = self.prompt_install(path_to_deb)
+                # Prompt to install on device
+                is_installed = self.prompt_install(path_to_deb)
 
             # Done, print end message
-            print()
             Logger.log(f"We are finished!", color=Colors.green)
 
-            if is_installed:
+            if is_installed or not self.args.folder:
                 Logger.log(f"The application was installed to your device, no further steps are required!", color=Colors.green)
             else:
                 Logger.log(f"Copy the newly created deb from the output folder to your jailbroken iDevice and install it!", color=Colors.green)
@@ -170,7 +190,16 @@ class Main(object):
             Logger.log(f"Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)",
                        color=Colors.green)
             print(Colors.green + "    https://patreon.com/nebulalol" + Colors.reset)
-            Logger.log(f"Output file: {path_to_deb}", color=Colors.green)
+            if self.args.folder:
+                final_outputs = ""
+                for output in self.outputs:
+                    if final_outputs == "":
+                        final_outputs = f"{output}"
+                    else:
+                        final_outputs = f"{final_outputs}, {output}"
+                Logger.log(f"Output files: {final_outputs}", color=Colors.green)
+            else:
+                Logger.log(f"Output file: {path_to_deb}", color=Colors.green)
 
     def checks(self, ldid_in_path, dpkg_in_path, data_dir):
         # Check if script is running on Windows, if so, fail

@@ -21,6 +21,9 @@
   <a href="https://github.com/itsnebulalol/permasigner/actions" target="_blank">
     <img src="https://img.shields.io/github/workflow/status/itsnebulalol/permasigner/Test%20script/main.svg" alt="Test status">
   </a>
+  <a href="#" target="_blank">
+    <img src="https://img.shields.io/tokei/lines/github.com/itsnebulalol/permasigner" alt="Lines of code">
+  </a>
 </p>
 
 <p align="center">
@@ -30,6 +33,7 @@ Permanently sign IPAs on jailbroken iDevices 14.0-14.8.1 (persists on stock)
 ---
 
 # How does it work?
+
 In iOS 14.0-14.8.1, there is a bug where CoreTrust will allow any root certificate. Although the bug exists on iOS 15.0-15.4.1, it can not be abused (yet) since you need to be jailbroken at first to place the app in the /Applications folder. This bug does not exist on anything older than iOS 14.
 
 This script makes a deb file for you based on an IPA. Tested only with Taurine, but should work with many others.
@@ -39,6 +43,7 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
 **Note:** ~~unc0ver will probably fail to jailbreak. It works for some people but not everyone.~~ unc0ver support is now fixed!
 
 # Prerequsites
+
 1. A computer or jailbroken iDevice with Procursus
     - Mac OS X 10.5.0 (?) or later required.
     - (Basically) any Linux distro is supported.
@@ -47,25 +52,29 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
     - The device needs to be jailbroken at first to place the app in the /Applications folder. After installing it'll continue working on stock.
 
 # Tutorials
-- [Run Online](https://permasigner.itsnebula.net/usage/run-online)
-- [Run in Docker](https://permasigner.itsnebula.net/usage/run-in-docker)
-- [Run on iOS](https://permasigner.itsnebula.net/usage/run-on-ios)
-- [Run on macOS](https://permasigner.itsnebula.net/usage/run-on-macos)
-- [Run on Linux](https://permasigner.itsnebula.net/usage/run-on-linux)
-- [Run on Windows](https://permasigner.itsnebula.net/usage/run-on-windows)
+
+-   [Run Online](https://permasigner.itsnebula.net/usage/run-online)
+-   [Run in Docker](https://permasigner.itsnebula.net/usage/run-in-docker)
+-   [Run on iOS](https://permasigner.itsnebula.net/usage/run-on-ios)
+-   [Run on macOS](https://permasigner.itsnebula.net/usage/run-on-macos)
+-   [Run on Linux](https://permasigner.itsnebula.net/usage/run-on-linux)
+-   [Run on Windows](https://permasigner.itsnebula.net/usage/run-on-windows)
 
 # In Progress
+
 View the [GitHub Projects board](https://github.com/users/itsnebulalol/projects/2/views/1)!
 
 # Credits
-- [Linus Henze](https://github.com/LinusHenze) for the bug
-- [zhuowei](https://github.com/zhuowei) for the original Taurine script
-- [RexSonic](https://github.com/RexSonic) for the fix and a lot of help
-- [verygenericname](https://github.com/verygenericname) for the ldid downloader and support
-- [superrnovae](https://github.com/superrnovae) for contributing lots of fixes and features
-- the [Procursus Team](https://github.com/ProcursusTeam) for the amazing bootstrap and the ldid fork
-- [Amy](https://github.com/elihwyma) for the Procursus with cache GitHub action from the Sileo Git repository
-- anyone who sent a pull request or issue! Your contribution helps a lot!
+
+-   [Linus Henze](https://github.com/LinusHenze) for the bug
+-   [zhuowei](https://github.com/zhuowei) for the original Taurine script
+-   [RexSonic](https://github.com/RexSonic) for the fix and a lot of help
+-   [verygenericname](https://github.com/verygenericname) for the ldid downloader and support
+-   [superrnovae](https://github.com/superrnovae) for contributing lots of fixes and features
+-   the [Procursus Team](https://github.com/ProcursusTeam) for the amazing bootstrap and the ldid fork
+-   [Amy](https://github.com/elihwyma) for the Procursus with cache GitHub action from the Sileo Git repository
+-   anyone who sent a pull request or issue! Your contribution helps a lot!
 
 # Other Stuff
-- [Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
+
+-   [Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
