@@ -31,10 +31,6 @@ class Main(object):
         self.outputs = []
 
     def main(self):
-        if not self.utils.is_ios():
-            from .ps_installer import Installer
-            from .ps_tcprelay import USBMux
-
         data_dir = self.utils.get_home_data_directory()
         os.makedirs(data_dir, exist_ok=True)
 
@@ -153,7 +149,7 @@ class Main(object):
                     Logger.log(
                         "Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.", color=Colors.orange)
                     ipa_name = input(Colors.orange + '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ' + Colors.reset)
-                    path = f"/usr/src/permasigner/ipas/{ipa_name}"
+                    path = f"/permasigner/ipas/{ipa_name}"
                 else:
                     path = Logger.ask("Paste in the path to an IPA in your file system: ")
 
@@ -244,6 +240,11 @@ class Main(object):
                 exit(1)
 
     def prompt_install(self, path_to_deb):
+
+        if not self.utils.is_ios():
+            from .ps_installer import Installer
+            from .ps_tcprelay import USBMux
+
         is_installed = False
         if not self.args.noinstall:
             option = 'n'
@@ -274,7 +275,7 @@ class Main(object):
                         if self.args.debug:
                             Logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
 
-                        subprocess.get(
+                        subprocess.run(
                             ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
 
                         subprocess.run(
