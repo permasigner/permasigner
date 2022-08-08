@@ -48,8 +48,6 @@ class Main(object):
 
             if self.in_package:
                 ver_string = f"{__version__.__version__}"
-            elif os.environ.get('IS_DOCKER_CONTAINER', False):
-                ver_string = os.environ.get('VERSION')
             elif "main" not in subprocess.getoutput(['git', 'rev-parse', '--abbrev-ref', 'HEAD']):
                 ver_string = f"{subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
             else:
@@ -57,8 +55,10 @@ class Main(object):
         else:
             if self.args.debug:
                 Logger.debug(f"Git is not in PATH")
-
-            ver_string = f"{__version__.__version__}"
+            if os.environ.get('IS_DOCKER_CONTAINER'):
+                ver_string = os.environ.get('VERSION', False)
+            else:
+                ver_string = f"{__version__.__version__}"
 
         print(Colors.bold + f"Permasigner | Version {ver_string}")
         print(Colors.bold + "Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
