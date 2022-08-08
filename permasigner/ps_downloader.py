@@ -48,11 +48,11 @@ class DpkgDeb(object):
         subprocess.run(f"tar -xf data.tar.xz".split(),
                        stdout=subprocess.DEVNULL)
         copy("usr/bin/dpkg-deb", "dpkg-deb")
-        
+
         if self.args.debug:
             Logger.debug(f"Copied dpkg-deb to project directory")
             Logger.debug(f"Running command: chmod +x dpkg-deb")
-            
+
         subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
         os.remove("data.tar.xz")
         os.remove("control.tar.xz")
@@ -62,12 +62,13 @@ class DpkgDeb(object):
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
-        
+
         if self.args.debug:
             Logger.debug(f"Cleaned up extracted content")
             Logger.debug(f"Moving dpkg-deb to {self.data_dir}")
-            
+
         move("dpkg-deb", f"{self.data_dir}/dpkg-deb")
+
 
 class Ldid(object):
     def __init__(self, args, data_dir):
@@ -113,10 +114,10 @@ class Ldid(object):
         except requests.exceptions.RequestException as err:
             Logger.error(f"ldid download URL is not reachable. Error: {err}")
             exit(1)
-            
+
         if self.args.debug:
             Logger.debug("Running command: chmod +x ldid")
             Logger.debug(f"Moving ldid to {self.data_dir}")
-        
+
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
         move("ldid", f"{self.data_dir}/ldid")

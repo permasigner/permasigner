@@ -20,12 +20,14 @@ from .ps_logger import Logger, Colors
 
 
 """ Main Class """
+
+
 class Main(object):
     def __init__(self, args, in_package=False):
         self.args = args
         self.in_package = in_package
         self.utils = Utils(self.args)
-        
+
     def main(self):
         if not self.utils.is_ios():
             from .ps_installer import Installer
@@ -63,15 +65,15 @@ class Main(object):
         print(Colors.bold + f"Permasigner | Version {ver_string}")
         print(Colors.bold + "Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
         print()
-        
+
         # Run checks
         self.checks(ldid_in_path, dpkg_in_path, data_dir)
-        
+
         # Prompt the user if they'd like to use an external IPA or a local IPA
         if not (self.args.url or self.args.path):
             option = Logger.ask("Would you like to use an external or a local IPA? [E, L] ").lower()
             print()
-            
+
         with tempfile.TemporaryDirectory() as tmpfolder:
             Logger.log(f"Created temporary directory.", color=Colors.pink)
             print()
@@ -131,7 +133,8 @@ class Main(object):
                     exit(1)
             elif option == "l":
                 if os.environ.get('IS_DOCKER_CONTAINER', False):
-                    Logger.log("Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.", color=Colors.orange)
+                    Logger.log(
+                        "Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.", color=Colors.orange)
                     ipa_name = input(Colors.orange + '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ' + Colors.reset)
                     path = f"/usr/src/permasigner/ipas/{ipa_name}"
                 else:
@@ -150,10 +153,10 @@ class Main(object):
             print()
 
             path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
-            
+
             # Prompt to install on device
             is_installed = self.prompt_install(path_to_deb)
-            
+
             # Done, print end message
             print()
             Logger.log(f"We are finished!", color=Colors.green)
@@ -164,10 +167,11 @@ class Main(object):
                 Logger.log(f"Copy the newly created deb from the output folder to your jailbroken iDevice and install it!", color=Colors.green)
 
             Logger.log(f"The app will continue to work when rebooted to stock.", color=Colors.green)
-            Logger.log(f"Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)", color=Colors.green)
+            Logger.log(f"Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)",
+                       color=Colors.green)
             print(Colors.green + "    https://patreon.com/nebulalol" + Colors.reset)
             Logger.log(f"Output file: {path_to_deb}", color=Colors.green)
-    
+
     def checks(self, ldid_in_path, dpkg_in_path, data_dir):
         # Check if script is running on Windows, if so, fail
         if sys.platform == "windows":
@@ -209,7 +213,7 @@ class Main(object):
                     Logger.debug(f"On macOS x86_64, dpkg not found...")
                 Logger.error("dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
-    
+
     def prompt_install(self, path_to_deb):
         is_installed = False
         if not self.args.noinstall:
@@ -235,7 +239,7 @@ class Main(object):
                 elif self.utils.is_ios():
                     print("Checking if user is in sudoers")
                     p = subprocess.run('sudo -nv'.split(),
-                                    capture_output=True)
+                                       capture_output=True)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
                         if self.args.debug:
@@ -246,7 +250,7 @@ class Main(object):
 
                         subprocess.run(
                             ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
-                        
+
                         is_installed = True
                     else:
                         print("User is not in sudoers, using su instead")
@@ -258,11 +262,11 @@ class Main(object):
 
                         subprocess.run(
                             "su root -c 'apt-get install -f'".split(), capture_output=True)
-                        
+
                         is_installed = True
-        
+
         return is_installed
-    
+
     def run(self, tmpfolder, dpkg_in_path, data_dir):
         # Unzip the IPA file
         Logger.log(f"Unzipping IPA...", color=Colors.pink)

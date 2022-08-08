@@ -64,7 +64,7 @@ class Utils(object):
         ps_home = os.environ.get("PERMASIGNER_HOME")
         if ps_home:
             return ps_home
-        
+
         user_home = os.path.expanduser("~")
         if self.is_linux():
             xdg_data_home = os.environ.get("XDG_DATA_HOME", os.path.join(user_home, ".local", "share"))
