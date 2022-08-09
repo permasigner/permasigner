@@ -1,4 +1,5 @@
 import os
+import pkgutil
 from pathlib import Path
 from shutil import copy, copytree, rmtree
 import plistlib
@@ -401,10 +402,10 @@ class Main(object):
         os.makedirs(f"{tmpfolder}/deb/Applications", exist_ok=False)
         os.makedirs(f"{tmpfolder}/deb/DEBIAN", exist_ok=False)
         print("Copying deb file scripts and control...")
-        Copier.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm", app_name, self.in_package)
-        Copier.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst", app_name, self.in_package)
-        Copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control", app_name,
-                            app_bundle, app_version, app_min_ios, app_author, self.in_package)
+        copier = Copier(app_name, app_bundle, app_version, app_min_ios, app_author, self.in_package)
+        copier.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm")
+        copier.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst")
+        copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control")
         print("Copying app files...")
         full_app_path = os.path.join(f"{tmpfolder}/deb/Applications", app_dir)
         copytree(pre_app_path, full_app_path)
@@ -421,7 +422,7 @@ class Main(object):
 
         # Sign the app
         Logger.log(f"Signing app...", color=Colors.pink)
-        Copier.copy_entitlements(f"{tmpfolder}/entitlements.plist", app_bundle, self.in_package)
+        copier.copy_entitlements(f"{tmpfolder}/entitlements.plist")
         if self.in_package:
             cert_path = self.utils.get_resource_path(__name__, "data/certificate.p12")
         else:
