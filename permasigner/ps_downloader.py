@@ -22,8 +22,7 @@ class DpkgDeb(object):
 
     def download(self):
         arch = self.get_arch()
-        if self.args.debug:
-            Logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
+        Logger.debug(f"Downloading dpkg-deb for {arch} architecture.", self.args)
 
         res = requests.get(
             f"http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.21.9_{arch}.deb", stream=True)
@@ -31,8 +30,7 @@ class DpkgDeb(object):
             if res.status_code == 200:
                 with open(f"dpkg.deb", "wb") as f:
                     f.write(res.content)
-                    if self.args.debug:
-                        Logger.debug(f"Wrote file.")
+                    Logger.debug(f"Wrote file.", self.args)
             else:
                 Logger.error(f"dpkg download URL is not reachable. Status code: {res.status_code}")
                 exit(1)
@@ -40,19 +38,15 @@ class DpkgDeb(object):
             Logger.error(f"dpkg download URL is not reachable. Error: {err}")
             exit(1)
 
-        if self.args.debug:
-            Logger.debug(f"Running command: ar x dpkg.deb")
+        Logger.debug(f"Running command: ar x dpkg.deb", self.args)
         subprocess.run(f"ar x dpkg.deb".split(), stdout=subprocess.DEVNULL)
-        if self.args.debug:
-            Logger.debug(f"Running command: tar -xf data.tar.xz")
+        Logger.debug(f"Running command: tar -xf data.tar.xz", self.args)
         subprocess.run(f"tar -xf data.tar.xz".split(),
                        stdout=subprocess.DEVNULL)
         copy("usr/bin/dpkg-deb", "dpkg-deb")
-
-        if self.args.debug:
-            Logger.debug(f"Copied dpkg-deb to project directory")
-            Logger.debug(f"Running command: chmod +x dpkg-deb")
-
+        Logger.debug(f"Copied dpkg-deb to project directory", self.args)
+        
+        Logger.debug(f"Running command: chmod +x dpkg-deb", self.args)
         subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
         os.remove("data.tar.xz")
         os.remove("control.tar.xz")
@@ -62,11 +56,9 @@ class DpkgDeb(object):
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
-
-        if self.args.debug:
-            Logger.debug(f"Cleaned up extracted content")
-            Logger.debug(f"Moving dpkg-deb to {self.data_dir}")
-
+        Logger.debug(f"Cleaned up extracted content", self.args)
+        
+        Logger.debug(f"Moving dpkg-deb to {self.data_dir}", self.args)
         move("dpkg-deb", f"{self.data_dir}/dpkg-deb")
 
 
@@ -97,17 +89,15 @@ class Ldid(object):
 
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{arch}"
 
-        if self.args.debug:
-            Logger.debug(f"Using ldid fork {ldid_fork}.")
-            Logger.debug(f"Downloading ldid from {url}")
+        Logger.debug(f"Using ldid fork {ldid_fork}.", self.args)
+        Logger.debug(f"Downloading ldid from {url}", self.args)
 
         res = requests.get(url, stream=True)
         try:
             if res.status_code == 200:
                 with open(f"ldid", "wb") as f:
                     f.write(res.content)
-                    if self.args.debug:
-                        Logger.debug(f"Wrote file.")
+                    Logger.debug(f"Wrote file.", self.args)
             else:
                 Logger.error(f"ldid download URL is not reachable. Status code: {res.status_code}")
                 exit(1)
@@ -115,9 +105,8 @@ class Ldid(object):
             Logger.error(f"ldid download URL is not reachable. Error: {err}")
             exit(1)
 
-        if self.args.debug:
-            Logger.debug("Running command: chmod +x ldid")
-            Logger.debug(f"Moving ldid to {self.data_dir}")
-
+        Logger.debug("Running command: chmod +x ldid", self.args)
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
+        
+        Logger.debug(f"Moving ldid to {self.data_dir}", self.args)
         move("ldid", f"{self.data_dir}/ldid")

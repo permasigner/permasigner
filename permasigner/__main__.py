@@ -34,8 +34,7 @@ class Main(object):
         os.makedirs(data_dir, exist_ok=True)
 
         if self.in_package:
-            if self.args.debug:
-                Logger.debug(f"Running from package, not cloned repo.")
+            Logger.debug(f"Running from package, not cloned repo.", self.args)
 
         is_extracted = False
 
@@ -44,8 +43,7 @@ class Main(object):
         git_in_path = self.utils.cmd_in_path('git')
 
         if git_in_path:
-            if self.args.debug:
-                Logger.debug(f"Git is in PATH")
+            Logger.debug(f"Git is in PATH", self.args)
 
             if self.in_package:
                 ver_string = f"{__version__.__version__}"
@@ -54,8 +52,7 @@ class Main(object):
             else:
                 ver_string = f"{__version__.__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
-            if self.args.debug:
-                Logger.debug(f"Git is not in PATH")
+            Logger.debug(f"Git is not in PATH", self.args)
             if os.environ.get('IS_DOCKER_CONTAINER'):
                 ver_string = os.environ.get('VERSION', False)
             else:
@@ -107,14 +104,12 @@ class Main(object):
                 if Path(path).exists():
                     if path.endswith(".deb"):
                         if dpkg_in_path:
-                            if self.args.debug:
-                                Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+                            Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
 
                             subprocess.run(
                                 ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
                         else:
-                            if self.args.debug:
-                                Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+                            Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
 
                             subprocess.run(
                                 [f"{data_dir}/dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"],
@@ -187,14 +182,12 @@ class Main(object):
                 if Path(path).exists():
                     if path.endswith(".deb"):
                         if dpkg_in_path:
-                            if self.args.debug:
-                                Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+                            Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
 
                             subprocess.run(
                                 ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
                         else:
-                            if self.args.debug:
-                                Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+                            Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
 
                             subprocess.run(
                                 [f"{data_dir}/dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"],
@@ -284,8 +277,7 @@ class Main(object):
         # Auto download dpkg-deb on Linux
         if not dpkg_in_path and self.utils.is_linux():
             if not Path(f"{data_dir}/dpkg-deb").exists():
-                if self.args.debug:
-                    Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
+                Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...", self.args)
                 Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
                 dpkg_downloader = DpkgDeb(self.args, data_dir)
                 dpkg_downloader.download()
@@ -293,8 +285,7 @@ class Main(object):
 
         if self.utils.is_macos():
             if not subprocess.getstatusoutput("which dpkg")[0] == 0:
-                if self.args.debug:
-                    Logger.debug(f"On macOS x86_64, dpkg not found...")
+                Logger.debug(f"On macOS x86_64, dpkg not found...", self.args)
                 Logger.error(
                     "dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
@@ -332,8 +323,7 @@ class Main(object):
                                        capture_output=True)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
-                        if self.args.debug:
-                            Logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
+                        Logger.debug(f"Running command: sudo dpkg -i {path_to_deb}", self.args)
 
                         subprocess.run(
                             ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
@@ -344,8 +334,7 @@ class Main(object):
                         is_installed = True
                     else:
                         print("User is not in sudoers, using su instead")
-                        if self.args.debug:
-                            Logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
+                        Logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}", self.args)
 
                         subprocess.run(
                             f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)
@@ -452,9 +441,7 @@ class Main(object):
                 ldid_cmd = 'ldid'
             else:
                 ldid_cmd = f'{data_dir}/ldid'
-            if self.args.debug:
-                Logger.debug(
-                    f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
+            Logger.debug(f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'", self.args)
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
@@ -474,15 +461,13 @@ class Main(object):
         dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {path_to_deb}"
 
         if dpkg_in_path:
-            if self.args.debug:
-                Logger.debug(f"Path to deb file: {path_to_deb}")
-                Logger.debug(f"Running command: {dpkg_cmd}")
+            Logger.debug(f"Path to deb file: {path_to_deb}", self.args)
+            Logger.debug(f"Running command: {dpkg_cmd}", self.args)
 
             subprocess.run(
                 ["dpkg-deb", "-Zxz", "--root-owner-group", "-b", f"{tmpfolder}/deb", f"{path_to_deb}"], stdout=DEVNULL)
         else:
-            if self.args.debug:
-                Logger.debug(f"Running command: {data_dir}/{dpkg_cmd}")
+            Logger.debug(f"Running command: {data_dir}/{dpkg_cmd}", self.args)
 
             subprocess.run(
                 [f"{data_dir}/dpkg-deb", "-Zxz", "--root-owner-group", "-b", f"{tmpfolder}/deb", f"{path_to_deb}"],

@@ -32,8 +32,7 @@ class LdidHash(object):
         ldid = Ldid(self.args, self.data_dir)
         arch = ldid.get_arch()
 
-        if self.args.debug:
-            Logger.debug(f"Checking {arch} hash...")
+        Logger.debug(f"Checking {arch} hash...", self.args)
 
         if self.args.ldidfork:
             ldid_fork = self.args.ldidfork
@@ -44,12 +43,10 @@ class LdidHash(object):
         local_hash = Hash.get_hash(f"{self.data_dir}/ldid", None)
 
         if remote_hash == local_hash:
-            if self.args.debug:
-                Logger.debug(f"ldid hash successfully verified.")
+            Logger.debug(f"ldid hash successfully verified.", self.args)
 
             return True
         else:
-            if self.args.debug:
-                Logger.debug(f"ldid hash failed to verify.")
+            Logger.debug(f"ldid hash failed to verify.", self.args)
 
             return False

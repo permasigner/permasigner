@@ -17,8 +17,7 @@ class Installer:
 
     def install_deb(self):
         Logger.log("Relaying TCP connection", color=Colors.pink)
-        if self.args.debug:
-            Logger.debug(f"Running command: ./permasigner/ps_tcprelay.py -t 22:2222")
+        Logger.debug(f"Running command: ./permasigner/ps_tcprelay.py -t 22:2222", self.args)
 
         relay = subprocess.Popen(
             './permasigner/ps_tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
@@ -41,13 +40,11 @@ class Installer:
                 with SCPClient(client.get_transport()) as scp:
                     Logger.log(f"Sending {self.path} to device", color=Colors.pink)
                     filename = self.path.split("/")[-1]
-                    if self.args.debug:
-                        Logger.debug(f"Copying via scp from {self.path} to /var/mobile/Documents/")
+                    Logger.debug(f"Copying via scp from {self.path} to /var/mobile/Documents/", self.args)
 
                     scp.put(f'{self.path}',
                             remote_path='/var/mobile/Documents')
-                    if self.args.debug:
-                        Logger.debug(f"Running command: sudo -nv")
+                    Logger.debug(f"Running command: sudo -nv", self.args)
 
                     stdin, stdout, stderr = client.exec_command('sudo -nv')
                     status = stdout.channel.recv_exit_status()
@@ -55,8 +52,7 @@ class Installer:
 
                     if "password" in out:
                         command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
-                        if self.args.debug:
-                            Logger.debug(f"Running command: {command}")
+                        Logger.debug(f"Running command: {command}", self.args)
 
                         stdin, stdout, stderr = client.exec_command(
                             f"{command}", get_pty=True)
@@ -65,36 +61,30 @@ class Installer:
                         stdin.flush()
                         Logger.log("Installing... this may take some time", color=Colors.pink)
 
-                        if self.args.debug:
-                            Logger.debug(stdout.read().decode())
-                            Logger.debug(f"Running command: sudo apt-get install -f")
+                        Logger.debug(stdout.read().decode(), self.args)
+                        Logger.debug(f"Running command: sudo apt-get install -f", self.args)
 
                         streams = client.exec_command(
                             'sudo apt-get install -f', get_pty=True)
                         time.sleep(0.2)
                         streams[0].write(f'{password}\n')
                         streams[0].flush()
-                        if self.args.debug:
-                            Logger.debug(streams[1].read().decode())
+                        Logger.debug(streams[1].read().decode(), self.args)
                     elif status == 0:
                         command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
-                        if self.args.debug:
-                            Logger.debug(f"Running command: {command}")
+                        Logger.debug(f"Running command: {command}", self.args)
 
                         output = client.exec_command(f'{command}')[1]
                         Logger.log("Installing... this may take some time", color=Colors.pink)
-                        if self.args.debug:
-                            Logger.debug(output.read().decode())
-                            Logger.debug(f"Running command: sudo apt-get install -f")
+                        Logger.debug(output.read().decode())
+                        Logger.debug(f"Running command: sudo apt-get install -f", self.args)
 
                         output = client.exec_command(
                             'sudo apt-get install -f')[1]
-                        if self.args.debug:
-                            Logger.debug(output.read().decode())
+                        Logger.debug(output.read().decode(), self.args)
                     else:
                         command = f"su root -c 'dpkg -i /var/mobile/Documents/{filename}'"
-                        if self.args.debug:
-                            Logger.debug(f"Running command: {command}")
+                        Logger.debug(f"Running command: {command}", self.args)
 
                         streams = client.exec_command(
                             f"{command}", get_pty=True)
@@ -105,24 +95,20 @@ class Installer:
                             streams[0].write(f'{password}\n')
                             streams[0].flush()
                             Logger.log("Installing... this may take some time", color=Colors.pink)
-                            if self.args.debug:
-                                Logger.debug(streams[1].read().decode())
+                            Logger.debug(streams[1].read().decode(), self.args)
                             streams = client.exec_command(
                                 "su root -c 'apt-get install -f'", get_pty=True)
                             streams[0].write(f'{password}\n')
                             streams[0].flush()
-                            if self.args.debug:
-                                Logger.debug(streams[1].channel.recv(2048).decode())
+                            Logger.debug(streams[1].channel.recv(2048).decode(), self.args)
                         else:
                             Logger.log("Installing... this may take some time", color=Colors.pink)
-                            if self.args.debug:
-                                Logger.debug(streams[1].read().decode())
-                                Logger.debug(f"Running command: sudo apt-get install -f")
+                            Logger.debug(streams[1].read().decode(), self.args)
+                            Logger.debug(f"Running command: sudo apt-get install -f", self.args)
 
                             output = client.exec_command(
                                 'sudo apt-get install -f')[1]
-                            if self.args.debug:
-                                Logger.debug(output.read().decode())
+                            logger.debug(output.read().decode(), self.args)
                     return True
         except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
             Logger.error(e)

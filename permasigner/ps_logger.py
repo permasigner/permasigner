@@ -33,9 +33,10 @@ class Logger:
             print(color + Colors.bold + "[*] " + Colors.reset + color + f"{message}" + Colors.reset)
 
     @staticmethod
-    def debug(message):
-        print(
-            Colors.lightblue + Colors.bold + "[DEBUG] " + Colors.reset + Colors.lightblue + f"{message}" + Colors.reset)
+    def debug(message, args):
+        if args.debug:
+            print(
+                Colors.lightblue + Colors.bold + "[DEBUG] " + Colors.reset + Colors.lightblue + f"{message}" + Colors.reset)
 
     @staticmethod
     def error(message):

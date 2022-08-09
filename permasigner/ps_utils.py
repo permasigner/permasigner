@@ -20,13 +20,11 @@ class Utils(object):
     def cmd_in_path(self, cmd):
         utils = Utils(self.args)
 
-        if self.args.debug:
-            Logger.debug(f"Checking if command {cmd} is in PATH...")
+        Logger.debug(f"Checking if command {cmd} is in PATH...", self.args)
 
         if cmd == "ldid":
             if utils.is_ios():
-                if self.args.debug:
-                    Logger.debug(f"Checking for ldid on iOS")
+                Logger.debug(f"Checking for ldid on iOS", self.args)
 
                 if os.path.exists("/.bootstrapped"):
                     Logger.error("Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
@@ -34,8 +32,7 @@ class Utils(object):
                     exit(1)
 
                 if utils.is_dpkg_installed("ldid"):
-                    if self.args.debug:
-                        Logger.debug(f"ldid is installed via dpkg")
+                    Logger.debug(f"ldid is installed via dpkg", self.args)
 
                     return True
                 else:
