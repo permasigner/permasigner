@@ -132,8 +132,9 @@ class Ldid(object):
             subprocess.run(f"chmod +x ldid".split(), stdout=DEVNULL)
             move("ldid", f"{self.data_dir}/ldid")
         else:
-            Logger.log('reusing the existing ldid', color = Colors.pink)
-            if not self.exists:
+            if self.exists:
+                Logger.log('reusing the existing ldid', color=Colors.pink)
+            else:
                 exit(1)
 
     def download(self):
