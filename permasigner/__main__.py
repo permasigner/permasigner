@@ -14,7 +14,6 @@ from subprocess import DEVNULL
 from glob import glob
 
 from .ps_copier import Copier
-from .ps_hash import LdidHash
 from .ps_downloader import DpkgDeb, Ldid
 from . import __version__
 from .ps_utils import Utils
@@ -271,16 +270,12 @@ class Main(object):
 
         # Auto download ldid
         if not ldid_in_path:
-            ldid = Ldid(self.args, data_dir)
             if Path(f"{data_dir}/ldid").exists():
-                ldid_hash = LdidHash(self.args, data_dir)
-                if not ldid_hash.check_hash():
-                    Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
-                    os.remove(f"{data_dir}/ldid")
-                    ldid.download()
+                ldid = Ldid(self.args, data_dir, self.utils, True)
             else:
                 Logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
-                ldid.download()
+                ldid = Ldid(self.args, data_dir, self.utils, False)
+            ldid.download()
 
         # Auto download dpkg-deb on Linux
         if not dpkg_in_path and self.utils.is_linux():
