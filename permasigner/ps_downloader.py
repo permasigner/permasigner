@@ -24,10 +24,14 @@ class Hash:
                     m.update(data)
                 return m.hexdigest()
         else:
-            res = requests.get(url, stream=True)
-            for data in res.iter_content(4096):
-                m.update(data)
-            return m.hexdigest(), res
+            try:
+                res = requests.get(url, stream=True)
+                for data in res.iter_content(4096):
+                    m.update(data)
+                return m.hexdigest(), res
+            except (requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
+                Logger.error(f"ldid download URL is not reachable. Error: {e}")
+                return m.hexdigest(), None
 
 
 class DpkgDeb(object):
@@ -111,29 +115,26 @@ class Ldid(object):
             return "ldid_macos_arm64"
 
     def process(self, res):
-        try:
-            if res.status_code == 200:
-                with open(f"ldid", "wb") as f:
-                    f.write(res.content)
-                    if self.args.debug:
-                        Logger.debug(f"Wrote file.")
-            else:
-                Logger.error(f"ldid download URL is not reachable. Status code: {res.status_code}")
-                if not self.exists:
-                    exit(1)
-        except requests.exceptions.RequestException as err:
-            Logger.error(f"ldid download URL is not reachable. Error: {err}")
+        if res is not None and res.status_code == 200:
+            Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
+            with open(f"ldid", "wb") as f:
+                f.write(res.content)
+                if self.args.debug:
+                    Logger.debug(f"Wrote file.")
+
+            if self.exists:
+                Logger.debug("Removing outdated version of ldid")
+                os.remove(f"{self.data_dir}/ldid")
+
+            if self.args.debug:
+                Logger.debug("Running command: chmod +x ldid")
+                Logger.debug(f"Moving ldid to {self.data_dir}")
+            subprocess.run(f"chmod +x ldid".split(), stdout=DEVNULL)
+            move("ldid", f"{self.data_dir}/ldid")
+        else:
+            Logger.log('reusing the existing ldid', color = Colors.pink)
             if not self.exists:
                 exit(1)
-
-        if self.args.debug:
-            Logger.debug("Removing outdated version of ldid")
-            Logger.debug("Running command: chmod +x ldid")
-            Logger.debug(f"Moving ldid to {self.data_dir}")
-        if self.exists:
-            os.remove(f"{self.data_dir}/ldid")
-        subprocess.run(f"chmod +x ldid".split(), stdout=DEVNULL)
-        move("ldid", f"{self.data_dir}/ldid")
 
     def download(self):
         if self.args.ldidfork:
@@ -141,10 +142,10 @@ class Ldid(object):
         else:
             ldid_fork = self.ldid_fork
 
-        url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{self.get_arch()}"
-
         if self.args.debug:
             Logger.debug(f"Using ldid fork {ldid_fork}.")
+
+        url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{self.get_arch()}"
 
         if self.exists:
             if self.args.debug:
@@ -152,18 +153,21 @@ class Ldid(object):
 
             remote_hash, res = Hash.get_hash(None, url)
             local_hash = Hash.get_hash(f"{self.data_dir}/ldid", None)
+
             if remote_hash == local_hash:
                 if self.args.debug:
                     Logger.debug(f"ldid hash successfully verified.")
             else:
                 if self.args.debug:
                     Logger.debug(f"ldid hash failed to verify.")
-
-                Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
                 self.process(res)
         else:
             if self.args.debug:
                 Logger.debug(f"Downloading {self.get_arch()} from {url}")
-            res = requests.get(url, stream=True)
-            self.process(res)
+            try:
+                res = requests.get(url, stream=True)
+                self.process(res)
+            except (requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
+                Logger.error(f"ldid download URL is not reachable. Error: {e}")
+                exit(1)
 
