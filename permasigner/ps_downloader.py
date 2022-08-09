@@ -45,7 +45,7 @@ class DpkgDeb(object):
                        stdout=subprocess.DEVNULL)
         copy("usr/bin/dpkg-deb", "dpkg-deb")
         Logger.debug(f"Copied dpkg-deb to project directory", self.args)
-        
+
         Logger.debug(f"Running command: chmod +x dpkg-deb", self.args)
         subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
         os.remove("data.tar.xz")
@@ -57,7 +57,7 @@ class DpkgDeb(object):
         rmtree("usr")
         rmtree("var")
         Logger.debug(f"Cleaned up extracted content", self.args)
-        
+
         Logger.debug(f"Moving dpkg-deb to {self.data_dir}", self.args)
         move("dpkg-deb", f"{self.data_dir}/dpkg-deb")
 
@@ -107,6 +107,6 @@ class Ldid(object):
 
         Logger.debug("Running command: chmod +x ldid", self.args)
         subprocess.run(f"chmod +x ldid".split(), stdout=subprocess.DEVNULL)
-        
+
         Logger.debug(f"Moving ldid to {self.data_dir}", self.args)
         move("ldid", f"{self.data_dir}/ldid")

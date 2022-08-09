@@ -442,7 +442,8 @@ class Main(object):
                 ldid_cmd = 'ldid'
             else:
                 ldid_cmd = f'{data_dir}/ldid'
-            Logger.debug(f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'", self.args)
+            Logger.debug(
+                f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'", self.args)
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
