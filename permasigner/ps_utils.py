@@ -3,6 +3,7 @@ import subprocess
 import platform
 import os
 import importlib
+from importlib import util
 
 from .ps_logger import Logger
 
