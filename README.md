@@ -21,9 +21,6 @@
   <a href="https://github.com/itsnebulalol/permasigner/actions" target="_blank">
     <img src="https://img.shields.io/github/workflow/status/itsnebulalol/permasigner/Test%20script/main.svg" alt="Test status">
   </a>
-  <a href="#" target="_blank">
-    <img src="https://img.shields.io/tokei/lines/github.com/itsnebulalol/permasigner" alt="Lines of code">
-  </a>
 </p>
 
 <p align="center">
