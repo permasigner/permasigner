@@ -11,6 +11,7 @@ from .ps_logger import Logger
 class Utils(object):
     def __init__(self, args):
         self.args = args
+        self.logger = Logger(self.args)
 
     def is_ios(self):
         if not sys.platform == "darwin":
@@ -19,25 +20,23 @@ class Utils(object):
         return platform.machine().startswith("i")
 
     def cmd_in_path(self, cmd):
-        utils = Utils(self.args)
-
-        Logger.debug(f"Checking if command {cmd} is in PATH...", self.args)
+        self.logger.debug(f"Checking if command {cmd} is in PATH...")
 
         if cmd == "ldid":
-            if utils.is_ios():
-                Logger.debug(f"Checking for ldid on iOS", self.args)
+            if self.is_ios():
+                self.logger.debug(f"Checking for ldid on iOS")
 
                 if os.path.exists("/.bootstrapped"):
-                    Logger.error("Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
+                    self.logger.error("Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
                     print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
                     exit(1)
 
-                if utils.is_dpkg_installed("ldid"):
-                    Logger.debug(f"ldid is installed via dpkg", self.args)
+                if self.is_dpkg_installed("ldid"):
+                    self.logger.debug(f"ldid is installed via dpkg")
 
                     return True
                 else:
-                    Logger.error("ldid is required on iOS, but it is not installed. Please install it from Procursus.")
+                    self.logger.error("ldid is required on iOS, but it is not installed. Please install it from Procursus.")
                     exit(1)
 
             # It seems like a better idea to force download ldid on macOS and Linux to make sure

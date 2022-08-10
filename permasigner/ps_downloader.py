@@ -11,8 +11,12 @@ from .ps_utils import Utils
 from .ps_logger import Logger, Colors
 
 
-class Hash:
-    def get_hash(filePath, url):
+class Hash(object):
+    def __init__(self, args):
+        self.args = args
+        self.logger = Logger(self.args)
+        
+    def get_hash(self, filePath, url):
         m = hashlib.md5()
         if url is None:
             with open(filePath, 'rb') as fh:
@@ -30,7 +34,7 @@ class Hash:
                     m.update(data)
                 return m.hexdigest(), res
             except (requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
-                Logger.error(f"ldid download URL is not reachable. Error: {e}")
+                self.logger.error(f"ldid download URL is not reachable. Error: {e}")
                 return m.hexdigest(), None
 
 
@@ -38,6 +42,7 @@ class DpkgDeb(object):
     def __init__(self, args, data_dir):
         self.args = args
         self.utils = Utils(self.args)
+        self.logger = Logger(self.args)
         self.data_dir = data_dir
 
     def get_arch(self):
@@ -48,7 +53,7 @@ class DpkgDeb(object):
 
     def download(self):
         arch = self.get_arch()
-        Logger.debug(f"Downloading dpkg-deb for {arch} architecture.", self.args)
+        self.logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
 
         res = requests.get(
             f"http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.21.9_{arch}.deb", stream=True)
@@ -56,24 +61,24 @@ class DpkgDeb(object):
             if res.status_code == 200:
                 with open(f"dpkg.deb", "wb") as f:
                     f.write(res.content)
-                    Logger.debug(f"Wrote file.", self.args)
+                    self.logger.debug(f"Wrote file.")
             else:
-                Logger.error(f"dpkg download URL is not reachable. Status code: {res.status_code}")
+                self.logger.error(f"dpkg download URL is not reachable. Status code: {res.status_code}")
                 exit(1)
         except requests.exceptions.RequestException as err:
-            Logger.error(f"dpkg download URL is not reachable. Error: {err}")
+            self.logger.error(f"dpkg download URL is not reachable. Error: {err}")
             exit(1)
 
-        Logger.debug(f"Running command: ar x dpkg.deb", self.args)
+        self.logger.debug(f"Running command: ar x dpkg.deb")
         subprocess.run(f"ar x dpkg.deb".split(), stdout=subprocess.DEVNULL)
-        Logger.debug(f"Running command: tar -xf data.tar.xz", self.args)
+        self.logger.debug(f"Running command: tar -xf data.tar.xz")
         subprocess.run(f"tar -xf data.tar.xz".split(),
                        stdout=DEVNULL)
         
         copy("usr/bin/dpkg-deb", "dpkg-deb")
-        Logger.debug(f"Copied dpkg-deb to project directory", self.args)
+        self.logger.debug(f"Copied dpkg-deb to project directory")
 
-        Logger.debug(f"Running command: chmod +x dpkg-deb", self.args)
+        self.logger.debug(f"Running command: chmod +x dpkg-deb")
         subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
         os.remove("data.tar.xz")
         os.remove("control.tar.xz")
@@ -83,9 +88,9 @@ class DpkgDeb(object):
         rmtree("sbin")
         rmtree("usr")
         rmtree("var")
-        Logger.debug(f"Cleaned up extracted content", self.args)
+        self.logger.debug(f"Cleaned up extracted content")
 
-        Logger.debug(f"Moving dpkg-deb to {self.data_dir}", self.args)
+        self.logger.debug(f"Moving dpkg-deb to {self.data_dir}")
         move("dpkg-deb", f"{self.data_dir}/dpkg-deb")
 
 
@@ -96,6 +101,9 @@ class Ldid(object):
         self.utils = utils
         self.data_dir = data_dir
         self.exists = exists
+        
+        self.logger = Logger(self.args)
+        self.hash = Hash(self.args)
 
     def get_arch(self):
         if self.utils.is_linux() and platform.machine() == "x86_64":
@@ -109,22 +117,22 @@ class Ldid(object):
 
     def process(self, res):
         if res is not None and res.status_code == 200:
-            Logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
+            self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
             with open(f"ldid", "wb") as f:
                 f.write(res.content)
-                Logger.debug(f"Wrote file.", self.args)
+                self.logger.debug(f"Wrote file.")
 
             if self.exists:
-                Logger.debug("Removing outdated version of ldid")
+                self.logger.debug("Removing outdated version of ldid")
                 os.remove(f"{self.data_dir}/ldid")
 
-            Logger.debug("Running command: chmod +x ldid", self.args)
-            Logger.debug(f"Moving ldid to {self.data_dir}", self.args)
+            self.logger.debug("Running command: chmod +x ldid")
+            self.logger.debug(f"Moving ldid to {self.data_dir}")
             subprocess.run(f"chmod +x ldid".split(), stdout=DEVNULL)
             move("ldid", f"{self.data_dir}/ldid")
         else:
             if self.exists:
-                Logger.log('Reusing the existing ldid', color=Colors.pink)
+                self.logger.log('Reusing the existing ldid', color=Colors.pink)
             else:
                 exit(1)
 
@@ -134,27 +142,27 @@ class Ldid(object):
         else:
             ldid_fork = self.ldid_fork
 
-        Logger.debug(f"Using ldid fork {ldid_fork}.", self.args)
+        self.logger.debug(f"Using ldid fork {ldid_fork}.")
 
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{self.get_arch()}"
 
         if self.exists:
-            Logger.debug(f"Comparing {self.get_arch()} hash with {url}", self.args)
+            self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
 
-            remote_hash, res = Hash.get_hash(None, url)
-            local_hash = Hash.get_hash(f"{self.data_dir}/ldid", None)
+            remote_hash, res = self.hash.get_hash(None, url)
+            local_hash = self.hash.get_hash(f"{self.data_dir}/ldid", None)
 
             if remote_hash == local_hash:
-                Logger.debug(f"ldid hash successfully verified.", self.args)
+                self.logger.debug(f"ldid hash successfully verified.")
             else:
-                Logger.debug(f"ldid hash failed to verify.", self.args)
+                self.logger.debug(f"ldid hash failed to verify.")
                 self.process(res)
         else:
-            Logger.debug(f"Downloading {self.get_arch()} from {url}", self.args)
+            self.logger.debug(f"Downloading {self.get_arch()} from {url}")
             try:
                 res = requests.get(url, stream=True)
                 self.process(res)
             except (requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
-                Logger.error(f"ldid download URL is not reachable. Error: {e}")
+                self.logger.error(f"ldid download URL is not reachable. Error: {e}")
                 exit(1)
                 

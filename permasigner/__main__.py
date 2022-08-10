@@ -27,6 +27,7 @@ class Main(object):
         self.args = args
         self.in_package = in_package
         self.utils = Utils(self.args)
+        self.logger = Logger(self.args)
         self.outputs = []
 
     def main(self):
@@ -34,7 +35,7 @@ class Main(object):
         os.makedirs(data_dir, exist_ok=True)
 
         if self.in_package:
-            Logger.debug(f"Running from package, not cloned repo.", self.args)
+            self.logger.debug(f"Running from package, not cloned repo.")
 
         is_extracted = False
 
@@ -43,7 +44,7 @@ class Main(object):
         git_in_path = self.utils.cmd_in_path('git')
 
         if git_in_path:
-            Logger.debug(f"Git is in PATH", self.args)
+            self.logger.debug(f"Git is in PATH")
 
             if self.in_package:
                 ver_string = f"{__version__.__version__}"
@@ -52,7 +53,7 @@ class Main(object):
             else:
                 ver_string = f"{__version__.__version__}_rev-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
-            Logger.debug(f"Git is not in PATH", self.args)
+            self.logger.debug(f"Git is not in PATH")
             if os.environ.get('IS_DOCKER_CONTAINER'):
                 ver_string = os.environ.get('VERSION', False)
             else:
@@ -68,11 +69,11 @@ class Main(object):
 
         # Prompt the user if they'd like to use an external IPA or a local IPA
         if not (self.args.url or self.args.path or self.args.folder):
-            option = Logger.ask("Would you like to use an external or a local IPA? [E, L] ").lower()
+            option = self.logger.ask("Would you like to use an external or a local IPA? [E, L] ").lower()
             print()
 
         with tempfile.TemporaryDirectory() as tmpfolder:
-            Logger.log(f"Created temporary directory.", color=Colors.pink)
+            self.logger.log(f"Created temporary directory.", color=Colors.pink)
             print()
 
             # If the user's choice is external, download an IPA
@@ -81,21 +82,21 @@ class Main(object):
                 url = self.args.url
 
                 if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
-                    Logger.error("URL provided is not an IPA, make sure to provide a direct link.")
+                    self.logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                     exit(1)
 
                 res = requests.get(url, stream=True)
                 try:
                     if res.status_code == 200:
-                        Logger.log(f"Downloading file...", color=Colors.pink)
+                        self.logger.log(f"Downloading file...", color=Colors.pink)
 
                         with open(f"{tmpfolder}/app.ipa", "wb") as f:
                             f.write(res.content)
                     else:
-                        Logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
+                        self.logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
                         exit(1)
                 except requests.exceptions.RequestException as err:
-                    Logger.error(f"URL provided is not reachable. Error: {err}")
+                    self.logger.error(f"URL provided is not reachable. Error: {err}")
                     exit(1)
             elif self.args.path:
                 path = self.args.path
@@ -104,12 +105,12 @@ class Main(object):
                 if Path(path).exists():
                     if path.endswith(".deb"):
                         if dpkg_in_path:
-                            Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
+                            self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
 
                             subprocess.run(
                                 ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
                         else:
-                            Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
+                            self.logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb")
 
                             subprocess.run(
                                 [f"{data_dir}/dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"],
@@ -125,10 +126,10 @@ class Main(object):
                     elif path.endswith(".ipa"):
                         copy(path, f"{tmpfolder}/app.ipa")
                     else:
-                        Logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                        self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
                         exit(1)
                 else:
-                    Logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
+                    self.logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
                     exit(1)
             elif self.args.folder:
                 for fpath in glob(f"{self.args.folder}/*.ipa"):
@@ -140,54 +141,54 @@ class Main(object):
                         rmtree(f"{tmpfolder}/deb")
 
                     fname = os.path.basename(fpath)
-                    Logger.log(f"Signing {fname}...", color=Colors.pink)
+                    self.logger.log(f"Signing {fname}...", color=Colors.pink)
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
                     path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
                     self.outputs.append(path_to_deb)
             elif option == "e":
-                url = Logger.ask("Paste in the *direct* path to an IPA online: ")
+                url = self.logger.ask("Paste in the *direct* path to an IPA online: ")
 
                 if not os.path.splitext(urlparse(url).path)[1] == ".ipa":
-                    Logger.error("URL provided is not an IPA, make sure to provide a direct link.")
+                    self.logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                     exit(1)
                 print()
 
                 res = requests.get(url, stream=True)
                 try:
                     if res.status_code == 200:
-                        Logger.log(f"Downloading file...", color=Colors.pink)
+                        self.logger.log(f"Downloading file...", color=Colors.pink)
 
                         with open(f"{tmpfolder}/app.ipa", "wb") as f:
                             f.write(res.content)
                     else:
-                        Logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
+                        self.logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
                         exit(1)
                 except requests.exceptions.RequestException as err:
-                    Logger.error(f"URL provided is not reachable. Error: {err}")
+                    self.logger.error(f"URL provided is not reachable. Error: {err}")
                     exit(1)
             elif option == "l":
                 if os.environ.get('IS_DOCKER_CONTAINER', False):
-                    Logger.log(
+                    self.logger.log(
                         "Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.",
                         color=Colors.orange)
                     ipa_name = input(Colors.orange + '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ' + Colors.reset)
                     path = f"/permasigner/ipas/{ipa_name}"
                 else:
-                    path = Logger.ask("Paste in the path to an IPA in your file system: ")
+                    path = self.logger.ask("Paste in the path to an IPA in your file system: ")
 
                 path = path.strip().lstrip("'").rstrip("'")
 
                 if Path(path).exists():
                     if path.endswith(".deb"):
                         if dpkg_in_path:
-                            Logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
+                            self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
 
                             subprocess.run(
                                 ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
                         else:
-                            Logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb", self.args)
+                            self.logger.debug(f"Running command: {data_dir}/dpkg-deb -X {path} {tmpfolder}/extractedDeb")
 
                             subprocess.run(
                                 [f"{data_dir}/dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"],
@@ -203,13 +204,13 @@ class Main(object):
                     elif path.endswith(".ipa"):
                         copy(path, f"{tmpfolder}/app.ipa")
                     else:
-                        Logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                        self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
                         exit(1)
                 else:
-                    Logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
+                    self.logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
                     exit(1)
             else:
-                Logger.error(f"That is not a valid option!")
+                self.logger.error(f"That is not a valid option!")
                 exit(1)
 
             if not self.args.folder:
@@ -223,18 +224,18 @@ class Main(object):
                 is_installed = self.prompt_install(path_to_deb)
 
             # Done, print end message
-            Logger.log(f"We are finished!", color=Colors.green)
+            self.logger.log(f"We are finished!", color=Colors.green)
 
             if is_installed or not self.args.folder:
-                Logger.log(f"The application was installed to your device, no further steps are required!",
+                self.logger.log(f"The application was installed to your device, no further steps are required!",
                            color=Colors.green)
             else:
-                Logger.log(
+                self.logger.log(
                     f"Copy the newly created deb from the output folder to your jailbroken iDevice and install it!",
                     color=Colors.green)
 
-            Logger.log(f"The app will continue to work when rebooted to stock.", color=Colors.green)
-            Logger.log(
+            self.logger.log(f"The app will continue to work when rebooted to stock.", color=Colors.green)
+            self.logger.log(
                 f"Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)",
                 color=Colors.green)
             print(Colors.green + "    https://patreon.com/nebulalol" + Colors.reset)
@@ -245,20 +246,20 @@ class Main(object):
                         final_outputs = f"{output}"
                     else:
                         final_outputs = f"{final_outputs}, {output}"
-                Logger.log(f"Output files: {final_outputs}", color=Colors.green)
+                self.logger.log(f"Output files: {final_outputs}", color=Colors.green)
             else:
-                Logger.log(f"Output file: {path_to_deb}", color=Colors.green)
+                self.logger.log(f"Output file: {path_to_deb}", color=Colors.green)
 
     def checks(self, ldid_in_path, dpkg_in_path, data_dir):
         # Check if script is running on Windows, if so, fail
         if sys.platform == "windows":
-            Logger.error(f"Script must be ran on macOS or Linux.")
+            self.logger.error(f"Script must be ran on macOS or Linux.")
             exit(1)
 
         # Check if codesign arg is added on Linux or iOS
         if self.args.codesign:
             if not self.utils.is_macos():
-                Logger.error(f"Codesign can only be used on macOS, remove the argument to use ldid instead.")
+                self.logger.error(f"Codesign can only be used on macOS, remove the argument to use ldid instead.")
                 exit(1)
 
         # Auto download ldid
@@ -266,23 +267,23 @@ class Main(object):
             if Path(f"{data_dir}/ldid").exists():
                 ldid = Ldid(self.args, data_dir, self.utils, True)
             else:
-                Logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
+                self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
                 ldid = Ldid(self.args, data_dir, self.utils, False)
             ldid.download()
 
         # Auto download dpkg-deb on Linux
         if not dpkg_in_path and self.utils.is_linux():
             if not Path(f"{data_dir}/dpkg-deb").exists():
-                Logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...", self.args)
-                Logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
+                self.logger.debug(f"On Linux {platform.machine()}, dpkg-deb not found...")
+                self.logger.log(f"dpkg-deb not found, downloading.", color=Colors.pink)
                 dpkg_downloader = DpkgDeb(self.args, data_dir)
                 dpkg_downloader.download()
                 print()
 
         if self.utils.is_macos():
             if not subprocess.getstatusoutput("which dpkg")[0] == 0:
-                Logger.debug(f"On macOS x86_64, dpkg not found...", self.args)
-                Logger.error(
+                self.logger.debug(f"On macOS x86_64, dpkg not found...")
+                self.logger.error(
                     "dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
 
@@ -295,7 +296,7 @@ class Main(object):
         if not self.args.noinstall:
             option = 'n'
             if not self.args.install:
-                option = Logger.ask(
+                option = self.logger.ask(
                     "Would you like install the application to your device (must be connected)? [y, n]: ").lower()
 
             if option == 'y' or self.args.install:
@@ -319,7 +320,7 @@ class Main(object):
                                        capture_output=True)
                     if p.returncode == 0 or 'password' in p.stderr.decode():
                         print("User is in sudoers, using sudo command")
-                        Logger.debug(f"Running command: sudo dpkg -i {path_to_deb}", self.args)
+                        self.logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
 
                         subprocess.run(
                             ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
@@ -330,7 +331,7 @@ class Main(object):
                         is_installed = True
                     else:
                         print("User is not in sudoers, using su instead")
-                        Logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}", self.args)
+                        self.logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
 
                         subprocess.run(
                             f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)
@@ -345,21 +346,21 @@ class Main(object):
     def run(self, tmpfolder, dpkg_in_path, data_dir, is_extracted):
         # Unzip the IPA file
         if not is_extracted:
-            Logger.log(f"Unzipping IPA...", color=Colors.pink)
+            self.logger.log(f"Unzipping IPA...", color=Colors.pink)
             with zipfile.ZipFile(f"{tmpfolder}/app.ipa", 'r') as f:
                 os.makedirs(f"{tmpfolder}/app", exist_ok=False)
                 f.extractall(f"{tmpfolder}/app")
             print()
 
         # Read data from the plist
-        Logger.log(f"Reading plist...", color=Colors.pink)
+        self.logger.log(f"Reading plist...", color=Colors.pink)
         if Path(f"{tmpfolder}/app/Payload").exists():
             for fname in os.listdir(path=f"{tmpfolder}/app/Payload"):
                 if fname.endswith(".app"):
                     app_dir = fname
             print("Found app directory!")
         else:
-            Logger.error(f"IPA/deb is not valid!")
+            self.logger.error(f"IPA/deb is not valid!")
             exit(1)
 
         pre_app_path = os.path.join(f"{tmpfolder}/app/Payload", app_dir)
@@ -392,7 +393,7 @@ class Main(object):
         print()
 
         # Get the deb file ready
-        Logger.log(f"Preparing deb file...", color=Colors.pink)
+        self.logger.log(f"Preparing deb file...", color=Colors.pink)
         print("Making directories...")
         os.makedirs(f"{tmpfolder}/deb/Applications", exist_ok=False)
         os.makedirs(f"{tmpfolder}/deb/DEBIAN", exist_ok=False)
@@ -416,7 +417,7 @@ class Main(object):
         print()
 
         # Sign the app
-        Logger.log(f"Signing app...", color=Colors.pink)
+        self.logger.log(f"Signing app...", color=Colors.pink)
         copier.copy_entitlements(f"{tmpfolder}/entitlements.plist")
         if self.in_package:
             cert_path = self.utils.get_resource_path(__name__, "data/certificate.p12")
@@ -437,15 +438,15 @@ class Main(object):
                 ldid_cmd = 'ldid'
             else:
                 ldid_cmd = f'{data_dir}/ldid'
-            Logger.debug(
-                f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'", self.args)
+            self.logger.debug(
+                f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
         print()
 
         # Package the deb file
-        Logger.log(f"Packaging the deb file...", color=Colors.pink)
+        self.logger.log(f"Packaging the deb file...", color=Colors.pink)
         if self.args.output:
             path_to_deb = self.args.output
         elif self.in_package:
@@ -458,13 +459,13 @@ class Main(object):
         dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {path_to_deb}"
 
         if dpkg_in_path:
-            Logger.debug(f"Path to deb file: {path_to_deb}", self.args)
-            Logger.debug(f"Running command: {dpkg_cmd}", self.args)
+            self.logger.debug(f"Path to deb file: {path_to_deb}")
+            self.logger.debug(f"Running command: {dpkg_cmd}")
 
             subprocess.run(
                 ["dpkg-deb", "-Zxz", "--root-owner-group", "-b", f"{tmpfolder}/deb", f"{path_to_deb}"], stdout=DEVNULL)
         else:
-            Logger.debug(f"Running command: {data_dir}/{dpkg_cmd}", self.args)
+            self.logger.debug(f"Running command: {data_dir}/{dpkg_cmd}")
 
             subprocess.run(
                 [f"{data_dir}/dpkg-deb", "-Zxz", "--root-owner-group", "-b", f"{tmpfolder}/deb", f"{path_to_deb}"],
