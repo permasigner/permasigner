@@ -69,7 +69,7 @@ class DpkgDeb(object):
         Logger.debug(f"Running command: tar -xf data.tar.xz", self.args)
         subprocess.run(f"tar -xf data.tar.xz".split(),
                        stdout=DEVNULL)
-        
+
         copy("usr/bin/dpkg-deb", "dpkg-deb")
         Logger.debug(f"Copied dpkg-deb to project directory", self.args)
 
@@ -157,4 +157,3 @@ class Ldid(object):
             except (requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
                 Logger.error(f"ldid download URL is not reachable. Error: {e}")
                 exit(1)
-                
