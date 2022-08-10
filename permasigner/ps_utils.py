@@ -27,7 +27,8 @@ class Utils(object):
                 self.logger.debug(f"Checking for ldid on iOS")
 
                 if os.path.exists("/.bootstrapped"):
-                    self.logger.error("Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
+                    self.logger.error(
+                        "Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
                     print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
                     exit(1)
 

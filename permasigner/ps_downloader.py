@@ -15,7 +15,7 @@ class Hash(object):
     def __init__(self, args):
         self.args = args
         self.logger = Logger(self.args)
-        
+
     def get_hash(self, filePath, url):
         m = hashlib.md5()
         if url is None:
@@ -101,7 +101,7 @@ class Ldid(object):
         self.utils = utils
         self.data_dir = data_dir
         self.exists = exists
-        
+
         self.logger = Logger(self.args)
         self.hash = Hash(self.args)
 

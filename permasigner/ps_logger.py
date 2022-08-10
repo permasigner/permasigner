@@ -27,7 +27,7 @@ class Colors:
 class Logger:
     def __init__(self, args):
         self.args = args
-        
+
     def log(self, message, color=None):
         if color is None:
             print(f"[*] {message}")

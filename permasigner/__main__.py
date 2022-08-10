@@ -228,7 +228,7 @@ class Main(object):
 
             if is_installed or not self.args.folder:
                 self.logger.log(f"The application was installed to your device, no further steps are required!",
-                           color=Colors.green)
+                                color=Colors.green)
             else:
                 self.logger.log(
                     f"Copy the newly created deb from the output folder to your jailbroken iDevice and install it!",
