@@ -37,7 +37,7 @@ class Utils(object):
 
                     return True
                 else:
-                    Logger.error("[-] ldid is required on iOS, but it is not installed. Please install it from Procursus.")
+                    Logger.error("ldid is required on iOS, but it is not installed. Please install it from Procursus.")
                     exit(1)
 
             # It seems like a better idea to force download ldid on macOS and Linux to make sure
