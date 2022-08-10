@@ -1,13 +1,13 @@
-import subprocess
 import time
 from getpass import getpass
+from threading import Thread
 
 from paramiko.client import AutoAddPolicy, SSHClient
 from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
 from scp import SCPClient
-from subprocess import DEVNULL, PIPE
 
 from .ps_logger import Logger, Colors
+from .ps_tcprelay import Relayer
 
 
 class Installer:
@@ -17,11 +17,9 @@ class Installer:
         self.logger = Logger(self.args)
 
     def install_deb(self):
-        self.logger.log("Relaying TCP connection", color=Colors.pink)
-        self.logger.debug(f"Running command: ./permasigner/ps_tcprelay.py -t 22:2222")
-
-        relay = subprocess.Popen(
-            './permasigner/ps_tcprelay.py -t 22:2222'.split(), stdout=DEVNULL, stderr=PIPE)
+        relayer = Relayer(22, 2222, 'localhost', self.args)
+        thread = Thread(target=relayer.relay, daemon=True)
+        thread.start()
         time.sleep(1)
         try:
             password = getpass(
@@ -53,7 +51,6 @@ class Installer:
                 if "password" in out:
                     command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
                     self.logger.debug(f"Running command: {command}")
-
                     stdin, stdout, stderr = client.exec_command(
                         f"{command}", get_pty=True)
                     time.sleep(0.2)
@@ -73,7 +70,6 @@ class Installer:
                 elif status == 0:
                     command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
                     self.logger.debug(f"Running command: {command}")
-
                     output = client.exec_command(f'{command}')[1]
                     self.logger.log("Installing... this may take some time", color=Colors.pink)
                     self.logger.debug(output.read().decode())
@@ -98,6 +94,7 @@ class Installer:
                         self.logger.debug(streams[1].read().decode())
                         streams = client.exec_command(
                             "su root -c 'apt-get install -f'", get_pty=True)
+                        time.sleep(0.2)
                         streams[0].write(f'{password}\n')
                         streams[0].flush()
                         self.logger.debug(streams[1].channel.recv(2048).decode())
@@ -113,5 +110,3 @@ class Installer:
         except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
             self.logger.error(e)
             return False
-        finally:
-            relay.kill()

@@ -1,5 +1,4 @@
 import os
-import pkgutil
 from pathlib import Path
 from shutil import copy, copytree, rmtree
 import plistlib
