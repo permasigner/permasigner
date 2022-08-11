@@ -352,6 +352,8 @@ class Main(object):
 
                 if self.args.bundleid:
                     app_bundle = self.args.bundleid
+                elif "science.xnu.undecimus" in info["CFBundleIdentifier"]:
+                    app_bundle = "8H69ZMY835.science.xnu.undecimus.8H69ZMY835"
                 else:
                     app_bundle = info["CFBundleIdentifier"]
 

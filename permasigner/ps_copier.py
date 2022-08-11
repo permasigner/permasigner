@@ -94,7 +94,7 @@ class Copier:
                 filedata = file.read()
 
         # Replace the target string
-        if self.app_bundle == "science.xnu.undecimus":
+        if "science.xnu.undecimus" in self.app_bundle:
             filedata = filedata.replace("{APP_BUNDLE}", "8H69ZMY835.science.xnu.undecimus.8H69ZMY835")
             filedata = filedata.replace("{APP_KEYCHAIN_GROUPS}", "8H69ZMY835.*")
         else:
