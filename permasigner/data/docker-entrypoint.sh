@@ -11,10 +11,6 @@ if [ ! -z "$DEBUG" ]; then
     ARGS="$ARGS -d"
 fi
 
-if [ ! -z "$NOINSTALL" ]; then
-    ARGS="$ARGS -n"
-fi
-
 if [ ! -z "$INSTALL" ]; then
     ARGS="$ARGS -i"
 fi
