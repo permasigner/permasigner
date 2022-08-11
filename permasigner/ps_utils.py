@@ -44,10 +44,10 @@ class Utils(object):
             if which("ldid") is not None:
                 if "procursus" not in subprocess.getoutput(["ldid"]):
                     return False
-                
+
                 self.logger.debug(f"Procursus ldid is installed")
                 return True
-                
+
             return False
 
         return which(cmd) is not None
