@@ -1,9 +1,9 @@
 import sys
-import subprocess
 import platform
 import os
 import importlib
 from importlib import util
+from shutil import which
 
 from .ps_logger import Logger
 
@@ -44,7 +44,7 @@ class Utils(object):
             # they have the proper version all the time. A lot of ugly code is necessary for it.
             return False
 
-        return subprocess.getstatusoutput(f"which {cmd}")[0] == 0
+        return which(cmd) is not None
 
     def is_macos(self):
         if platform.machine().startswith("i"):

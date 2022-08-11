@@ -5,7 +5,7 @@ pycodestyle==2.9.1
 idna==3.3
 charset-normalizer==2.1.0
 certifi==2022.6.15
-autopep8==1.6.0
+autopep8==1.7.0
 
 # Packages only required for desktop
 scp==0.14.4 ; sys_platform == "linux" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")

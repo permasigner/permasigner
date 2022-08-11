@@ -5,6 +5,7 @@ from subprocess import DEVNULL
 import os
 import platform
 from shutil import copy, rmtree, move
+from requests.exceptions import RequestException, ConnectionError
 
 from .ps_utils import Utils
 from .ps_logger import Logger, Colors
@@ -32,7 +33,7 @@ class Hash(object):
                 for data in res.iter_content(4096):
                     m.update(data)
                 return m.hexdigest(), res
-            except (requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
+            except (ConnectionError, RequestException) as e:
                 self.logger.error(f"ldid download URL is not reachable. Error: {e}")
                 return m.hexdigest(), None
 
@@ -54,9 +55,9 @@ class DpkgDeb(object):
         arch = self.get_arch()
         self.logger.debug(f"Downloading dpkg-deb for {arch} architecture.")
 
-        res = requests.get(
-            f"http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.21.9_{arch}.deb", stream=True)
         try:
+            res = requests.get(
+                f"http://ftp.us.debian.org/debian/pool/main/d/dpkg/dpkg_1.21.9_{arch}.deb", stream=True)
             if res.status_code == 200:
                 with open(f"dpkg.deb", "wb") as f:
                     f.write(res.content)
@@ -64,7 +65,7 @@ class DpkgDeb(object):
             else:
                 self.logger.error(f"dpkg download URL is not reachable. Status code: {res.status_code}")
                 exit(1)
-        except requests.exceptions.RequestException as err:
+        except (ConnectionError, RequestException) as err:
             self.logger.error(f"dpkg download URL is not reachable. Error: {err}")
             exit(1)
 
@@ -161,6 +162,6 @@ class Ldid(object):
             try:
                 res = requests.get(url, stream=True)
                 self.process(res)
-            except (requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
-                self.logger.error(f"ldid download URL is not reachable. Error: {e}")
+            except (ConnectionError, RequestException) as err:
+                self.logger.error(f"ldid download URL is not reachable. Error: {err}")
                 exit(1)

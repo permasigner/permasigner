@@ -18,14 +18,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
+import os
 import socket
 import struct
 import plistlib
-import select
-import sys
 import socketserver
-from optparse import OptionParser
+from select import select
+
+from permasigner.ps_logger import Logger, Colors
 
 
 class MuxError(Exception):
@@ -172,9 +172,9 @@ class PlistProtocol(BinaryProtocol):
 class MuxConnection(object):
     def __init__(self, socketpath, protoclass):
         self.socketpath = socketpath
-        if sys.platform in ['win32', 'cygwin']:
+        if os.environ.get("HOST_IS_WINDOWS", False):
             family = socket.AF_INET
-            address = ('127.0.0.1', 27015)
+            address = ('host.docker.internal', 27015)
         else:
             family = socket.AF_UNIX
             address = self.socketpath
@@ -227,8 +227,8 @@ class MuxConnection(object):
         if self.proto.connected:
             raise MuxError(
                 "Socket is connected, cannot process listener events")
-        rlo, wlo, xlo = select.select([self.socket.sock], [], [
-                                      self.socket.sock], timeout)
+        rlo, wlo, xlo = select([self.socket.sock], [], [
+            self.socket.sock], timeout)
         if xlo:
             self.socket.sock.close()
             raise MuxError("Exception in listener socket")
@@ -248,20 +248,15 @@ class MuxConnection(object):
 
 
 class USBMux(object):
-    def __init__(self, socketpath=None):
-        if socketpath is None:
-            if sys.platform == 'darwin':
-                socketpath = "/var/run/usbmuxd"
-            else:
-                socketpath = "/var/run/usbmuxd"
+    def __init__(self, socketpath):
         self.socketpath = socketpath
-        self.listener = MuxConnection(socketpath, BinaryProtocol)
+        self.listener = MuxConnection(self.socketpath, BinaryProtocol)
         try:
             self.listener.listen()
             self.version = 0
             self.protoclass = BinaryProtocol
         except MuxVersionError:
-            self.listener = MuxConnection(socketpath, PlistProtocol)
+            self.listener = MuxConnection(self.socketpath, PlistProtocol)
             self.listener.listen()
             self.protoclass = PlistProtocol
             self.version = 1
@@ -285,123 +280,98 @@ class SocketRelay(object):
 
     def handle(self):
         while True:
-            rlist = []
-            wlist = []
-            xlist = [self.a, self.b]
-            if self.atob:
-                wlist.append(self.b)
-            if self.btoa:
-                wlist.append(self.a)
-            if len(self.atob) < self.maxbuf:
-                rlist.append(self.a)
-            if len(self.btoa) < self.maxbuf:
-                rlist.append(self.b)
-            rlo, wlo, xlo = select.select(rlist, wlist, xlist)
-            if xlo:
+            try:
+                rlist = []
+                wlist = []
+                xlist = [self.a, self.b]
+                if self.atob:
+                    wlist.append(self.b)
+                if self.btoa:
+                    wlist.append(self.a)
+                if len(self.atob) < self.maxbuf:
+                    rlist.append(self.a)
+                if len(self.btoa) < self.maxbuf:
+                    rlist.append(self.b)
+                rlo, wlo, xlo = select(rlist, wlist, xlist)
+                if xlo:
+                    return
+                if self.a in wlo:
+                    n = self.a.send(self.btoa)
+                    self.btoa = self.btoa[n:]
+                if self.b in wlo:
+                    n = self.b.send(self.atob)
+                    self.atob = self.atob[n:]
+                if self.a in rlo:
+                    s = self.a.recv(self.maxbuf - len(self.atob))
+                    if not s:
+                        return
+                    self.atob += s
+                if self.b in rlo:
+                    s = self.b.recv(self.maxbuf - len(self.btoa))
+                    if not s:
+                        return
+                    self.btoa += s
+            except ConnectionResetError:
                 return
-            if self.a in wlo:
-                n = self.a.send(self.btoa)
-                self.btoa = self.btoa[n:]
-            if self.b in wlo:
-                n = self.b.send(self.atob)
-                self.atob = self.atob[n:]
-            if self.a in rlo:
-                s = self.a.recv(self.maxbuf - len(self.atob))
-                if not s:
-                    return
-                self.atob += s
-            if self.b in rlo:
-                s = self.b.recv(self.maxbuf - len(self.btoa))
-                if not s:
-                    return
-                self.btoa += s
 
 
 class TCPRelay(socketserver.BaseRequestHandler):
     def handle(self):
-        print(f"Incoming connection to {self.server.server_address[1]}")
-        mux = USBMux(options.sockpath)
-        print("Waiting for devices...")
+        logger = Logger(self.server.args)
+        logger.debug(f"Incoming connection to {self.server.server_address[1]}")
+        mux = USBMux(self.server.socketpath)
+        logger.debug("Waiting for devices...")
         if not mux.devices:
             mux.process(1.0)
         if not mux.devices:
-            print("No device found")
+            logger.debug("No device found")
             self.request.close()
             return
         dev = mux.devices[0]
-        print(f"Connecting to device {str(dev)}")
-        dsock = mux.connect(dev, server.rport)
+        logger.debug(f"Connecting to device {str(dev)}")
+        dsock = mux.connect(dev, self.server.server_address[1])
         lsock = self.request
-        print("Connection established, relaying data")
+        logger.debug("Connection established, relaying data")
         try:
-            fwd = SocketRelay(dsock, lsock, server.bufsize * 1024)
+            fwd = SocketRelay(dsock, lsock, 131072)
             fwd.handle()
         finally:
             dsock.close()
             lsock.close()
-        print("Connection closed")
+        logger.debug("Connection closed")
 
 
 class TCPServer(socketserver.TCPServer):
     allow_reuse_address = True
 
 
-class ThreadedTCPServer(socketserver.ThreadingMixIn, TCPServer):
-    pass
+class Relayer(object):
+    def __init__(self, rport, lport, args, host=None, socketpath=None):
+        self.rport = rport
+        self.lport = lport
+        self.args = args
+        if host is None:
+            host = 'localhost'
+        self.host = host
+        if socketpath is None:
+            socketpath = '/var/run/usbmuxd'
+        self.socketpath = socketpath
+        self.logger = Logger(self.args)
 
+    def relay(self):
+        self.logger.log(f"Forwarding local port {self.lport} to remote port {self.rport}", color=Colors.pink)
+        server = TCPServer((self.host, self.lport), TCPRelay)
+        server.rport = self.rport
+        server.socketpath = self.socketpath
+        server.args = self.args
+        servers = [server]
 
-if __name__ == '__main__':
-    HOST = "localhost"
+        alive = True
 
-    parser = OptionParser(
-        usage="usage: %prog [OPTIONS] RemotePort[:LocalPort] [RemotePort[:LocalPort]]...")
-    parser.add_option("-t", "--threaded", dest='threaded', action='store_true', default=False,
-                      help="use threading to handle multiple connections at once")
-    parser.add_option("-b", "--bufsize", dest='bufsize', action='store', metavar='KILOBYTES', type='int', default=128,
-                      help="specify buffer size for socket forwarding")
-    parser.add_option("-s", "--socket", dest='sockpath', action='store', metavar='PATH', type='str', default=None,
-                      help="specify the path of the usbmuxd socket")
-
-    options, args = parser.parse_args()
-
-    serverclass = TCPServer
-    if options.threaded:
-        serverclass = ThreadedTCPServer
-
-    if len(args) == 0:
-        parser.print_help()
-        sys.exit(1)
-
-    ports = []
-
-    for arg in args:
-        try:
-            if ':' in arg:
-                rport, lport = arg.split(":")
-                rport = int(rport)
-                lport = int(lport)
-                ports.append((rport, lport))
-            else:
-                ports.append((int(arg), int(arg)))
-        except:
-            parser.print_help()
-            sys.exit(1)
-
-    servers = []
-
-    for rport, lport in ports:
-        print(f"Forwarding local port {lport} to remote port {rport}")
-        server = serverclass((HOST, lport), TCPRelay)
-        server.rport = rport
-        server.bufsize = options.bufsize
-        servers.append(server)
-
-    alive = True
-
-    while alive:
-        try:
-            rl, wl, xl = select.select(servers, [], [])
-            for server in rl:
-                server.handle_request()
-        except:
-            alive = False
+        while alive:
+            try:
+                rl, wl, xl = select(servers, [], [])
+                for serv in rl:
+                    serv.handle_request()
+            except:
+                alive = False

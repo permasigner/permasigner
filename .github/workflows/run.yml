@@ -30,7 +30,7 @@ jobs:
 
       # Run script
       - name: Run script
-        run: python main.py -u ${{ github.event.inputs.ipa }} -n -d
+        run: python main.py -u ${{ github.event.inputs.ipa }} -d
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3

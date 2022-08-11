@@ -3,12 +3,20 @@
 ARGS=""
 export VERSION=$(cat githash)
 
+if [ ! -z "$WINDOWS" ]; then
+    export HOST_IS_WINDOWS=true
+fi
+
 if [ ! -z "$URL" ]; then
     ARGS="$ARGS -u $URL"
 fi
 
 if [ ! -z "$DEBUG" ]; then
     ARGS="$ARGS -d"
+fi
+
+if [ ! -z "$INSTALL" ]; then
+    ARGS="$ARGS -i"
 fi
 
 if [ ! -z "$BUNDLEID" ]; then
@@ -31,6 +39,10 @@ if [ ! -z "$FOLDER" ]; then
     ARGS="$ARGS -f $FOLDER"
 fi
 
+if [ ! -z "$TCPRELAY" ]; then
+    ARGS="$ARGS -t $TCPRELAY"
+fi
+
 echo "Running Permasigner with args:$ARGS"
 echo ""
-python -u main.py $ARGS -n
+python -u main.py $ARGS

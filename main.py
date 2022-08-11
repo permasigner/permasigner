@@ -16,8 +16,6 @@ if __name__ == '__main__':
                         help="the direct local path of the IPA to be signed")
     parser.add_argument('-i', '--install', action='store_true',
                         help="installs the application to your device")
-    parser.add_argument('-n', '--noinstall',
-                        action='store_true', help="skips the install prompt")
     parser.add_argument('-o', '--output', type=str,
                         help="specify output file")
     parser.add_argument('-b', '--bundleid', type=str,
@@ -32,6 +30,8 @@ if __name__ == '__main__':
                         help="specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])")
     parser.add_argument('-f', '--folder', type=str,
                         help="sign multiple IPAs from a direct path to a folder")
+    parser.add_argument('-t', '--tcprelay', type=str,
+                        help="args for tcprelay rport:lport:host:socketpath (ex: 22:2222:localhost:/var/run/usbmuxd)")
     parser.add_argument('-e', '--entitlements', type=str,
                         help="path to entitlements file")
     args = parser.parse_args()
