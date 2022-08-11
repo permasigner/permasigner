@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 from shutil import copy, copytree, rmtree, which
 import plistlib
+from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IXUSR, S_IXGRP, S_IROTH, S_IXOTH
+
 import requests
 from urllib.parse import urlparse
 import zipfile
@@ -384,14 +386,12 @@ class Main(object):
         full_app_path = os.path.join(f"{tmpfolder}/deb/Applications", app_dir)
         copytree(pre_app_path, full_app_path)
         print("Changing deb file scripts permissions...")
-        subprocess.run(
-            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postrm".split(), stdout=DEVNULL)
-        subprocess.run(
-            f"chmod 0755 {tmpfolder}/deb/DEBIAN/postinst".split(), stdout=DEVNULL)
+        os.chmod(f"{tmpfolder}/deb/DEBIAN/postrm", 256 | 128 | 64 | 32 | 8 | 4 | 1)
+        os.chmod(f"{tmpfolder}/deb/DEBIAN/postinst", 256 | 128 | 64 | 32 | 8 | 4 | 1)
         if app_executable is not None:
             print("Changing app executable permissions...")
             exec_path = os.path.join(full_app_path, app_executable)
-            subprocess.run(['chmod', '0755', f'{exec_path}'])
+            os.chmod(f'{exec_path}', 256 | 128 | 64 | 32 | 8 | 4 | 1)
         print()
 
         # Sign the app

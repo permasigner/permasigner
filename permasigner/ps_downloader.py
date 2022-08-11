@@ -1,9 +1,9 @@
-import hashlib
-import requests
-import subprocess
-from subprocess import DEVNULL
 import os
+import requests
+import hashlib
+import tarfile
 import platform
+import unix_ar
 from shutil import copy, rmtree, move
 from requests.exceptions import RequestException, ConnectionError
 
@@ -69,29 +69,17 @@ class DpkgDeb(object):
             self.logger.error(f"dpkg download URL is not reachable. Error: {err}")
             exit(1)
 
-        self.logger.debug(f"Running command: ar x dpkg.deb")
-        subprocess.run(f"ar x dpkg.deb".split(), stdout=subprocess.DEVNULL)
-        self.logger.debug(f"Running command: tar -xf data.tar.xz")
-        subprocess.run(f"tar -xf data.tar.xz".split(),
-                       stdout=DEVNULL)
-
-        copy("usr/bin/dpkg-deb", "dpkg-deb")
-        self.logger.debug(f"Copied dpkg-deb to project directory")
-
-        self.logger.debug(f"Running command: chmod +x dpkg-deb")
-        subprocess.run(f"chmod +x dpkg-deb".split(), stdout=subprocess.DEVNULL)
-        os.remove("data.tar.xz")
-        os.remove("control.tar.xz")
-        os.remove("debian-binary")
-        os.remove("dpkg.deb")
-        rmtree("etc")
-        rmtree("sbin")
-        rmtree("usr")
-        rmtree("var")
-        self.logger.debug(f"Cleaned up extracted content")
-
-        self.logger.debug(f"Moving dpkg-deb to {self.data_dir}")
-        move("dpkg-deb", f"{self.data_dir}/dpkg-deb")
+        ar_file = unix_ar.open('dpkg.deb')
+        with ar_file.open('data.tar.xz') as tarball:
+            with tarfile.open(fileobj=tarball) as tar_file:
+                tar_file.extract('./usr/bin/dpkg-deb')
+        ar_file.close()
+        self.logger.debug(f"Extracted dpkg-deb")
+        os.chmod('usr/bin/dpkg-deb', 256 | 128 | 64 | 32 | 8 | 4 | 1)
+        copy("usr/bin/dpkg-deb", f"{self.data_dir}/dpkg-deb")
+        self.logger.debug(f"Copied dpkg-deb to {self.data_dir}")
+        rmtree('usr')
+        self.logger.debug(f"Cleaned up")
 
 
 class Ldid(object):
@@ -128,7 +116,7 @@ class Ldid(object):
 
             self.logger.debug("Running command: chmod +x ldid")
             self.logger.debug(f"Moving ldid to {self.data_dir}")
-            subprocess.run(f"chmod +x ldid".split(), stdout=DEVNULL)
+            os.chmod('ldid', S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
             move("ldid", f"{self.data_dir}/ldid")
         else:
             if self.exists:
