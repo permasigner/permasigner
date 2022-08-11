@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from shutil import copy, copytree, rmtree, which
 import plistlib
-from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IXUSR, S_IXGRP, S_IROTH, S_IXOTH
 
 import requests
 from urllib.parse import urlparse

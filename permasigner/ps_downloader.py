@@ -114,10 +114,9 @@ class Ldid(object):
                 self.logger.debug("Removing outdated version of ldid")
                 os.remove(f"{self.data_dir}/ldid")
 
-            self.logger.debug("Running command: chmod +x ldid")
-            self.logger.debug(f"Moving ldid to {self.data_dir}")
-            os.chmod('ldid', S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
+            os.chmod('ldid', 256 | 128 | 64 | 32 | 8 | 4 | 1)
             move("ldid", f"{self.data_dir}/ldid")
+            self.logger.debug(f"Moved ldid to {self.data_dir}")
         else:
             if self.exists:
                 self.logger.log('Reusing the existing ldid', color=Colors.pink)
