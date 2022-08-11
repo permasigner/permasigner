@@ -12,7 +12,7 @@
     <true/>
     <key>keychain-access-groups</key>
     <array>
-      <string>{APP_BUNDLE}</string>
+      <string>{APP_KEYCHAIN_GROUPS}</string>
     </array>
     <key>application-identifier</key>
     <string>{APP_BUNDLE}</string>
