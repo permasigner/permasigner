@@ -43,7 +43,7 @@ class Installer:
         with SSHClient() as client:
             client.set_missing_host_key_policy(AutoAddPolicy())
             try:
-                client.connect(host,
+                client.connect(host or 'localhost',
                                port=lport,
                                username='mobile',
                                password=f'{password}',

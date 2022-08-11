@@ -3,6 +3,10 @@
 ARGS=""
 export VERSION=$(cat githash)
 
+if [ ! -z "$WINDOWS" ]; then
+    export HOST_IS_WINDOWS=true
+fi
+
 if [ ! -z "$URL" ]; then
     ARGS="$ARGS -u $URL"
 fi

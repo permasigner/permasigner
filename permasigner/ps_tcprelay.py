@@ -18,11 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
+import os
 import socket
 import struct
 import plistlib
 import socketserver
+import sys
 from select import select
 
 from permasigner.ps_logger import Logger, Colors
@@ -172,8 +173,12 @@ class PlistProtocol(BinaryProtocol):
 class MuxConnection(object):
     def __init__(self, socketpath, protoclass):
         self.socketpath = socketpath
-        family = socket.AF_UNIX
-        address = self.socketpath
+        if os.environ.get("HOST_IS_WINDOWS", False):
+            family = socket.AF_INET
+            address = ('127.0.0.1', 27015)
+        else:
+            family = socket.AF_UNIX
+            address = self.socketpath
         self.socket = SafeStreamSocket(address, family)
         self.proto = protoclass(self.socket)
         self.pkttag = 1
