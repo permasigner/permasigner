@@ -16,6 +16,7 @@ on:
       - 'docs/**'
     branches:
       - "main"
+      - "native"
   pull_request:
     paths-ignore:
       - 'README.md'
