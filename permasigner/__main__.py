@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from shutil import copy, copytree, rmtree
+from shutil import copy, copytree, rmtree, which
 import plistlib
 import requests
 from urllib.parse import urlparse
@@ -280,7 +280,7 @@ class Main(object):
                 print()
 
         if self.utils.is_macos():
-            if not subprocess.getstatusoutput("which dpkg")[0] == 0:
+            if which('dpkg') is None:
                 self.logger.debug(f"On macOS x86_64, dpkg not found...")
                 self.logger.error(
                     "dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
