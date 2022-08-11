@@ -173,12 +173,8 @@ class PlistProtocol(BinaryProtocol):
 class MuxConnection(object):
     def __init__(self, socketpath, protoclass):
         self.socketpath = socketpath
-        if sys.platform in ['win32', 'cygwin']:
-            family = socket.AF_INET
-            address = ('127.0.0.1', 27015)
-        else:
-            family = socket.AF_UNIX
-            address = self.socketpath
+        family = socket.AF_UNIX
+        address = self.socketpath
         self.socket = SafeStreamSocket(address, family)
         self.proto = protoclass(self.socket)
         self.pkttag = 1
@@ -249,8 +245,8 @@ class MuxConnection(object):
 
 
 class USBMux(object):
-    def __init__(self):
-        self.socketpath = "/var/run/usbmuxd"
+    def __init__(self, socketpath):
+        self.socketpath = socketpath
         self.listener = MuxConnection(self.socketpath, BinaryProtocol)
         try:
             self.listener.listen()
@@ -317,7 +313,7 @@ class TCPRelay(socketserver.BaseRequestHandler):
     def handle(self):
         logger = Logger(self.server.args)
         logger.debug(f"Incoming connection to {self.server.server_address[1]}")
-        mux = USBMux()
+        mux = USBMux(self.server.socketpath)
         logger.debug("Waiting for devices...")
         if not mux.devices:
             mux.process(1.0)

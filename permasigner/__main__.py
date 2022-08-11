@@ -299,21 +299,10 @@ class Main(object):
                     "Would you like install the application to your device (must be connected)? [y, n]: ").lower()
 
             if option == 'y' or self.args.install:
-                if self.utils.is_macos() or self.utils.is_linux():
-                    try:
-                        mux = USBMux()
-                        if not mux.devices:
-                            mux.process(1.0)
-                        if not mux.devices:
-                            print("Did not find a connected device")
-                        else:
-                            print("Found a connected device")
-                            installer = Installer(self.args, path_to_deb)
-                            is_installed = installer.install_deb()
-                    except ConnectionRefusedError:
-                        print("Did not find a connected device")
-                        pass
-                elif self.utils.is_ios():
+                if not self.utils.is_ios():
+                    installer = Installer(self.args, path_to_deb)
+                    is_installed = installer.install_deb()
+                else:
                     print("Checking if user is in sudoers")
                     p = subprocess.run('sudo -nv'.split(),
                                        capture_output=True)
