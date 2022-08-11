@@ -339,13 +339,15 @@ class TCPServer(socketserver.TCPServer):
 
 
 class Relayer(object):
-    def __init__(self, rport, lport, host, args, socketpath=None):
+    def __init__(self, rport, lport, args, host=None, socketpath=None):
         self.rport = rport
         self.lport = lport
-        self.host = host
         self.args = args
+        if host is None:
+            host = 'localhost'
+        self.host = host
         if socketpath is None:
-            socketpath = "/var/run/usbmuxd"
+            socketpath = '/var/run/usbmuxd'
         self.socketpath = socketpath
         self.logger = Logger(self.args)
 

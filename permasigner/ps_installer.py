@@ -17,7 +17,20 @@ class Installer:
         self.logger = Logger(self.args)
 
     def install_deb(self):
-        relayer = Relayer(22, 2222, 'localhost', self.args)
+        if self.args.tcprelay:
+            split = self.args.tcprelay.split(':')
+            values = dict(enumerate(split))
+            rport = int(values.get(0))
+            lport = int(values.get(1))
+            host = values.get(2)
+            socketpath = values.get(3)
+        else:
+            rport = 22
+            lport = 2222
+            host = 'localhost'
+            socketpath = '/var/run/usbmuxd'
+
+        relayer = Relayer(rport, lport, self.args, host, socketpath)
         thread = Thread(target=relayer.relay, daemon=True)
         thread.start()
         time.sleep(1)
@@ -30,8 +43,8 @@ class Installer:
         with SSHClient() as client:
             client.set_missing_host_key_policy(AutoAddPolicy())
             try:
-                client.connect('localhost',
-                               port=2222,
+                client.connect(host,
+                               port=lport,
                                username='mobile',
                                password=f'{password}',
                                timeout=5000,
