@@ -175,7 +175,7 @@ class MuxConnection(object):
         self.socketpath = socketpath
         if os.environ.get("HOST_IS_WINDOWS", False):
             family = socket.AF_INET
-            address = ('127.0.0.1', 27015)
+            address = ('host.docker.internal', 27015)
         else:
             family = socket.AF_UNIX
             address = self.socketpath
