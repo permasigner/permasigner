@@ -16,8 +16,6 @@ if __name__ == '__main__':
                         help="the direct local path of the IPA to be signed")
     parser.add_argument('-i', '--install', action='store_true',
                         help="installs the application to your device")
-    parser.add_argument('-n', '--noinstall',
-                        action='store_true', help="skips the install prompt")
     parser.add_argument('-o', '--output', type=str,
                         help="specify output file")
     parser.add_argument('-b', '--bundleid', type=str,

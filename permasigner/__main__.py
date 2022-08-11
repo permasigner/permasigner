@@ -172,7 +172,7 @@ class Main(object):
                     self.logger.log(
                         "Running in Docker container, please place an IPA in the 'ipas' folder, then put the name of the file below.",
                         color=Colors.orange)
-                    ipa_name = input(Colors.orange + '    IPA name (ex. Taurine.ipa, DemoApp.ipa): ' + Colors.reset)
+                    ipa_name = self.logger.ask('    IPA name (ex. Taurine.ipa, DemoApp.ipa): ')
                     path = f"/permasigner/ipas/{ipa_name}"
                 else:
                     path = self.logger.ask("Paste in the path to an IPA in your file system: ")
@@ -219,8 +219,8 @@ class Main(object):
             if not self.args.folder:
                 path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir, is_extracted)
 
-                # Prompt to install on device
-                is_installed = self.prompt_install(path_to_deb)
+                if self.args.install:
+                    is_installed = self.install(path_to_deb)
 
             # Done, print end message
             self.logger.log(f"We are finished!", color=Colors.green)
@@ -286,48 +286,39 @@ class Main(object):
                     "dpkg is not installed and is required on macOS. Install it though brew or Procursus to continue.")
                 exit(1)
 
-    def prompt_install(self, path_to_deb):
+    def install(self, path_to_deb):
         if not self.utils.is_ios():
             from .ps_installer import Installer
-            from .ps_tcprelay import USBMux
 
-        is_installed = False
-        if not self.args.noinstall:
-            option = 'n'
-            if not self.args.install:
-                option = self.logger.ask(
-                    "Would you like install the application to your device (must be connected)? [y, n]: ").lower()
+        if not self.utils.is_ios():
+            installer = Installer(self.args, path_to_deb)
+            is_installed = installer.install_deb()
+        else:
+            print("Checking if user is in sudoers")
+            p = subprocess.run('sudo -nv'.split(),
+                               capture_output=True)
+            if p.returncode == 0 or 'password' in p.stderr.decode():
+                print("User is in sudoers, using sudo command")
+                self.logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
 
-            if option == 'y' or self.args.install:
-                if not self.utils.is_ios():
-                    installer = Installer(self.args, path_to_deb)
-                    is_installed = installer.install_deb()
-                else:
-                    print("Checking if user is in sudoers")
-                    p = subprocess.run('sudo -nv'.split(),
-                                       capture_output=True)
-                    if p.returncode == 0 or 'password' in p.stderr.decode():
-                        print("User is in sudoers, using sudo command")
-                        self.logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
+                subprocess.run(
+                    ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
 
-                        subprocess.run(
-                            ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
+                subprocess.run(
+                    ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
 
-                        subprocess.run(
-                            ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
+                is_installed = True
+            else:
+                print("User is not in sudoers, using su instead")
+                self.logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
 
-                        is_installed = True
-                    else:
-                        print("User is not in sudoers, using su instead")
-                        self.logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
+                subprocess.run(
+                    f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)
 
-                        subprocess.run(
-                            f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)
+                subprocess.run(
+                    "su root -c 'apt-get install -f'".split(), capture_output=True)
 
-                        subprocess.run(
-                            "su root -c 'apt-get install -f'".split(), capture_output=True)
-
-                        is_installed = True
+                is_installed = True
 
         return is_installed
 

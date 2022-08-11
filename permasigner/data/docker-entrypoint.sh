@@ -11,6 +11,14 @@ if [ ! -z "$DEBUG" ]; then
     ARGS="$ARGS -d"
 fi
 
+if [ ! -z "$NOINSTALL" ]; then
+    ARGS="$ARGS -n"
+fi
+
+if [ ! -z "$INSTALL" ]; then
+    ARGS="$ARGS -i"
+fi
+
 if [ ! -z "$BUNDLEID" ]; then
     ARGS="$ARGS -b $BUNDLEID"
 fi
@@ -31,6 +39,10 @@ if [ ! -z "$FOLDER" ]; then
     ARGS="$ARGS -f $FOLDER"
 fi
 
+if [ ! -z "$TCPRELAY" ]; then
+    ARGS="$ARGS -t $TCPRELAY"
+fi
+
 echo "Running Permasigner with args:$ARGS"
 echo ""
-python -u main.py $ARGS -n
+python -u main.py $ARGS
