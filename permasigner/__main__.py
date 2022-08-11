@@ -144,7 +144,7 @@ class Main(object):
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
-                    path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir)
+                    path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir, is_extracted)
                     self.outputs.append(path_to_deb)
             elif option == "e":
                 url = self.logger.ask("Paste in the *direct* path to an IPA online: ")
