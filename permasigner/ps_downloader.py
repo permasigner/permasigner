@@ -79,6 +79,7 @@ class DpkgDeb(object):
         copy("usr/bin/dpkg-deb", f"{self.data_dir}/dpkg-deb")
         self.logger.debug(f"Copied dpkg-deb to {self.data_dir}")
         rmtree('usr')
+        os.remove("dpkg.deb")
         self.logger.debug(f"Cleaned up")
 
 
