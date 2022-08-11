@@ -1,5 +1,4 @@
 import hashlib
-
 import requests
 import subprocess
 from subprocess import DEVNULL

@@ -7,7 +7,8 @@ description: Flags you can pass through to change options.
 ## Command Arguments
 
 ```
-usage: main.py [-h] [-d] [-c] [-u URL] [-p PATH] [-i] [-n] [-o OUTPUT] [-b BUNDLEID] [-N NAME] [-m MINVER] [-v] [-l LDIDFORK] [-f FOLDER]
+usage: main.py [-h] [-d] [-c] [-u URL] [-p PATH] [-i] [-n] [-o OUTPUT] [-b BUNDLEID] [-N NAME] [-m MINVER] [-v] [-l LDIDFORK]
+               [-f FOLDER] [-e ENTITLEMENTS]
 
 options:
   -h, --help            show help message and exit
@@ -27,8 +28,8 @@ options:
   -v, --version         show current version and exit
   -l LDIDFORK, --ldidfork LDIDFORK
                         specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])
-  -f FOLDER, --folder FOLDER
-                        sign multiple IPAs from a direct path to a folder
+  -e ENTITLEMENTS, --entitlements ENTITLEMENTS
+                        path to entitlements file
 ```
 
 ## Docker Options

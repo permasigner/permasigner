@@ -166,4 +166,4 @@ dpkg*
 dpkg/
 .DS_Store
 */.DS_Store
-ipas
+ipas/

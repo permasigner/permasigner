@@ -73,9 +73,6 @@ class Main(object):
             print()
 
         with tempfile.TemporaryDirectory() as tmpfolder:
-            self.logger.log(f"Created temporary directory.", color=Colors.pink)
-            print()
-
             # If the user's choice is external, download an IPA
             # Otherwise, copy the IPA to the temporary directory
             if self.args.url:
@@ -442,6 +439,11 @@ class Main(object):
                 f"Running command: {ldid_cmd} -S{tmpfolder}/entitlements.plist -M -K{cert_path} -Upassword '{full_app_path}'")
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
+                            f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+            
+            if self.args.entitlements:
+                self.logger.debug(f"Signing with extra entitlements located in {self.args.entitlements}")
+                subprocess.run([f'{ldid_cmd}', f'-S{self.args.entitlements}', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
         print()
 

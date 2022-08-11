@@ -33,6 +33,8 @@ if __name__ == '__main__':
                         help="specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])")
     parser.add_argument('-f', '--folder', type=str,
                         help="sign multiple IPAs from a direct path to a folder")
+    parser.add_argument('-e', '--entitlements', type=str,
+                        help="path to entitlements file")
     args = parser.parse_args()
 
     if args.version:
