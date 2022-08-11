@@ -224,7 +224,7 @@ class MuxConnection(object):
             raise MuxError(
                 "Socket is connected, cannot process listener events")
         rlo, wlo, xlo = select([self.socket.sock], [], [
-                                      self.socket.sock], timeout)
+            self.socket.sock], timeout)
         if xlo:
             self.socket.sock.close()
             raise MuxError("Exception in listener socket")
