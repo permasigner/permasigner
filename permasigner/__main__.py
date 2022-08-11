@@ -419,11 +419,11 @@ class Main(object):
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
-            
+
             if self.args.entitlements:
                 self.logger.debug(f"Signing with extra entitlements located in {self.args.entitlements}")
                 subprocess.run([f'{ldid_cmd}', f'-S{self.args.entitlements}', '-M',
-                            f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
+                                f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
         print()
 
         # Package the deb file
