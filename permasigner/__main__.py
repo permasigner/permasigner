@@ -225,7 +225,7 @@ class Main(object):
             # Done, print end message
             self.logger.log(f"We are finished!", color=Colors.green)
 
-            if is_installed or not self.args.folder:
+            if is_installed:
                 self.logger.log(f"The application was installed to your device, no further steps are required!",
                                 color=Colors.green)
             else:

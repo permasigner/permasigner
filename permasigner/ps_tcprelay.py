@@ -22,7 +22,6 @@
 import socket
 import struct
 import plistlib
-import sys
 import socketserver
 from select import select
 
