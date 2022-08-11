@@ -22,9 +22,9 @@
 import socket
 import struct
 import plistlib
-import select
 import sys
 import socketserver
+from select import select
 
 from permasigner.ps_logger import Logger, Colors
 
@@ -228,7 +228,7 @@ class MuxConnection(object):
         if self.proto.connected:
             raise MuxError(
                 "Socket is connected, cannot process listener events")
-        rlo, wlo, xlo = select.select([self.socket.sock], [], [
+        rlo, wlo, xlo = select([self.socket.sock], [], [
                                       self.socket.sock], timeout)
         if xlo:
             self.socket.sock.close()
@@ -292,7 +292,7 @@ class SocketRelay(object):
                 rlist.append(self.a)
             if len(self.btoa) < self.maxbuf:
                 rlist.append(self.b)
-            rlo, wlo, xlo = select.select(rlist, wlist, xlist)
+            rlo, wlo, xlo = select(rlist, wlist, xlist)
             if xlo:
                 return
             if self.a in wlo:
@@ -344,11 +344,14 @@ class TCPServer(socketserver.TCPServer):
 
 
 class Relayer(object):
-    def __init__(self, rport, lport, host, args):
+    def __init__(self, rport, lport, host, args, socketpath=None):
         self.rport = rport
         self.lport = lport
         self.host = host
         self.args = args
+        if socketpath is None:
+            socketpath = "/var/run/usbmuxd"
+        self.socketpath = socketpath
         self.logger = Logger(self.args)
 
     def relay(self):
@@ -356,6 +359,7 @@ class Relayer(object):
         server = TCPServer((self.host, self.lport), TCPRelay)
         server.rport = self.rport
         server.bufsize = 128
+        server.socketpath = self.socketpath
         server.args = self.args
         servers = [server]
 
@@ -363,7 +367,7 @@ class Relayer(object):
 
         while alive:
             try:
-                rl, wl, xl = select.select(servers, [], [])
+                rl, wl, xl = select(servers, [], [])
                 for serv in rl:
                     serv.handle_request()
             except ():
