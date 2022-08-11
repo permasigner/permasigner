@@ -280,36 +280,39 @@ class SocketRelay(object):
 
     def handle(self):
         while True:
-            rlist = []
-            wlist = []
-            xlist = [self.a, self.b]
-            if self.atob:
-                wlist.append(self.b)
-            if self.btoa:
-                wlist.append(self.a)
-            if len(self.atob) < self.maxbuf:
-                rlist.append(self.a)
-            if len(self.btoa) < self.maxbuf:
-                rlist.append(self.b)
-            rlo, wlo, xlo = select(rlist, wlist, xlist)
-            if xlo:
+            try:
+                rlist = []
+                wlist = []
+                xlist = [self.a, self.b]
+                if self.atob:
+                    wlist.append(self.b)
+                if self.btoa:
+                    wlist.append(self.a)
+                if len(self.atob) < self.maxbuf:
+                    rlist.append(self.a)
+                if len(self.btoa) < self.maxbuf:
+                    rlist.append(self.b)
+                rlo, wlo, xlo = select(rlist, wlist, xlist)
+                if xlo:
+                    return
+                if self.a in wlo:
+                    n = self.a.send(self.btoa)
+                    self.btoa = self.btoa[n:]
+                if self.b in wlo:
+                    n = self.b.send(self.atob)
+                    self.atob = self.atob[n:]
+                if self.a in rlo:
+                    s = self.a.recv(self.maxbuf - len(self.atob))
+                    if not s:
+                        return
+                    self.atob += s
+                if self.b in rlo:
+                    s = self.b.recv(self.maxbuf - len(self.btoa))
+                    if not s:
+                        return
+                    self.btoa += s
+            except ConnectionResetError:
                 return
-            if self.a in wlo:
-                n = self.a.send(self.btoa)
-                self.btoa = self.btoa[n:]
-            if self.b in wlo:
-                n = self.b.send(self.atob)
-                self.atob = self.atob[n:]
-            if self.a in rlo:
-                s = self.a.recv(self.maxbuf - len(self.atob))
-                if not s:
-                    return
-                self.atob += s
-            if self.b in rlo:
-                s = self.b.recv(self.maxbuf - len(self.btoa))
-                if not s:
-                    return
-                self.btoa += s
 
 
 class TCPRelay(socketserver.BaseRequestHandler):
@@ -330,7 +333,7 @@ class TCPRelay(socketserver.BaseRequestHandler):
         lsock = self.request
         logger.debug("Connection established, relaying data")
         try:
-            fwd = SocketRelay(dsock, lsock, self.server.bufsize * 1024)
+            fwd = SocketRelay(dsock, lsock, 131072)
             fwd.handle()
         finally:
             dsock.close()
@@ -359,7 +362,6 @@ class Relayer(object):
         self.logger.log(f"Forwarding local port {self.lport} to remote port {self.rport}", color=Colors.pink)
         server = TCPServer((self.host, self.lport), TCPRelay)
         server.rport = self.rport
-        server.bufsize = 128
         server.socketpath = self.socketpath
         server.args = self.args
         servers = [server]
@@ -371,5 +373,5 @@ class Relayer(object):
                 rl, wl, xl = select(servers, [], [])
                 for serv in rl:
                     serv.handle_request()
-            except ():
+            except:
                 alive = False
