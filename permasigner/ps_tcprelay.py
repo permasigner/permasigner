@@ -23,7 +23,6 @@ import socket
 import struct
 import plistlib
 import socketserver
-import sys
 from select import select
 
 from permasigner.ps_logger import Logger, Colors
