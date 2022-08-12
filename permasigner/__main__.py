@@ -215,7 +215,7 @@ class Main(object):
 
             is_installed = False
             if not self.args.folder:
-                path_to_deb = self.run(tmpfolder, dpkg_in_path, data_dir, is_extracted)
+                path_to_deb = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
 
                 if self.args.install:
                     is_installed = self.install(path_to_deb)
@@ -320,7 +320,7 @@ class Main(object):
 
         return is_installed
 
-    def run(self, tmpfolder, dpkg_in_path, data_dir, is_extracted):
+    def run(self, tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted):
         # Unzip the IPA file
         if not is_extracted:
             self.logger.log(f"Unzipping IPA...", color=Colors.pink)
@@ -411,7 +411,7 @@ class Main(object):
                            stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            if self.utils.is_ios():
+            if self.utils.is_ios() or ldid_in_path:
                 ldid_cmd = 'ldid'
             else:
                 ldid_cmd = f'{data_dir}/ldid'

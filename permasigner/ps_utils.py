@@ -1,6 +1,7 @@
 import sys
 import platform
 import os
+import subprocess
 import importlib
 from importlib import util
 from shutil import which
@@ -40,8 +41,13 @@ class Utils(object):
                     self.logger.error("ldid is required on iOS, but it is not installed. Please install it from Procursus.")
                     exit(1)
 
-            # It seems like a better idea to force download ldid on macOS and Linux to make sure
-            # they have the proper version all the time. A lot of ugly code is necessary for it.
+            if which("ldid") is not None:
+                if "procursus" not in subprocess.getoutput(["ldid"]):
+                    return False
+
+                self.logger.debug(f"Procursus ldid is installed")
+                return True
+
             return False
 
         return which(cmd) is not None

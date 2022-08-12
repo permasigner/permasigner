@@ -99,6 +99,8 @@ class Ldid(object):
             return "ldid_linux_x86_64"
         elif self.utils.is_linux() and platform.machine() == "aarch64":
             return "ldid_linux_aarch64"
+        elif self.utils.is_linux() and platform.machine() == "armv7l":
+            return "ldid_linux_armv7l"
         elif self.utils.is_macos() and platform.machine() == "x86_64":
             return "ldid_macos_x86_64"
         elif self.utils.is_macos() and platform.machine() == "arm64":
