@@ -452,6 +452,7 @@ class Permasigner(object):
         self.logger.log(f"Packaging the deb file...", color=Colors.pink)
         if self.args.output:
             out_dir = self.args.output
+            os.makedirs(out_dir, exist_ok=True)
         elif self.in_package:
             os.makedirs(f"{data_dir}/output", exist_ok=True)
             out_dir = os.path.join(f"{data_dir}", 'output')
