@@ -219,8 +219,13 @@ class Permasigner(object):
 
                 if Path(path).exists():
                     if path.endswith(".deb"):
-                        deb = Deb(path, f"{tmpfolder}/extractedDeb", self.args)
-                        deb.extract()
+                        if dpkg_in_path:
+                            self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+                            subprocess.run(
+                                ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
+                        else:
+                            deb = Deb(path, f"{tmpfolder}/extractedDeb", self.args)
+                            deb.extract()
                         self.logger.debug(f"Extracted deb file from {path} to {tmpfolder}/extractedDeb")
                         os.makedirs(f"{tmpfolder}/app/Payload", exist_ok=False)
                         for fname in os.listdir(path=f"{tmpfolder}/extractedDeb/Applications"):
