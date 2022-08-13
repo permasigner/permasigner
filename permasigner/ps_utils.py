@@ -33,6 +33,10 @@ class Utils(object):
         return sys.platform == "linux"
 
     @staticmethod
+    def is_windows():
+        return sys.platform == "win32"
+
+    @staticmethod
     def is_dpkg_installed(pkg):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
@@ -79,6 +83,8 @@ class Utils(object):
             return os.path.join(xdg_data_home, "permasigner")
         elif self.is_ios() or self.is_macos():
             return os.path.join(user_home, "Library", "Application Support", "permasigner")
+        elif self.is_windows():
+            return os.getenv('APPDATA')
 
     @staticmethod
     def get_resource_path(package, resource):
