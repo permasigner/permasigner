@@ -182,7 +182,7 @@ class Permasigner(object):
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
-                    path_to_deb = self.run(tmpfolder, ldid_in_path, data_dir, is_extracted)
+                    path_to_deb = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
                     self.outputs.append(path_to_deb)
             elif option == "e":
                 url = self.logger.ask("Paste in the *direct* path to an IPA online: ")
@@ -340,7 +340,7 @@ class Permasigner(object):
 
         return is_installed
 
-    def run(self, tmpfolder, ldid_in_path, data_dir, is_extracted):
+    def run(self, tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted):
         # Unzip the IPA file
         if not is_extracted:
             self.logger.log(f"Unzipping IPA...", color=Colors.pink)
@@ -400,6 +400,8 @@ class Permasigner(object):
         copier = Copier(app_name, app_bundle, app_version, app_min_ios, app_author, self.in_package)
         copier.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm")
         copier.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst")
+        if dpkg_in_path:
+            copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control")
         print("Copying app files...")
         full_app_path = os.path.join(f"{tmpfolder}/deb/Applications", app_dir)
         copytree(pre_app_path, full_app_path)

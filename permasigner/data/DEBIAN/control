@@ -1,0 +1,11 @@
+Package: {APP_BUNDLE}
+Version: {APP_VERSION}
+Section: Applications
+Architecture: iphoneos-arm
+Depends: firmware (>={APP_MIN_IOS})
+Description: {APP_NAME} resigned with Linus Henze's CoreTrust bypass so it doesn't expire, and will persist in stock.
+Name: {APP_NAME}
+Author: {APP_AUTHOR}
+Maintainer: {APP_AUTHOR}
+Tags: compatible_min::ios{APP_MIN_IOS}
+Depiction: https://permasigner-depictions.itsnebula.net/depiction?name={APP_NAME_ENCODED}
