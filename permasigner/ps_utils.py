@@ -6,7 +6,7 @@ import importlib
 from importlib import util
 from shutil import which
 
-from .ps_logger import Logger
+from permasigner.ps_logger import Logger
 
 
 class Utils(object):
@@ -14,11 +14,27 @@ class Utils(object):
         self.args = args
         self.logger = Logger(self.args)
 
-    def is_ios(self):
+    @staticmethod
+    def is_ios():
         if not sys.platform == "darwin":
             return False
 
         return platform.machine().startswith("i")
+
+    @staticmethod
+    def is_macos():
+        if platform.machine().startswith("i"):
+            return False
+
+        return sys.platform == "darwin"
+
+    @staticmethod
+    def is_linux():
+        return sys.platform == "linux"
+
+    @staticmethod
+    def is_dpkg_installed(pkg):
+        return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
     def cmd_in_path(self, cmd):
         self.logger.debug(f"Checking if command {cmd} is in PATH...")
@@ -52,18 +68,6 @@ class Utils(object):
 
         return which(cmd) is not None
 
-    def is_macos(self):
-        if platform.machine().startswith("i"):
-            return False
-
-        return sys.platform == "darwin"
-
-    def is_linux(self):
-        return sys.platform == "linux"
-
-    def is_dpkg_installed(self, pkg):
-        return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
-
     def get_home_data_directory(self):
         ps_home = os.environ.get("PERMASIGNER_HOME")
         if ps_home:
@@ -76,7 +80,8 @@ class Utils(object):
         elif self.is_ios() or self.is_macos():
             return os.path.join(user_home, "Library", "Application Support", "permasigner")
 
-    def get_resource_path(self, package, resource):
+    @staticmethod
+    def get_resource_path(package, resource):
         spec = importlib.util.find_spec(package)
         if spec is None:
             return None

@@ -1,35 +1,29 @@
-from os.path import join
-import setuptools
+import os
+from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
-    readme = fh.read()
+here = os.path.abspath(os.path.dirname(__file__))
 
-exec(open('permasigner/__version__.py').read())
+with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
+    readme = f.read()
 
+with open(os.path.join(here, "permasigner", "__version__.py"), encoding="utf-8") as f:
+    version = f.read()
 
-def parse_requirements(requirements, ignore=('setuptools',)):
-    with open(requirements) as f:
-        packages = set()
-        for line in f:
-            line = line.strip()
-            if line.startswith(('#', '-r', '--')):
-                continue
-            if '#egg=' in line:
-                line = line.split('#egg=')[1]
-            pkg = line.strip()
-            if pkg not in ignore:
-                packages.add(pkg)
-        return tuple(packages)
+version = version.split('=')[-1].strip().strip('"').strip("'")
 
 
-setuptools.setup(
+with open(os.path.join(here, "requirements.txt"), encoding="utf-8") as f:
+    requires = f.readlines()
+
+
+setup(
     name='permasigner',
-    version=__version__,
+    version=version,
     description=('Permanently signs IPAs on jailbroken iDevices (persists on stock).'),
     license='BSD-3-Clause',
     url='https://github.com/itsnebulalol/permasigner',
     python_requires=">=3.7",
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
     long_description=readme,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -42,7 +36,7 @@ setuptools.setup(
     keywords='python, windows, macos, linux, docker, cli, open-source, ios, command-line-app, cli-app, hacktoberfest, procursus, permasign, permasigner',
     include_package_data=True,
     author='Nebula',
-    install_requires=parse_requirements('requirements.txt'),
+    install_requires=requires,
     author_email='me@itsnebula.net',
-    zip_safe=False,
+    zip_safe=True,
 )

@@ -52,20 +52,23 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
 
       # Display the Python version being used
       - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+        run: python3 -c "import sys; print(sys.version); print(sys.path)"
 
       # Install dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install .
 
       # Run script
+      # python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
       - name: Run script
-        run: python main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -d
+        run: python3 main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
+
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
@@ -104,7 +107,7 @@ jobs:
 
       # Display the Python version being used
       - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+        run: python3 -c "import sys; print(sys.version)"
 
       - name: Setup Procursus Bootstrap (install)
         if: steps.procache.outputs.cache-hit != 'true'
@@ -116,8 +119,7 @@ jobs:
           sudo /opt/procursus/bin/apt install ldid -y
 
       - name: Add Procursus to PATH
-        run: |
-          echo '/opt/procursus/sbin:/opt/procursus/bin' >> $GITHUB_PATH
+        run: echo '/opt/procursus/sbin:/opt/procursus/bin' >> $GITHUB_PATH
 
       - name: Setup Procursus Bootstrap (cache)
         if: steps.procache.outputs.cache-hit == 'true'
@@ -129,12 +131,13 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install .
 
       # Run script
       - name: Run script
-        run: python main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -d
+        run: |
+          python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
