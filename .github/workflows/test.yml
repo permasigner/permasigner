@@ -66,13 +66,13 @@ jobs:
       # Run script
       # python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
       - name: Run script
-        run: python3 main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
+        run: python3 main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o ${GITHUB_WORKSPACE}/output/ -d
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-linux-Python${{ matrix.python-version }}.deb
-          path: output/Taurine.deb
+          path: output/**
 
   macos:
     runs-on: ${{ matrix.os }}
@@ -135,13 +135,13 @@ jobs:
       # Run script
       - name: Run script
         run: |
-          python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
+          python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o ${GITHUB_WORKSPACE}/output/ -d
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-${{ matrix.os }}-Python${{ matrix.python-version }}.deb
-          path: output/Taurine.deb
+          path: output/**
 
       - name: Copy Procursus to Cache Location
         run: |
