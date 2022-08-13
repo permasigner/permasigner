@@ -62,12 +62,12 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
 
       # Run script
       # python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
       - name: Run script
         run: python3 main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
-
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
@@ -131,6 +131,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
 
       # Run script
       - name: Run script
