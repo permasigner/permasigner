@@ -246,7 +246,7 @@ class Permasigner(object):
 
             is_installed = False
             if not self.args.folder:
-                path_to_deb = self.run(tmpfolder, ldid_in_path, data_dir, is_extracted, self.in_package)
+                path_to_deb = self.run(tmpfolder, ldid_in_path, data_dir, is_extracted)
 
                 if self.args.install:
                     is_installed = self.install(path_to_deb)
@@ -293,10 +293,10 @@ class Permasigner(object):
         # Auto download ldid
         if not ldid_in_path:
             if Path(f"{data_dir}/ldid").exists():
-                ldid = Ldid(self.args, data_dir, self.utils, True)
+                ldid = Ldid(data_dir, self.args, self.utils, True)
             else:
                 self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
-                ldid = Ldid(self.args, data_dir, self.utils, False)
+                ldid = Ldid(data_dir, self.args, self.utils, False)
             ldid.download()
 
     def install(self, path_to_deb):
