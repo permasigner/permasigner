@@ -251,7 +251,7 @@ class Permasigner(object):
 
             is_installed = False
             if not self.args.folder:
-                path_to_deb = self.run(tmpfolder, ldid_in_path, data_dir, is_extracted)
+                path_to_deb = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
 
                 if self.args.install:
                     is_installed = self.install(path_to_deb)
