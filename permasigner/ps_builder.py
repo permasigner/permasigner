@@ -53,8 +53,8 @@ class Deb(object):
                               'Tags': control.tags,
                               'Depiction': control.depiction
                               })
-
-        d = DPKGBuilder(self.output, c, dirs, links, scripts, output_name=control.name+'.deb')
+        output_name = control.name + '_' + control.version + '.deb'
+        d = DPKGBuilder(self.output, c, dirs, links, scripts, output_name=output_name)
         d.build_package()
         return d.output_name
 

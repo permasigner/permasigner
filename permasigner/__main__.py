@@ -38,7 +38,7 @@ def main(in_package=None):
     parser.add_argument('-i', '--install', action='store_true',
                         help="installs the application to your device")
     parser.add_argument('-o', '--output', type=str,
-                        help="specify output file")
+                        help="specify output path")
     parser.add_argument('-b', '--bundleid', type=str,
                         help="specify new bundle id")
     parser.add_argument('-N', '--name', type=str,
@@ -182,8 +182,8 @@ class Permasigner(object):
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
-                    path_to_deb = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
-                    self.outputs.append(path_to_deb)
+                    out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
+                    self.outputs.append(out_dir)
             elif option == "e":
                 url = self.logger.ask("Paste in the *direct* path to an IPA online: ")
 
@@ -251,10 +251,10 @@ class Permasigner(object):
 
             is_installed = False
             if not self.args.folder:
-                path_to_deb = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
+                out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
 
                 if self.args.install:
-                    is_installed = self.install(path_to_deb)
+                    is_installed = self.install(out_dir)
 
             # Done, print end message
             self.logger.log(f"We are finished!", color=Colors.green)
@@ -281,7 +281,7 @@ class Permasigner(object):
                         final_outputs = f"{final_outputs}, {output}"
                 self.logger.log(f"Output files: {final_outputs}", color=Colors.green)
             else:
-                self.logger.log(f"Output file: {path_to_deb}", color=Colors.green)
+                self.logger.log(f"Output file: {out_dir}", color=Colors.green)
 
     def checks(self, ldid_in_path, data_dir):
         # Check if script is running on Windows, if so, fail
@@ -304,12 +304,12 @@ class Permasigner(object):
                 ldid = Ldid(data_dir, self.args, self.utils, False)
             ldid.download()
 
-    def install(self, path_to_deb):
+    def install(self, out_dir):
         if not self.utils.is_ios():
             from .ps_installer import Installer
 
         if not self.utils.is_ios():
-            installer = Installer(self.args, path_to_deb)
+            installer = Installer(self.args, out_dir)
             is_installed = installer.install_deb()
         else:
             print("Checking if user is in sudoers")
@@ -317,10 +317,10 @@ class Permasigner(object):
                                capture_output=True)
             if p.returncode == 0 or 'password' in p.stderr.decode():
                 print("User is in sudoers, using sudo command")
-                self.logger.debug(f"Running command: sudo dpkg -i {path_to_deb}")
+                self.logger.debug(f"Running command: sudo dpkg -i {out_dir}")
 
                 subprocess.run(
-                    ["sudo", "dpkg", "-i", f"{path_to_deb}"], capture_output=True)
+                    ["sudo", "dpkg", "-i", f"{out_dir}"], capture_output=True)
 
                 subprocess.run(
                     ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
@@ -328,10 +328,10 @@ class Permasigner(object):
                 is_installed = True
             else:
                 print("User is not in sudoers, using su instead")
-                self.logger.debug(f"Running command: su root -c 'dpkg -i {path_to_deb}")
+                self.logger.debug(f"Running command: su root -c 'dpkg -i {out_dir}")
 
                 subprocess.run(
-                    f"su root -c 'dpkg -i {path_to_deb}'".split(), capture_output=True)
+                    f"su root -c 'dpkg -i {out_dir}'".split(), capture_output=True)
 
                 subprocess.run(
                     "su root -c 'apt-get install -f'".split(), capture_output=True)
@@ -451,18 +451,25 @@ class Permasigner(object):
         # Package the deb file
         self.logger.log(f"Packaging the deb file...", color=Colors.pink)
         if self.args.output:
-            path_to_deb = self.args.output
+            out_dir = self.args.output
         elif self.in_package:
             os.makedirs(f"{data_dir}/output", exist_ok=True)
-            path_to_deb = os.path.join(f"{data_dir}", "output/")
+            out_dir = os.path.join(f"{data_dir}", 'output')
         else:
             os.makedirs("output", exist_ok=True)
-            path_to_deb = os.path.join(os.getcwd(), f"output/")
+            out_dir = os.path.join(os.getcwd(), 'output')
 
-        control = Control(app_bundle, app_version, app_min_ios, app_name, app_author)
-        deb = Deb(f"{tmpfolder}/deb/Applications/", path_to_deb, self.args)
-        output_name = deb.build(f"{tmpfolder}/deb/DEBIAN/postinst", f"{tmpfolder}/deb/DEBIAN/postrm", control)
-        return os.path.join(path_to_deb, output_name)
+        if dpkg_in_path:
+            out_path = os.path.join(out_dir, app_name.replace(' ', '') + f'_{app_version}' + '.deb')
+            dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {out_path}"
+            self.logger.debug(f"Running command: {dpkg_cmd}")
+            subprocess.run(dpkg_cmd.split(), stdout=DEVNULL)
+            return out_path
+        else:
+            control = Control(app_bundle, app_version, app_min_ios, app_name, app_author)
+            deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
+            output_name = deb.build(f"{tmpfolder}/deb/DEBIAN/postinst", f"{tmpfolder}/deb/DEBIAN/postrm", control)
+            return os.path.join(out_dir, output_name)
 
 
 if __name__ == "__main__":
