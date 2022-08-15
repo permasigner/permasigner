@@ -76,7 +76,7 @@ class Permasigner(object):
 
     def main(self):
         data_dir = self.utils.get_home_data_directory()
-        Path(data_dir).mkdir(exist_ok=True)
+        Path(data_dir).mkdir(exist_ok=True, parents=True)
 
         if self.in_package:
             self.logger.debug(f"Running from package, not cloned repo.")
@@ -149,9 +149,9 @@ class Permasigner(object):
                         if dpkg.in_path:
                             self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
                             subprocess.run(
-                                ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
+                                ["dpkg-deb", "-X", path, Path(f'{tmpfolder}/extractedDeb')], stdout=DEVNULL)
                         else:
-                            deb = Deb(path, f"{tmpfolder}/extractedDeb", self.args)
+                            deb = Deb(path, Path(f'{tmpfolder}/extractedDeb'), self.args)
                             deb.extract()
                         Path(f"{tmpfolder}/app/Payload").mkdir(exist_ok=True)
                         for fname in Path(f"{tmpfolder}/extractedDeb/Applications").iterdir():
