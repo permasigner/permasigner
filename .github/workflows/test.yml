@@ -70,7 +70,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-linux-Python${{ matrix.python-version }}.deb
-          path: output/Taurine.deb
+          path: output/**
 
   macos:
     runs-on: ${{ matrix.os }}

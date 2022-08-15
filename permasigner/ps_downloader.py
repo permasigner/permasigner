@@ -78,7 +78,7 @@ class Ldid(object):
             else:
                 name = 'ldid'
 
-            move("ldid", Path(f'{self.data_dir}/{name}'))
+            move("ldid", Path(f'{self.data_dir}/permasigner/{name}'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
         else:
             if self.exists:

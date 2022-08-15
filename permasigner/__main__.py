@@ -297,7 +297,10 @@ class Permasigner(object):
 
         # Auto download ldid
         if not ldid.in_path:
-            if Path(f"{data_dir}/ldid").exists():
+            name = 'ldid'
+            if self.utils.is_windows():
+                name = 'ldid.exe'
+            if Path(f"{data_dir}/{name}").exists():
                 ldid = Ldid(data_dir, self.args, self.utils, True)
             else:
                 self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)

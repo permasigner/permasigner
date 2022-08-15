@@ -92,7 +92,7 @@ class Utils(object):
         elif self.is_ios() or self.is_macos():
             return PurePath(f'{user_home}/Library/Application Support/permasigner')
         elif self.is_windows():
-            return os.getenv('APPDATA')
+            return PurePath(f"{os.getenv('APPDATA')}/permasigner")
 
     @staticmethod
     def get_resource_path(package, resource):
