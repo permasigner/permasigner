@@ -56,6 +56,8 @@ class Ldid(object):
             return "ldid_macos_x86_64"
         elif self.utils.is_macos() and platform.machine() == "arm64":
             return "ldid_macos_arm64"
+        elif self.utils.is_windows() and platform.machine() == "x86_64":
+            return "ldid_win32_x86_64"
 
     def process(self, res):
         if res is not None and res.status_code == 200:
