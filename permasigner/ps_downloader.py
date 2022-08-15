@@ -62,6 +62,7 @@ class Ldid(object):
     def process(self, res):
         if res is not None and res.status_code == 200:
             self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
+
             with open(f"ldid", "wb") as f:
                 f.write(res.content)
                 self.logger.debug(f"Wrote file.")
@@ -71,7 +72,13 @@ class Ldid(object):
                 Path(f"{self.data_dir}/ldid").unlink()
 
             Path('ldid').chmod(256 | 128 | 64 | 32 | 8 | 4 | 1)
-            move("ldid", Path(f'{self.data_dir}/ldid'))
+
+            if self.utils.is_windows():
+                name = 'ldid.exe'
+            else:
+                name = 'ldid'
+
+            move("ldid", Path(f'{self.data_dir}/{name}'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
         else:
             if self.exists:

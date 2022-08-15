@@ -352,14 +352,15 @@ class Permasigner(object):
 
         # Read data from the plist
         app_dir = ''
-        if Path(f"{tmpfolder}/app/Payload").exists():
-            for fname in Path(f"{tmpfolder}/app/Payload").iterdir():
-                if fname.suffix == '.app':
-                    app_dir = fname
-                    break
-                else:
-                    self.logger.error("Unable to find the application bundle")
-                    exit(1)
+        payload = Path(f"{tmpfolder}/app/Payload")
+        if payload.exists():
+            for fname in payload.rglob('*.app'):
+                app_dir = fname
+                break
+
+            if app_dir == '':
+                self.logger.error("Unable to find the application bundle")
+                exit(1)
             print("Found app directory!")
         else:
             self.logger.error(f"IPA/deb is not valid!")
