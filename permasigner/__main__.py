@@ -428,7 +428,7 @@ class Permasigner(object):
         if self.in_package:
             cert_path = self.utils.get_resource_path(__name__, "data/certificate.p12")
         else:
-            cert_path = Path("permasigner/data/certificate.p12")
+            cert_path = Path(f'{Path.cwd()}/permasigner/data/certificate.p12')
 
         if self.args.codesign:
             print("Signing with codesign as it was specified...")

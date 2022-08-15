@@ -1,4 +1,4 @@
-	.PHONY: build
+.PHONY: build
 
 build:
 	rm -rf dist/* build/* || true
