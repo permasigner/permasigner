@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import requests
 import hashlib
 import platform
@@ -56,8 +56,8 @@ class Ldid(object):
             return "ldid_macos_x86_64"
         elif self.utils.is_macos() and platform.machine() == "arm64":
             return "ldid_macos_arm64"
-        elif self.utils.is_windows() and platform.machine() == "x86_64":
-            return "ldid_win32_x86_64"
+        elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
+            return "ldid_win32_x86_64.exe"
 
     def process(self, res):
         if res is not None and res.status_code == 200:
@@ -68,10 +68,10 @@ class Ldid(object):
 
             if self.exists:
                 self.logger.debug("Removing outdated version of ldid")
-                os.remove(f"{self.data_dir}/ldid")
+                Path(f"{self.data_dir}/ldid").unlink()
 
-            os.chmod('ldid', 256 | 128 | 64 | 32 | 8 | 4 | 1)
-            move("ldid", f"{self.data_dir}/ldid")
+            Path('ldid').chmod(256 | 128 | 64 | 32 | 8 | 4 | 1)
+            move("ldid", Path(f'{self.data_dir}/ldid'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
         else:
             if self.exists:

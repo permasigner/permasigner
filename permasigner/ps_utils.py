@@ -4,6 +4,7 @@ import os
 import subprocess
 import importlib
 from importlib import util
+from pathlib import Path, PurePath
 from shutil import which
 
 from permasigner.ps_logger import Logger
@@ -43,11 +44,14 @@ class Utils(object):
     def cmd_in_path(self, cmd):
         self.logger.debug(f"Checking if command {cmd} is in PATH...")
 
+        path = which(cmd)
+        utility = Utility(path)
+
         if cmd == "ldid":
             if self.is_ios():
                 self.logger.debug(f"Checking for ldid on iOS")
 
-                if os.path.exists("/.bootstrapped"):
+                if Path("/.bootstrapped").exists():
                     self.logger.error(
                         "Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
                     print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
@@ -55,34 +59,38 @@ class Utils(object):
 
                 if self.is_dpkg_installed("ldid"):
                     self.logger.debug(f"ldid is installed via dpkg")
-
-                    return True
+                    utility.in_path = True
+                    return utility
                 else:
                     self.logger.error("ldid is required on iOS, but it is not installed. Please install it from Procursus.")
                     exit(1)
 
-            if which("ldid") is not None:
-                if "procursus" not in subprocess.getoutput(["ldid"]):
-                    return False
+            if utility.path is not None:
+                if "procursus" not in subprocess.getoutput([utility.path]):
+                    utility.in_path = False
+                    return utility
 
                 self.logger.debug(f"Procursus ldid is installed")
-                return True
+                utility.in_path = True
+                return utility
 
-            return False
+            utility.in_path = False
+            return utility
 
-        return which(cmd) is not None
+        utility.in_path = path is not None
+        return utility
 
     def get_home_data_directory(self):
         ps_home = os.environ.get("PERMASIGNER_HOME")
         if ps_home:
             return ps_home
 
-        user_home = os.path.expanduser("~")
+        user_home = Path.home()
         if self.is_linux():
-            xdg_data_home = os.environ.get("XDG_DATA_HOME", os.path.join(user_home, ".local", "share"))
-            return os.path.join(xdg_data_home, "permasigner")
+            xdg_data_home = os.environ.get("XDG_DATA_HOME", PurePath(f'{user_home}/.local/share'))
+            return PurePath(f'{xdg_data_home}/permasigner')
         elif self.is_ios() or self.is_macos():
-            return os.path.join(user_home, "Library", "Application Support", "permasigner")
+            return PurePath(f'{user_home}/Library/Application Support/permasigner')
         elif self.is_windows():
             return os.getenv('APPDATA')
 
@@ -100,5 +108,11 @@ class Utils(object):
             return None
 
         parts = resource.split('/')
-        parts.insert(0, os.path.dirname(mod.__file__))
-        return f"{os.path.join(*parts)}"
+        parts.insert(0, PurePath(mod.__file__).parent)
+        return f"{PurePath(*parts)}"
+
+
+class Utility:
+    def __init__(self, path, in_path=False):
+        self.path = path
+        self.in_path = in_path
