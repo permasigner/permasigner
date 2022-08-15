@@ -1,4 +1,4 @@
-name: Build and publish package to PyPi
+name: Publish package
 
 on:
   release:
@@ -30,4 +30,3 @@ jobs:
         run: |
           make build
           twine upload dist/*
-
