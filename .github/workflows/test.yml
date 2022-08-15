@@ -51,30 +51,26 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
 
       # Display the Python version being used
       - name: Display Python version
-        run: python3 -c "import sys; print(sys.version); print(sys.path)"
+        run: python -c "import sys; print(sys.version)"
 
       # Install dependencies
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       # Run script
-      # python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
       - name: Run script
-        run: |
-          mkdir output
-          python3 main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o output/ -d
+        run: python main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -d
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-linux-Python${{ matrix.python-version }}.deb
-          path: output/**
+          path: output/Taurine.deb
 
   macos:
     runs-on: ${{ matrix.os }}
@@ -82,18 +78,19 @@ jobs:
     strategy:
       matrix:
         # Run with all these versions of macOS
-        os: [macos-11, macos-12]
+        os: [macos-12]
 
         # Run with all these versions of Python
         python-version: [3.7, 3.8, 3.9]
 
     steps:
-      - uses: actions/cache@v3
-        id: procache
+      - name: Set up Procursus
+        uses: beerpiss/procursus-action@v1
         with:
-          path: |
-            ~/__cache
-          key: ${{ runner.os }}-procursus
+          packages: ldid
+          cache: true
+          cache-path: ~/__cache
+          mirror: 'https://procursus.itsnebula.net/'
 
       # Checkout the latest code from the repo
       - name: Checkout repo
@@ -109,25 +106,6 @@ jobs:
       - name: Display Python version
         run: python3 -c "import sys; print(sys.version)"
 
-      - name: Setup Procursus Bootstrap (install)
-        if: steps.procache.outputs.cache-hit != 'true'
-        run: |
-          wget https://apt.procurs.us/bootstrap_darwin-amd64.tar.zst
-          sudo gtar --preserve-permissions -xkf ./bootstrap_darwin-amd64.tar.zst -C /
-          echo '/opt/procursus/sbin:/opt/procursus/bin' >> $GITHUB_PATH
-          PATH=/opt/procursus/sbin:/opt/procursus/bin:$PATH sudo /opt/procursus/bin/apt update
-          sudo /opt/procursus/bin/apt install ldid -y
-
-      - name: Add Procursus to PATH
-        run: echo '/opt/procursus/sbin:/opt/procursus/bin' >> $GITHUB_PATH
-
-      - name: Setup Procursus Bootstrap (cache)
-        if: steps.procache.outputs.cache-hit == 'true'
-        run: |
-          sudo mkdir -p ~/__cache/procursus/var/cache/apt/archives/partial ~/__cache/procursus/var/lib/apt/lists/partial
-          sudo rsync -aP ~/__cache/procursus /opt
-          sudo /opt/procursus/bin/apt update
-
       # Install dependencies
       - name: Install dependencies
         run: |
@@ -136,8 +114,7 @@ jobs:
 
       # Run script
       - name: Run script
-        run: |
-          python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o ${GITHUB_WORKSPACE}/output/ -d
+        run: python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o ${GITHUB_WORKSPACE}/output/ -d
 
       # Upload test artifact
       - uses: actions/upload-artifact@v3
@@ -145,8 +122,3 @@ jobs:
           name: TaurineTest-${{ matrix.os }}-Python${{ matrix.python-version }}.deb
           path: output/**
 
-      - name: Copy Procursus to Cache Location
-        run: |
-          sudo mkdir -p ~/__cache
-          sudo rsync -aP /opt/procursus ~/__cache
-          sudo rm -rf ~/__cache/procursus/var/cache/apt/archives/partial ~/__cache/procursus/var/lib/apt/lists/partial ~/__cache/procursus/Library/dpkg/triggers/Lock
