@@ -36,7 +36,7 @@ class Hash(object):
 
 
 class Ldid(object):
-    def __init__(self, name, data_dir, args, utils, exists=False):
+    def __init__(self, data_dir, name, args, utils, exists=False):
         self.name = name
         self.data_dir = data_dir
         self.args = args
