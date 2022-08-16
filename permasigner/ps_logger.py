@@ -1,3 +1,11 @@
+import os
+
+if os.name == 'nt':  # Only if we are running on Windows
+    from ctypes import windll
+    k = windll.kernel32
+    k.SetConsoleMode(k.GetStdHandle(-11), 7)
+
+
 class Colors:
     black = '\033[30m'
     red = '\033[31m'
@@ -37,7 +45,7 @@ class Logger:
     def debug(self, message):
         if self.args.debug:
             print(
-                Colors.lightblue + Colors.bold + "[DEBUG] " + Colors.reset + Colors.lightblue + f"{message}" + Colors.reset)
+                Colors.lightcyan + Colors.bold + "[DEBUG] " + Colors.reset + Colors.lightcyan + f"{message}" + Colors.reset)
 
     def error(self, message):
         print(Colors.lightred + Colors.bold + "[!] " + Colors.reset + Colors.lightred + f"{message}" + Colors.reset)

@@ -175,6 +175,9 @@ class MuxConnection(object):
         if os.environ.get("HOST_IS_WINDOWS", False):
             family = socket.AF_INET
             address = ('host.docker.internal', 27015)
+        elif os.name == 'nt':
+            family = socket.AF_INET
+            address = ('127.0.0.1', 27015)
         else:
             family = socket.AF_UNIX
             address = self.socketpath
@@ -359,7 +362,7 @@ class Relayer(object):
         self.logger = Logger(self.args)
 
     def relay(self):
-        self.logger.log(f"Forwarding local port {self.lport} to remote port {self.rport}", color=Colors.pink)
+        self.logger.log(f"Forwarding local port {self.lport} to remote port {self.rport}", color=Colors.yellow)
         server = TCPServer((self.host, self.lport), TCPRelay)
         server.rport = self.rport
         server.socketpath = self.socketpath

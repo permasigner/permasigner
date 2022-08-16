@@ -56,7 +56,7 @@ class Installer:
                 return False
 
             with SCPClient(client.get_transport()) as scp:
-                self.logger.log(f"Sending {self.path} to device", color=Colors.pink)
+                self.logger.log(f"Sending {self.path} to device", color=Colors.yellow)
                 filename = self.path.split("/")[-1]
                 self.logger.debug(f"Copying via scp from {self.path} to /var/mobile/Documents/")
                 scp.put(f'{self.path}',
@@ -75,7 +75,7 @@ class Installer:
                 time.sleep(0.2)
                 stdin.write(f'{password}\n')
                 stdin.flush()
-                self.logger.log("Installing... this may take some time", color=Colors.pink)
+                self.logger.log("Installing... this may take some time", color=Colors.yellow)
 
                 self.logger.debug(stdout.read().decode())
                 self.logger.debug(f"Running command: sudo apt-get install -f")
@@ -90,7 +90,7 @@ class Installer:
                 command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
                 self.logger.debug(f"Running command: {command}")
                 output = client.exec_command(f'{command}')[1]
-                self.logger.log("Installing... this may take some time", color=Colors.pink)
+                self.logger.log("Installing... this may take some time", color=Colors.yellow)
                 self.logger.debug(output.read().decode())
                 self.logger.debug(f"Running command: sudo apt-get install -f")
 
@@ -109,7 +109,7 @@ class Installer:
                     password = getpass()
                     streams[0].write(f'{password}\n')
                     streams[0].flush()
-                    self.logger.log("Installing... this may take some time", color=Colors.pink)
+                    self.logger.log("Installing... this may take some time", color=Colors.yellow)
                     self.logger.debug(streams[1].read().decode())
                     streams = client.exec_command(
                         "su root -c 'apt-get install -f'", get_pty=True)
@@ -118,7 +118,7 @@ class Installer:
                     streams[0].flush()
                     self.logger.debug(streams[1].channel.recv(2048).decode())
                 else:
-                    self.logger.log("Installing... this may take some time", color=Colors.pink)
+                    self.logger.log("Installing... this may take some time", color=Colors.yellow)
                     self.logger.debug(streams[1].read().decode())
                     self.logger.debug(f"Running command: sudo apt-get install -f")
 

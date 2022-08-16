@@ -20,9 +20,9 @@ class Copier:
 
         # Read the file
         if self.in_package:
-            filedata = pkgutil.get_data(__name__, "data/postinst").decode('utf_8')
+            filedata = pkgutil.get_data(__name__, "data/DEBIAN/postinst").decode('utf_8')
         else:
-            with open("permasigner/data/postinst", 'r') as file:
+            with open("permasigner/data/DEBIAN/postinst", 'r') as file:
                 filedata = file.read()
 
         # Replace the target string
@@ -41,9 +41,9 @@ class Copier:
 
         # Read the file
         if self.in_package:
-            filedata = pkgutil.get_data(__name__, "data/postrm").decode('utf_8')
+            filedata = pkgutil.get_data(__name__, "data/DEBIAN/postrm").decode('utf_8')
         else:
-            with open('permasigner/data/postrm', 'r') as file:
+            with open('permasigner/data/DEBIAN/postrm', 'r') as file:
                 filedata = file.read()
 
         # Replace the target string
@@ -62,9 +62,9 @@ class Copier:
 
         # Read the file
         if self.in_package:
-            filedata = pkgutil.get_data(__name__, "data/control").decode('utf_8')
+            filedata = pkgutil.get_data(__name__, "data/DEBIAN/control").decode('utf_8')
         else:
-            with open('permasigner/data/control', 'r') as file:
+            with open('permasigner/data/DEBIAN/control', 'r') as file:
                 filedata = file.read()
 
         # Replace the target strings
