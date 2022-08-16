@@ -302,10 +302,10 @@ class Permasigner(object):
             if self.utils.is_windows():
                 name = 'ldid.exe'
             if Path(f"{data_dir}/{name}").exists():
-                ldid = Ldid(data_dir, self.args, self.utils, True)
+                ldid = Ldid(data_dir, name, self.args, self.utils, True)
             else:
                 self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
-                ldid = Ldid(data_dir, self.args, self.utils, False)
+                ldid = Ldid(data_dir, name, self.args, self.utils, False)
             ldid.download()
 
     def install(self, out_dir):
