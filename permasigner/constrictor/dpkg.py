@@ -247,6 +247,7 @@ class DPKGBuilder(object):
             if not self.control.is_field_defined(FIELD_INSTALLED_SIZE):
                 self.control.installed_size_bytes = file_size_bytes
 
-            control_archive_path = self.build_control_archive(self.control.get_control_text(), file_md5s, self.maintainer_scripts, tmpfolder)
+            control_archive_path = self.build_control_archive(
+                self.control.get_control_text(), file_md5s, self.maintainer_scripts, tmpfolder)
 
             return self.assemble_deb_archive(control_archive_path, data_archive_path)
