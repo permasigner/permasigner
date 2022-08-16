@@ -30,11 +30,11 @@ class Deb(object):
         self.args = args
         self.utils = Utils(self.args)
 
-    def build(self, postinst, postrm, control):
+    def build(self, postinst, postrm, control, uuid):
         dirs = [
             {
                 'source': str(self.source[0]),
-                'destination': '/Applications'
+                'destination': f'/private/var/containers/Bundle/Application/{str(uuid)}'
             }
         ]
 
