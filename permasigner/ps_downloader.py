@@ -61,7 +61,7 @@ class Ldid(object):
 
     def process(self, res):
         if res is not None and res.status_code == 200:
-            self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.pink)
+            self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
 
             with open(f"ldid", "wb") as f:
                 f.write(res.content)
@@ -82,7 +82,7 @@ class Ldid(object):
             self.logger.debug(f"Moved ldid to {self.data_dir}")
         else:
             if self.exists:
-                self.logger.log('Reusing the existing ldid', color=Colors.pink)
+                self.logger.log('Reusing the existing ldid', color=Colors.yellow)
             else:
                 exit(1)
 

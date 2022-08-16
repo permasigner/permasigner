@@ -359,7 +359,7 @@ class Relayer(object):
         self.logger = Logger(self.args)
 
     def relay(self):
-        self.logger.log(f"Forwarding local port {self.lport} to remote port {self.rport}", color=Colors.pink)
+        self.logger.log(f"Forwarding local port {self.lport} to remote port {self.rport}", color=Colors.yellow)
         server = TCPServer((self.host, self.lport), TCPRelay)
         server.rport = self.rport
         server.socketpath = self.socketpath

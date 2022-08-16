@@ -129,7 +129,7 @@ class Permasigner(object):
                 res = requests.get(url, stream=True)
                 try:
                     if res.status_code == 200:
-                        self.logger.log(f"Downloading file...", color=Colors.pink)
+                        self.logger.log(f"Downloading file...", color=Colors.yellow)
 
                         with open(f"{tmpfolder}/app.ipa", "wb") as f:
                             f.write(res.content)
@@ -178,7 +178,7 @@ class Permasigner(object):
                         rmtree(f"{tmpfolder}/deb")
 
                     fname = Path(fpath).name
-                    self.logger.log(f"Signing {fname}...", color=Colors.pink)
+                    self.logger.log(f"Signing {fname}...", color=Colors.yellow)
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
@@ -195,7 +195,7 @@ class Permasigner(object):
                 res = requests.get(url, stream=True)
                 try:
                     if res.status_code == 200:
-                        self.logger.log(f"Downloading file...", color=Colors.pink)
+                        self.logger.log(f"Downloading file...", color=Colors.yellow)
 
                         with open(f"{tmpfolder}/app.ipa", "wb") as f:
                             f.write(res.content)
@@ -303,7 +303,7 @@ class Permasigner(object):
             if Path(f"{data_dir}/{name}").exists():
                 ldid = Ldid(data_dir, self.args, self.utils, True)
             else:
-                self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.pink)
+                self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
                 ldid = Ldid(data_dir, self.args, self.utils, False)
             ldid.download()
 
@@ -346,7 +346,7 @@ class Permasigner(object):
     def run(self, tmpfolder, ldid, dpkg, data_dir, is_extracted):
         # Unzip the IPA file
         if not is_extracted:
-            self.logger.log(f"Unzipping IPA...", color=Colors.pink)
+            self.logger.log(f"Unzipping IPA...", color=Colors.yellow)
             with zipfile.ZipFile(Path(f"{tmpfolder}/app.ipa"), 'r') as f:
                 with Path(f"{tmpfolder}/app") as path:
                     path.mkdir(exist_ok=False)
@@ -370,7 +370,7 @@ class Permasigner(object):
             exit(1)
 
         if Path(f'{app_dir}/Info.plist').exists():
-            self.logger.log(f"Reading plist...", color=Colors.pink)
+            self.logger.log(f"Reading plist...", color=Colors.yellow)
             with open(f'{app_dir}/Info.plist', 'rb') as f:
                 info = plistlib.load(f)
                 if self.args.name:
@@ -403,7 +403,7 @@ class Permasigner(object):
         print()
 
         # Get the deb file ready
-        self.logger.log(f"Preparing deb file...", color=Colors.pink)
+        self.logger.log(f"Preparing deb file...", color=Colors.yellow)
         print("Making directories...")
         Path(f'{tmpfolder}/deb/Applications').mkdir(exist_ok=False, parents=True)
         Path(f"{tmpfolder}/deb/DEBIAN").mkdir(exist_ok=False, parents=True)
@@ -427,7 +427,7 @@ class Permasigner(object):
         print()
 
         # Sign the app
-        self.logger.log(f"Signing app...", color=Colors.pink)
+        self.logger.log(f"Signing app...", color=Colors.yellow)
         copier.copy_entitlements(f"{tmpfolder}/entitlements.plist")
         if self.in_package:
             cert_path = self.utils.get_resource_path(__name__, "data/certificate.p12")
@@ -465,7 +465,7 @@ class Permasigner(object):
         print()
 
         # Package the deb file
-        self.logger.log(f"Packaging the deb file...", color=Colors.pink)
+        self.logger.log(f"Packaging the deb file...", color=Colors.yellow)
         if self.args.output:
             out_dir = self.args.output
             Path(out_dir).mkdir(exist_ok=True)
