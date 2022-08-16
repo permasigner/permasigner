@@ -162,5 +162,5 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-${{ matrix.os }}-Python${{ matrix.python-version }}.deb
-          path: output/**
+          path: \output\**
 
