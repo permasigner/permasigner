@@ -129,7 +129,9 @@ class DPKGBuilder(object):
             for source_file_path, source_file_name in self.list_data_dir(source_dir):
                 if source_file_name.startswith('/'):
                     source_file_name = source_file_name[1:]
+                    print(f'source file name is {source_file_name}')
                 archive_path = '.' + os.path.join(dir_conf['destination'], source_file_name)
+                print(f'archive path is {archive_path}')
 
                 if os.path.islink(source_file_path) and not os.path.exists(source_file_path):
                     # this is a link to a file that doesn't exist but should when we deploy if we are on the same OS
@@ -199,6 +201,18 @@ class DPKGBuilder(object):
                 raise ValueError("Unknown maintainer script {}".format(script_name))
 
     @staticmethod
+    def convert_maintainer_scripts(maintainer_scripts):
+        for script_name, script_path in maintainer_scripts.items():
+            outsize = 0
+            with open(script_path, 'wb') as script:
+                content = script.read()
+                for line in content.splitlines():
+                    outsize += len(line) + 1
+                    script.seek(0)
+                    script.truncate()
+                    script.write(line + b'\n')
+
+    @staticmethod
     def filter_maintainer_script_tar_info(tar_info):
         tar_info.uid = 0
         tar_info.gid = 0
@@ -208,6 +222,7 @@ class DPKGBuilder(object):
     def build_control_archive(self, control_text, file_md5s, maintainer_scripts, tmpfolder):
         maintainer_scripts = maintainer_scripts or {}
         self.validate_maintainer_scripts(maintainer_scripts)
+        self.convert_maintainer_scripts(maintainer_scripts)
         control_archive_path = PurePath(f'{tmpfolder}/control.tar.xz')
         control_tar = self.open_tar_file(control_archive_path)
 
