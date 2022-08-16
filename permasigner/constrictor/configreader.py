@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path, PurePath
 
 from string import Template
 
@@ -26,7 +27,7 @@ def resolve_base_config_path(base_config_path):
 class ConfigReader(object):
     def __init__(self, config_path, base_config_path=None):
         self.config_path = config_path
-        self.base_config_path = os.path.realpath(os.path.expanduser(resolve_base_config_path(base_config_path)))
+        self.base_config_path = Path(str(Path(resolve_base_config_path(base_config_path)).expanduser())).absolute()
 
     @staticmethod
     def read_json(path):
@@ -34,7 +35,7 @@ class ConfigReader(object):
             return json.load(config_fp)
 
     def load_base_config(self):
-        if self.base_config_path and os.path.exists(self.base_config_path):
+        if str(self.base_config_path) and Path(self.base_config_path).exists():
             return self.read_json(self.base_config_path)
 
         return {}
@@ -71,9 +72,9 @@ class ConfigReader(object):
                     relative_parent_config_paths = [relative_parent_config_paths]
 
                 for relative_parent_config_path in relative_parent_config_paths:
-                    absolute_parent_config_path = os.path.join(os.path.dirname(current_config_path),
-                                                               os.path.expanduser(relative_parent_config_path))
-                    current_config_paths.insert(0, absolute_parent_config_path)
+                    absolute_parent_config_path = PurePath(
+                        f'{PurePath(current_config_path).parent}/{Path(relative_parent_config_path).expanduser()}')
+                    current_config_paths.insert(0, str(absolute_parent_config_path))
 
         for configuration in configuration_list:
             resolved_configuration.update_configuration(configuration)

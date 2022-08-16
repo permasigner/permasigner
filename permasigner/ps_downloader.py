@@ -36,7 +36,8 @@ class Hash(object):
 
 
 class Ldid(object):
-    def __init__(self, data_dir, args, utils, exists=False):
+    def __init__(self, data_dir, name, args, utils, exists=False):
+        self.name = name
         self.data_dir = data_dir
         self.args = args
         self.utils = utils
@@ -63,26 +64,21 @@ class Ldid(object):
         if res is not None and res.status_code == 200:
             self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
 
-            with open(f"ldid", "wb") as f:
+            with open(self.name, "wb") as f:
                 f.write(res.content)
                 self.logger.debug(f"Wrote file.")
 
             if self.exists:
                 self.logger.debug("Removing outdated version of ldid")
-                Path(f"{self.data_dir}/ldid").unlink()
+                Path(f"{self.data_dir}/{self.name}").unlink()
 
-            Path('ldid').chmod(256 | 128 | 64 | 32 | 8 | 4 | 1)
+            Path(self.name).chmod(256 | 128 | 64 | 32 | 8 | 4 | 1)
 
-            if self.utils.is_windows():
-                name = 'ldid.exe'
-            else:
-                name = 'ldid'
-
-            move("ldid", Path(f'{self.data_dir}/{name}'))
+            move(self.name, Path(f'{self.data_dir}/{self.name}'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
         else:
             if self.exists:
-                self.logger.log('Reusing the existing ldid', color=Colors.yellow)
+                self.logger.log('Reusing ldid found in path', color=Colors.yellow)
             else:
                 exit(1)
 
@@ -100,7 +96,7 @@ class Ldid(object):
             self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
 
             remote_hash, res = self.hash.get_hash(None, url)
-            local_hash = self.hash.get_hash(f"{self.data_dir}/ldid", None)
+            local_hash = self.hash.get_hash(f"{self.data_dir}/{self.name}", None)
 
             if remote_hash == local_hash:
                 self.logger.debug(f"ldid hash successfully verified.")

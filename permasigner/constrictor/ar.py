@@ -1,5 +1,4 @@
-import os
-import os.path
+from pathlib import PurePath, Path
 from shutil import copyfileobj
 
 AR_HEADER_TEXT = "!<arch>\n"
@@ -46,8 +45,8 @@ class ARWriter(object):
     def archive_file(self, file_path, mod_time_override=None, uid_override=None, gid_override=None, mode_override=None):
         if not self.archive_ready:
             self.create_archive()
-        file_to_archive_name = os.path.basename(file_path)
-        file_stat = os.stat(file_path)
+        file_to_archive_name = PurePath(file_path).name
+        file_stat = Path(file_path).stat(follow_symlinks=True)
 
         mod_time = mod_time_override or file_stat.st_mtime
         uid = uid_override or file_stat.st_uid

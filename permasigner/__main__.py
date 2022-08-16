@@ -1,5 +1,6 @@
 import argparse
 import os
+import stat
 import sys
 from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
@@ -216,7 +217,10 @@ class Permasigner(object):
                     path = self.logger.ask("Paste in the path to an IPA in your file system: ")
 
                 path = path.strip().lstrip("'").rstrip("'")
-
+                
+                if path.startswith("~"):
+                    path = os.path.expanduser("~")+path.strip().lstrip("~")
+                
                 if Path(path).exists():
                     if path.endswith(".deb"):
                         if dpkg.in_path:
@@ -301,10 +305,10 @@ class Permasigner(object):
             if self.utils.is_windows():
                 name = 'ldid.exe'
             if Path(f"{data_dir}/{name}").exists():
-                ldid = Ldid(data_dir, self.args, self.utils, True)
+                ldid = Ldid(data_dir, name, self.args, self.utils, True)
             else:
                 self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
-                ldid = Ldid(data_dir, self.args, self.utils, False)
+                ldid = Ldid(data_dir, name, self.args, self.utils, False)
             ldid.download()
 
     def install(self, out_dir):
@@ -351,6 +355,8 @@ class Permasigner(object):
                 with Path(f"{tmpfolder}/app") as path:
                     path.mkdir(exist_ok=False)
                     f.extractall(path)
+                    for ds in Path(path).rglob('.DS_Store*'):
+                        Path(ds).unlink()
             print()
 
         # Read data from the plist
@@ -417,13 +423,20 @@ class Permasigner(object):
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
         print("Changing deb file scripts permissions...")
-        permissions = 256 | 128 | 64 | 32 | 8 | 4 | 1
-        Path(f"{tmpfolder}/deb/DEBIAN/postrm").chmod(permissions)
-        Path(f"{tmpfolder}/deb/DEBIAN/postinst").chmod(permissions)
+        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postrm")
+        mode = postrm.stat().st_mode
+        mode |= (mode & 0o444) >> 2
+        postrm.chmod(mode)
+        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postinst")
+        mode = postrm.stat().st_mode
+        mode |= (mode & 0o444) >> 2
+        postrm.chmod(mode)
         if app_executable is not None:
             print("Changing app executable permissions...")
-            exec_path = PurePath(f"{full_app_path}/{app_executable}")
-            Path(f'{exec_path}').chmod(permissions)
+            exec_path = Path(f"{full_app_path}/{app_executable}")
+            st = exec_path.stat().st_mode
+            mode |= (mode & 0o444) >> 2
+            exec_path.chmod(mode)
         print()
 
         # Sign the app
@@ -477,7 +490,7 @@ class Permasigner(object):
             out_dir = PurePath(f"{Path.cwd()}/output")
 
         if dpkg.in_path:
-            out_path = PurePath(f"{out_dir}/{app_name.replace(' ', '') + '_{app_version}' + '.deb'}")
+            out_path = PurePath(f"{out_dir}/{app_name.replace(' ', '') + f'_{app_version}' + '.deb'}")
             dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {out_path}"
             self.logger.debug(f"Running command: {dpkg_cmd}")
             subprocess.run(dpkg_cmd.split(), stdout=DEVNULL)
