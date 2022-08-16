@@ -5,6 +5,7 @@ from io import BytesIO
 import tarfile
 import tempfile
 import time
+from pathlib import PurePath, Path
 
 from .ar import ARWriter
 from .control import FIELD_INSTALLED_SIZE
@@ -24,7 +25,7 @@ LINK_TARGET_KEY = "target"
 def generate_directories(path, existing_dirs=None):
     """Recursively build a list of directories inside a path."""
     existing_dirs = existing_dirs or []
-    directory_name = os.path.dirname(path)
+    directory_name = str(PurePath(path).parent)
 
     if directory_name == '.':
         return
@@ -47,7 +48,6 @@ class DPKGBuilder(object):
         self.links = links or {}
         self.maintainer_scripts = maintainer_scripts
         self.seen_data_dirs = set()
-        self.working_dir = tempfile.mkdtemp()
         self.control = control
         self.output_name = output_name or control.get_default_output_name()
         self.ignore_paths = ignore_paths or []
@@ -73,7 +73,7 @@ class DPKGBuilder(object):
         """
         for root_dir, dirs, files in os.walk(source_dir):
             for file_name in files:
-                file_path = os.path.join(root_dir, file_name)
+                file_path = str(PurePath(f'{root_dir}/{file_name}'))
                 relative_path = file_path[len(source_dir):]
 
                 if self.should_skip_path(relative_path):
@@ -110,18 +110,15 @@ class DPKGBuilder(object):
 
         return tar_info
 
-    @property
-    def data_archive_path(self):
-        return os.path.join(self.working_dir, 'data.tar.gz')
-
     @staticmethod
     def open_tar_file(path):
-        tf = tarfile.open(path, 'w:gz')
+        tf = tarfile.open(path, 'w:xz')
         tf.format = tarfile.USTAR_FORMAT
         return tf
 
-    def build_data_archive(self):
-        data_tar_file = self.open_tar_file(self.data_archive_path)
+    def build_data_archive(self, tmpfolder):
+        data_archive_path = str(PurePath(f'{tmpfolder}/data.tar.xz'))
+        data_tar_file = self.open_tar_file(data_archive_path)
         file_size_bytes = 0
 
         file_md5s = []
@@ -139,7 +136,7 @@ class DPKGBuilder(object):
                     # (e.g. venv build with docker and .deb assembled on host) so add it as a link
                     self.links.append({
                         LINK_PATH_KEY: archive_path,
-                        LINK_TARGET_KEY: os.readlink(source_file_path)
+                        LINK_TARGET_KEY: Path(source_file_path).readlink()
                     })
                 else:
                     self.add_directory_root_to_archive(data_tar_file, dir_conf, archive_path)
@@ -172,7 +169,7 @@ class DPKGBuilder(object):
 
         data_tar_file.close()
 
-        return file_size_bytes, file_md5s
+        return file_size_bytes, file_md5s, data_archive_path
 
     def build_link_tarinfo(self, symlink_conf, target, path):
         link_ti = tarfile.TarInfo()
@@ -208,15 +205,11 @@ class DPKGBuilder(object):
         tar_info.mode = TAR_DEFAULT_MODE
         return tar_info
 
-    @property
-    def control_archive_path(self):
-        return os.path.join(self.working_dir, 'control.tar.gz')
-
-    def build_control_archive(self, control_text, file_md5s, maintainer_scripts):
+    def build_control_archive(self, control_text, file_md5s, maintainer_scripts, tmpfolder):
         maintainer_scripts = maintainer_scripts or {}
         self.validate_maintainer_scripts(maintainer_scripts)
-
-        control_tar = self.open_tar_file(self.control_archive_path)
+        control_archive_path = PurePath(f'{tmpfolder}/control.tar.xz')
+        control_tar = self.open_tar_file(control_archive_path)
 
         for script_name, script_path in maintainer_scripts.items():
             control_tar.add(script_path, arcname=script_name, filter=self.filter_maintainer_script_tar_info)
@@ -231,12 +224,11 @@ class DPKGBuilder(object):
             control_tar.addfile(*self.build_member_from_string('./conffiles', conf_file_text.encode()))
 
         control_tar.close()
+        return control_archive_path
 
     def assemble_deb_archive(self, control_archive_path, data_archive_path):
-        if not os.path.exists(self.output_directory):
-            os.makedirs(self.output_directory)
-
-        pkg_path = os.path.join(self.output_directory, self.output_name)
+        Path(self.output_directory).mkdir(exist_ok=True, parents=True)
+        pkg_path = PurePath(f'{self.output_directory}/{self.output_name}')
 
         with open(pkg_path, 'wb') as ar_fp:
             ar_writer = ARWriter(ar_fp)
@@ -249,11 +241,12 @@ class DPKGBuilder(object):
         return pkg_path
 
     def build_package(self):
-        file_size_bytes, file_md5s = self.build_data_archive()
+        with tempfile.TemporaryDirectory() as tmpfolder:
+            file_size_bytes, file_md5s, data_archive_path = self.build_data_archive(tmpfolder)
 
-        if not self.control.is_field_defined(FIELD_INSTALLED_SIZE):
-            self.control.installed_size_bytes = file_size_bytes
+            if not self.control.is_field_defined(FIELD_INSTALLED_SIZE):
+                self.control.installed_size_bytes = file_size_bytes
 
-        self.build_control_archive(self.control.get_control_text(), file_md5s, self.maintainer_scripts)
+            control_archive_path = self.build_control_archive(self.control.get_control_text(), file_md5s, self.maintainer_scripts, tmpfolder)
 
-        return self.assemble_deb_archive(self.control_archive_path, self.data_archive_path)
+            return self.assemble_deb_archive(control_archive_path, data_archive_path)

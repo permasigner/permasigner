@@ -1,5 +1,6 @@
 import argparse
 import os
+import stat
 import sys
 from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
@@ -419,13 +420,20 @@ class Permasigner(object):
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
         print("Changing deb file scripts permissions...")
-        permissions = 256 | 128 | 64 | 32 | 8 | 4 | 1
-        Path(f"{tmpfolder}/deb/DEBIAN/postrm").chmod(permissions)
-        Path(f"{tmpfolder}/deb/DEBIAN/postinst").chmod(permissions)
+        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postrm")
+        mode = postrm.stat().st_mode
+        mode |= (mode & 0o444) >> 2
+        postrm.chmod(mode)
+        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postinst")
+        mode = postrm.stat().st_mode
+        mode |= (mode & 0o444) >> 2
+        postrm.chmod(mode)
         if app_executable is not None:
             print("Changing app executable permissions...")
-            exec_path = PurePath(f"{full_app_path}/{app_executable}")
-            Path(f'{exec_path}').chmod(permissions)
+            exec_path = Path(f"{full_app_path}/{app_executable}")
+            st = exec_path.stat().st_mode
+            mode |= (mode & 0o444) >> 2
+            exec_path.chmod(mode)
         print()
 
         # Sign the app
