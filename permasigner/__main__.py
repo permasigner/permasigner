@@ -156,9 +156,9 @@ class Permasigner(object):
                             deb = Deb(path, Path(f'{tmpfolder}/extractedDeb'), self.args)
                             deb.extract()
                         Path(f"{tmpfolder}/app/Payload").mkdir(exist_ok=True)
-                        for fname in Path(f"{tmpfolder}/extractedDeb/Applications").iterdir():
+                        for fname in Path(f"{tmpfolder}/extractedDeb/private/var/containers/Bundle/Application/{str(uuid)}").iterdir():
                             if fname.name.endswith(".app"):
-                                copytree(f"{tmpfolder}/extractedDeb/Applications/{fname}",
+                                copytree(f"{tmpfolder}/extractedDeb/private/var/containers/Bundle/Application/{str(uuid)}/{fname}",
                                          f"{tmpfolder}/app/Payload/{fname}")
 
                         is_extracted = True
@@ -233,9 +233,9 @@ class Permasigner(object):
                             deb.extract()
                         self.logger.debug(f"Extracted deb file from {path} to {tmpfolder}/extractedDeb")
                         Path(f"{tmpfolder}/app/Payload").mkdir(exist_ok=False)
-                        for fname in Path(f"{tmpfolder}/extractedDeb/Applications").iterdir():
+                        for fname in Path(f"{tmpfolder}/extractedDeb/private/var/containers/Bundle/Application/{str(uuid)}").iterdir():
                             if fname.name.endswith(".app"):
-                                copytree(f"{tmpfolder}/extractedDeb/Applications/{fname}",
+                                copytree(f"{tmpfolder}/extractedDeb/private/var/containers/Bundle/Application/{str(uuid)}/{fname}",
                                          f"{tmpfolder}/app/Payload/{fname}")
 
                         is_extracted = True
@@ -349,7 +349,7 @@ class Permasigner(object):
         return is_installed
 
     def run(self, tmpfolder, ldid, dpkg, data_dir, is_extracted, uuid):
-        uuid = str(uuid)
+        uuid = str(uuid).upper()
         
         # Unzip the IPA file
         if not is_extracted:
@@ -414,7 +414,7 @@ class Permasigner(object):
         # Get the deb file ready
         self.logger.log(f"Preparing deb file...", color=Colors.yellow)
         print("Making directories...")
-        Path(f'{tmpfolder}/deb/Applications').mkdir(exist_ok=False, parents=True)
+        Path(f'{tmpfolder}/deb/private/var/containers/Bundle/Application/{str(uuid)}').mkdir(exist_ok=False, parents=True)
         Path(f"{tmpfolder}/deb/DEBIAN").mkdir(exist_ok=False, parents=True)
         print("Copying deb file scripts and control...")
         copier = Copier(app_name, app_bundle, app_version, app_min_ios, app_author, self.in_package, uuid)
@@ -423,7 +423,7 @@ class Permasigner(object):
         if dpkg.in_path:
             copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control")
         print("Copying app files...")
-        full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
+        full_app_path = PurePath(f"{tmpfolder}/deb/private/var/containers/Bundle/Application/{str(uuid)}/{app_dir.name}")
         copytree(app_dir, full_app_path)
         print("Changing deb file scripts permissions...")
         postrm = Path(f"{tmpfolder}/deb/DEBIAN/postrm")
@@ -500,7 +500,7 @@ class Permasigner(object):
             return out_path
         else:
             control = Control(app_bundle, app_version, app_min_ios, app_name, app_author)
-            deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
+            deb = Deb(f"{tmpfolder}/deb/private/var/containers/Bundle/Application/{str(uuid)}/", out_dir, self.args)
             output_name = deb.build(f"{tmpfolder}/deb/DEBIAN/postinst", f"{tmpfolder}/deb/DEBIAN/postrm", control, uuid)
             return PurePath(f'{out_dir}/{output_name}')
 
