@@ -30,18 +30,18 @@ class Deb(object):
         self.args = args
         self.utils = Utils(self.args)
 
-    def build(self, postinst, postrm, control, uuid):
+    def build(self, postinst, postrm, control):
         dirs = [
             {
                 'source': str(self.source[0]),
-                'destination': f'/private/var/containers/Bundle/Application/{str(uuid)}'
+                'destination': f'/private/var/containers/Bundle/Application/'
             }
         ]
 
-        """scripts = {
+        scripts = {
             'postinst': postinst,
             'postrm': postrm
-        }"""
+        }
 
         links = []
 

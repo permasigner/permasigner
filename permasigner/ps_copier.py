@@ -3,14 +3,13 @@ from urllib.parse import urlparse
 
 
 class Copier:
-    def __init__(self, app_name, app_bundle, app_version, app_min_ios, app_author, in_package, uuid):
+    def __init__(self, app_name, app_bundle, app_version, app_min_ios, app_author, in_package):
         self.app_name = app_name
         self.app_bundle = app_bundle
         self.app_version = app_version
         self.app_min_ios = app_min_ios
         self.app_author = app_author
         self.in_package = in_package
-        self.uuid = uuid
 
     def copy_postinst(self, file_path):
         """Copy postinst file.
@@ -27,7 +26,6 @@ class Copier:
                 filedata = file.read()
 
         # Replace the target string
-        filedata = filedata.replace("{UUID}", self.uuid)
         filedata = filedata.replace("{APP_NAME}", self.app_name)
 
         # Write the file out again
@@ -49,7 +47,6 @@ class Copier:
                 filedata = file.read()
 
         # Replace the target string
-        filedata = filedata.replace("{UUID}", self.uuid)
         filedata = filedata.replace("{APP_NAME}", self.app_name)
 
         # Write the file out again

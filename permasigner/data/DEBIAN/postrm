@@ -1,2 +1,2 @@
 #!/bin/sh
-uicache -p /private/var/containers/Bundle/Application/{UUID}/{APP_NAME}.app
+uicache -f -p /private/var/containers/Bundle/Application/{APP_NAME}.app
