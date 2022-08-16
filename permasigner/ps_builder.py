@@ -38,10 +38,10 @@ class Deb(object):
             }
         ]
 
-        scripts = {
+        """scripts = {
             'postinst': postinst,
             'postrm': postrm
-        }
+        }"""
 
         links = []
 
