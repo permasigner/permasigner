@@ -24,7 +24,7 @@ from .ps_builder import Deb, Control
 
 
 def main(in_package=None):
-    in_package = False if in_package is None else in_package
+    in_package = True if in_package is None else in_package
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true',
