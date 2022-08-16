@@ -218,7 +218,7 @@ class Permasigner(object):
                 path = path.strip().lstrip("'").rstrip("'")
                 
                 if path.startswith("~"):
-                    path = os.expanduser("~")+path.strip().lstrip("~")
+                    path = os.path.expanduser("~")+path.strip().lstrip("~")
                 
                 if Path(path).exists():
                     if path.endswith(".deb"):
