@@ -72,7 +72,8 @@ class ConfigReader(object):
                     relative_parent_config_paths = [relative_parent_config_paths]
 
                 for relative_parent_config_path in relative_parent_config_paths:
-                    absolute_parent_config_path = PurePath(f'{PurePath(current_config_path).parent}/{Path(relative_parent_config_path).expanduser()}')
+                    absolute_parent_config_path = PurePath(
+                        f'{PurePath(current_config_path).parent}/{Path(relative_parent_config_path).expanduser()}')
                     current_config_paths.insert(0, str(absolute_parent_config_path))
 
         for configuration in configuration_list:
