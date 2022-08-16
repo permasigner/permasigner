@@ -216,7 +216,10 @@ class Permasigner(object):
                     path = self.logger.ask("Paste in the path to an IPA in your file system: ")
 
                 path = path.strip().lstrip("'").rstrip("'")
-
+                
+                if path.startswith("~"):
+                    path = os.expanduser("~")+path.strip().lstrip("~")
+                
                 if Path(path).exists():
                     if path.endswith(".deb"):
                         if dpkg.in_path:
