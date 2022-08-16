@@ -351,6 +351,8 @@ class Permasigner(object):
                 with Path(f"{tmpfolder}/app") as path:
                     path.mkdir(exist_ok=False)
                     f.extractall(path)
+                    for ds in Path(path).rglob('.DS_Store*'):
+                        Path(ds).unlink()
             print()
 
         # Read data from the plist
@@ -477,7 +479,7 @@ class Permasigner(object):
             out_dir = PurePath(f"{Path.cwd()}/output")
 
         if dpkg.in_path:
-            out_path = PurePath(f"{out_dir}/{app_name.replace(' ', '') + '_{app_version}' + '.deb'}")
+            out_path = PurePath(f"{out_dir}/{app_name.replace(' ', '') + f'_{app_version}' + '.deb'}")
             dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {out_path}"
             self.logger.debug(f"Running command: {dpkg_cmd}")
             subprocess.run(dpkg_cmd.split(), stdout=DEVNULL)
