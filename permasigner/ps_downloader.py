@@ -54,11 +54,14 @@ class Ldid(object):
             return "ldid_linux_armv7l"
         elif self.utils.is_macos() and platform.machine() == "x86_64":
             return "ldid_macos_x86_64"
+        elif self.utils.is_freebsd13() and platform.machine() == "x86_64":
+            return "ldid_freebsd13_x86_64"
+
         elif self.utils.is_macos() and platform.machine() == "arm64":
             return "ldid_macos_arm64"
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
             return "ldid_win32_x86_64.exe"
-
+        
     def process(self, res):
         if res is not None and res.status_code == 200:
             self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
