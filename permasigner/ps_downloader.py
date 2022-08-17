@@ -4,6 +4,7 @@ import hashlib
 import platform
 from shutil import move
 from requests.exceptions import RequestException, ConnectionError
+from urllib3.exceptions import NewConnectionError
 
 from .ps_logger import Logger, Colors
 
@@ -27,11 +28,13 @@ class Hash(object):
         else:
             try:
                 res = requests.get(url, stream=True)
+                content = bytearray()
                 for data in res.iter_content(4096):
+                    content += data
                     m.update(data)
-                return m.hexdigest(), res
-            except (ConnectionError, RequestException) as e:
-                self.logger.error(f"ldid download URL is not reachable. Error: {e}")
+                return m.hexdigest(), content
+            except (NewConnectionError, ConnectionError, RequestException) as err:
+                self.logger.error(f"ldid download URL is not reachable. Error: {err}")
                 return m.hexdigest(), None
 
 
@@ -60,12 +63,12 @@ class Ldid(object):
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
             return "ldid_win32_x86_64.exe"
 
-    def process(self, res):
-        if res is not None and res.status_code == 200:
-            self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
+    def process(self, content):
+        self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
 
+        if content is not None:
             with open(self.name, "wb") as f:
-                f.write(res.content)
+                f.write(content)
                 self.logger.debug(f"Wrote file.")
 
             if self.exists:
@@ -73,14 +76,13 @@ class Ldid(object):
                 Path(f"{self.data_dir}/{self.name}").unlink()
 
             Path(self.name).chmod(256 | 128 | 64 | 32 | 8 | 4 | 1)
+            path = Path(self.name)
+            mode = path.stat().st_mode
+            mode |= (mode & 0o444) >> 2
+            path.chmod(mode)
 
             move(self.name, Path(f'{self.data_dir}/{self.name}'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
-        else:
-            if self.exists:
-                self.logger.log('Reusing ldid found in path', color=Colors.yellow)
-            else:
-                exit(1)
 
     def download(self):
         if self.args.ldidfork:
@@ -95,19 +97,22 @@ class Ldid(object):
         if self.exists:
             self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
 
-            remote_hash, res = self.hash.get_hash(None, url)
+            remote_hash, content = self.hash.get_hash(None, url)
             local_hash = self.hash.get_hash(f"{self.data_dir}/{self.name}", None)
 
             if remote_hash == local_hash:
                 self.logger.debug(f"ldid hash successfully verified.")
             else:
                 self.logger.debug(f"ldid hash failed to verify.")
-                self.process(res)
+                self.process(content)
         else:
             self.logger.debug(f"Downloading {self.get_arch()} from {url}")
             try:
                 res = requests.get(url, stream=True)
-                self.process(res)
-            except (ConnectionError, RequestException) as err:
+                if res is not None and res.status_code == 200:
+                    self.process(res.content)
+                else:
+                    raise RequestException
+            except (NewConnectionError, ConnectionError, RequestException) as err:
                 self.logger.error(f"ldid download URL is not reachable. Error: {err}")
                 exit(1)

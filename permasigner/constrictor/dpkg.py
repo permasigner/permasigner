@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import sys
 from functools import partial
 from io import BytesIO
 import tarfile
@@ -43,7 +44,7 @@ class DPKGBuilder(object):
 
     def __init__(self, output_directory, control, data_dirs, links, maintainer_scripts=None, output_name=None,
                  ignore_paths=None, configuration_files=None):
-        self.output_directory = os.path.expanduser(output_directory)
+        self.output_directory = Path(output_directory).expanduser()
         self.data_dirs = data_dirs or []
         self.links = links or {}
         self.maintainer_scripts = maintainer_scripts
@@ -88,6 +89,9 @@ class DPKGBuilder(object):
 
             dir_ti = tarfile.TarInfo()
             dir_ti.type = tarfile.DIRTYPE
+            if sys.platform == 'win32':
+                directory = directory.replace('\\', '/')
+            print(f'directory name is ={directory}')
             dir_ti.name = directory
             dir_ti.mtime = int(time.time())
             dir_ti.mode = TAR_DEFAULT_MODE
@@ -124,14 +128,19 @@ class DPKGBuilder(object):
         file_md5s = []
 
         for dir_conf in self.data_dirs:
-            source_dir = os.path.expanduser(dir_conf['source'])
+            source_dir = str(Path(dir_conf['source']).expanduser())
 
             for source_file_path, source_file_name in self.list_data_dir(source_dir):
                 if source_file_name.startswith('/'):
                     source_file_name = source_file_name[1:]
-                    print(f'source file name is {source_file_name}')
-                archive_path = '.' + os.path.join(dir_conf['destination'], source_file_name)
-                print(f'archive path is {archive_path}')
+                destination = dir_conf['destination']
+
+                filepath = ('/' + source_file_name)
+
+                if sys.platform == 'win32':
+                    filepath = filepath[1:].replace('\\', '/')
+
+                archive_path = '.' + destination + filepath
 
                 if os.path.islink(source_file_path) and not os.path.exists(source_file_path):
                     # this is a link to a file that doesn't exist but should when we deploy if we are on the same OS
@@ -201,18 +210,6 @@ class DPKGBuilder(object):
                 raise ValueError("Unknown maintainer script {}".format(script_name))
 
     @staticmethod
-    def convert_maintainer_scripts(maintainer_scripts):
-        for script_name, script_path in maintainer_scripts.items():
-            outsize = 0
-            with open(script_path, 'wb') as script:
-                content = script.read()
-                for line in content.splitlines():
-                    outsize += len(line) + 1
-                    script.seek(0)
-                    script.truncate()
-                    script.write(line + b'\n')
-
-    @staticmethod
     def filter_maintainer_script_tar_info(tar_info):
         tar_info.uid = 0
         tar_info.gid = 0
@@ -222,7 +219,6 @@ class DPKGBuilder(object):
     def build_control_archive(self, control_text, file_md5s, maintainer_scripts, tmpfolder):
         maintainer_scripts = maintainer_scripts or {}
         self.validate_maintainer_scripts(maintainer_scripts)
-        self.convert_maintainer_scripts(maintainer_scripts)
         control_archive_path = PurePath(f'{tmpfolder}/control.tar.xz')
         control_tar = self.open_tar_file(control_archive_path)
 

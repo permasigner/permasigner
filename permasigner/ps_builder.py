@@ -25,7 +25,7 @@ class Control:
 
 class Deb(object):
     def __init__(self, source, output, args):
-        self.source = source,
+        self.source = source
         self.output = output
         self.args = args
         self.utils = Utils(self.args)
@@ -33,7 +33,7 @@ class Deb(object):
     def build(self, postinst, postrm, control):
         dirs = [
             {
-                'source': str(self.source[0]),
+                'source': self.source,
                 'destination': '/Applications'
             }
         ]
