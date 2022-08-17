@@ -43,8 +43,11 @@ class Utils(object):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
     def set_executable_permission(self, path):
-        self.logger.debug(f"Setting chmod +x on {path}")
-        oschmod.set_mode(path, '+x')
+        self.logger.debug(f'Settings chmod +x on {path}')
+        path = Path(path)
+        mode = path.stat().st_mode
+        mode |= (mode & 0o444) >> 2
+        path.chmod(mode)
 
     def cmd_in_path(self, cmd):
         self.logger.debug(f"Checking if command {cmd} is in PATH...")

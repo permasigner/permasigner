@@ -23,7 +23,10 @@ from .ps_builder import Deb, Control
 """ Main Class """
 
 
-def main(in_package=None):
+def main(argv=None, in_package=None):
+    if argv is None:
+        in_package = True
+
     in_package = False if in_package is None else in_package
 
     parser = argparse.ArgumentParser()
@@ -412,20 +415,22 @@ class Permasigner(object):
         Path(f"{tmpfolder}/deb/DEBIAN").mkdir(exist_ok=False, parents=True)
         print("Copying deb file scripts and control...")
         copier = Copier(app_name, app_bundle, app_version, app_min_ios, app_author, self.in_package)
-        copier.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm")
-        copier.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst")
+        postrm_path = f"{tmpfolder}/deb/DEBIAN/postrm"
+        postinsts_path = f"{tmpfolder}/deb/DEBIAN/postinst"
+        control_path = f"{tmpfolder}/deb/DEBIAN/control"
+        copier.copy_postinst(postinsts_path)
+        copier.copy_control(control_path)
+        copier.copy_postrm(postrm_path)
         if dpkg.in_path:
-            copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control")
+            print("Changing deb file scripts permissions...")
+            self.utils.set_executable_permission(postrm_path)
+            self.utils.set_executable_permission(postinsts_path)
         print("Copying app files...")
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
-        print("Changing deb file scripts permissions...")
-        self.utils.set_executable_permission(f"{tmpfolder}/deb/DEBIAN/postrm")
-        self.utils.set_executable_permission(f"{tmpfolder}/deb/DEBIAN/postinst")
-
         if app_executable is not None:
             print("Changing app executable permissions...")
-            self.utils.set_executable_permission(f"{full_app_path}/{app_executable}")
+            self.utils.set_executable_permission(full_app_path)
         print()
 
         # Sign the app
@@ -492,4 +497,4 @@ class Permasigner(object):
 
 
 if __name__ == "__main__":
-    main(True)
+    main()

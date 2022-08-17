@@ -75,11 +75,7 @@ class Ldid(object):
                 self.logger.debug("Removing outdated version of ldid")
                 Path(f"{self.data_dir}/{self.name}").unlink()
 
-            Path(self.name).chmod(256 | 128 | 64 | 32 | 8 | 4 | 1)
-            path = Path(self.name)
-            mode = path.stat().st_mode
-            mode |= (mode & 0o444) >> 2
-            path.chmod(mode)
+            self.utils.set_executable_permission(self.name)
 
             move(self.name, Path(f'{self.data_dir}/{self.name}'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
