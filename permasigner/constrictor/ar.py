@@ -46,7 +46,7 @@ class ARWriter(object):
         if not self.archive_ready:
             self.create_archive()
         file_to_archive_name = PurePath(file_path).name
-        file_stat = Path(file_path).stat(follow_symlinks=True)
+        file_stat = Path(file_path).stat()
 
         mod_time = mod_time_override or file_stat.st_mtime
         uid = uid_override or file_stat.st_uid

@@ -91,7 +91,6 @@ class DPKGBuilder(object):
             dir_ti.type = tarfile.DIRTYPE
             if sys.platform == 'win32':
                 directory = directory.replace('\\', '/')
-            print(f'directory name is ={directory}')
             dir_ti.name = directory
             dir_ti.mtime = int(time.time())
             dir_ti.mode = TAR_DEFAULT_MODE
@@ -142,7 +141,7 @@ class DPKGBuilder(object):
 
                 archive_path = '.' + destination + filepath
 
-                if os.path.islink(source_file_path) and not os.path.exists(source_file_path):
+                if Path(source_file_path).is_symlink() and not Path(source_file_path).exists():
                     # this is a link to a file that doesn't exist but should when we deploy if we are on the same OS
                     # (e.g. venv build with docker and .deb assembled on host) so add it as a link
                     self.links.append({
@@ -151,10 +150,10 @@ class DPKGBuilder(object):
                     })
                 else:
                     self.add_directory_root_to_archive(data_tar_file, dir_conf, archive_path)
-                    if os.path.basename(source_file_name) in FORCE_DIRECTORY_INCLUSION_FILENAMES:
+                    if PurePath(source_file_name).name in FORCE_DIRECTORY_INCLUSION_FILENAMES:
                         continue
 
-                    file_size_bytes += os.path.getsize(source_file_path)
+                    file_size_bytes += Path(source_file_path).stat().st_size
 
                     file_md5s.append((md5_for_path(source_file_path), archive_path))
                     data_tar_file.add(source_file_path, arcname=archive_path, recursive=False,

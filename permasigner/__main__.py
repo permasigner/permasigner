@@ -25,7 +25,7 @@ from .ps_builder import Deb, Control
 
 
 def main(in_package=None):
-    in_package = False if in_package is None else in_package
+    in_package = True if in_package is None else in_package
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true',
@@ -141,10 +141,10 @@ class Permasigner(object):
                     self.logger.error(f"URL provided is not reachable. Error: {err}")
                     exit(1)
             elif self.args.path:
-                path = self.args.path
-                path = path.strip().lstrip("'").rstrip("'")
+                path = Path(self.args.path).expanduser()
 
-                if Path(path).exists():
+                if path.exists():
+                    path = str(path)
                     if path.endswith(".deb"):
                         self.logger.debug(f"Extracting deb package from {path} to {tmpfolder}/extractedDeb")
                         if dpkg.in_path:
@@ -216,9 +216,10 @@ class Permasigner(object):
                 else:
                     path = self.logger.ask("Paste in the path to an IPA in your file system: ")
 
-                path = path.strip().lstrip("'").rstrip("'")
+                path = Path(path).expanduser()
 
-                if Path(path).exists():
+                if path.exists():
+                    path = str(path)
                     if path.endswith(".deb"):
                         if dpkg.in_path:
                             self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
@@ -420,20 +421,12 @@ class Permasigner(object):
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
         print("Changing deb file scripts permissions...")
-        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postrm")
-        mode = postrm.stat().st_mode
-        mode |= (mode & 0o444) >> 2
-        postrm.chmod(mode)
-        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postinst")
-        mode = postrm.stat().st_mode
-        mode |= (mode & 0o444) >> 2
-        postrm.chmod(mode)
+        self.utils.set_executable_permission(f"{tmpfolder}/deb/DEBIAN/postrm")
+        self.utils.set_executable_permission(f"{tmpfolder}/deb/DEBIAN/postinst")
+
         if app_executable is not None:
             print("Changing app executable permissions...")
-            exec_path = Path(f"{full_app_path}/{app_executable}")
-            st = exec_path.stat().st_mode
-            mode |= (mode & 0o444) >> 2
-            exec_path.chmod(mode)
+            self.utils.set_executable_permission(f"{full_app_path}/{app_executable}")
         print()
 
         # Sign the app

@@ -6,6 +6,7 @@ import importlib
 from importlib import util
 from pathlib import Path, PurePath
 from shutil import which
+import oschmod
 
 from permasigner.ps_logger import Logger
 
@@ -40,6 +41,10 @@ class Utils(object):
     @staticmethod
     def is_dpkg_installed(pkg):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
+
+    def set_executable_permission(self, path):
+        self.logger.debug(f"Setting chmod +x on {path}")
+        oschmod.set_mode(path, '+x')
 
     def cmd_in_path(self, cmd):
         self.logger.debug(f"Checking if command {cmd} is in PATH...")

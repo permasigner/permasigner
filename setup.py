@@ -28,11 +28,14 @@ setup(
     long_description_content_type="text/markdown",
     classifiers=[
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7',
         'Environment :: Console',
         'Operating System :: OS Independent',
     ],
-    scripts=['bin/permasigner'],
+    entry_points={
+        'console_scripts': [
+            'permasigner = permasigner:main',
+        ],
+    },
     keywords='python, windows, macos, linux, docker, cli, open-source, ios, command-line-app, cli-app, hacktoberfest, procursus, permasign, permasigner',
     include_package_data=True,
     author='Nebula',
