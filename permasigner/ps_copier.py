@@ -46,7 +46,7 @@ class Copier:
 
         # Read the file
         if self.in_package:
-            filedata = pkgutil.get_data(__name__, "data/DEBIAN/postrm").decode('utf_8')
+            filedata = pkgutil.get_data('permasigner', "data/DEBIAN/postrm")
         else:
             with open('permasigner/data/DEBIAN/postrm', 'rb') as file:
                 filedata = file.read()
@@ -68,7 +68,7 @@ class Copier:
 
         # Read the file
         if self.in_package:
-            filedata = pkgutil.get_data(__name__, "data/DEBIAN/control").decode('utf_8')
+            filedata = pkgutil.get_data('permasigner', "data/DEBIAN/control")
         else:
             with open('permasigner/data/DEBIAN/control', 'rb') as file:
                 filedata = file.read()

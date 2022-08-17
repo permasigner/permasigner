@@ -1,7 +1,7 @@
 import argparse
 import os
-import stat
 import sys
+from importlib import metadata
 from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
 import plistlib
@@ -25,8 +25,8 @@ from .ps_builder import Deb, Control
 
 
 def main(in_package=None):
-    in_package = True if in_package is None else in_package
-
+    in_package = False if in_package is None else True
+    print(in_package)
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true',
                         help="shows some debug info, only useful for testing")
@@ -64,7 +64,8 @@ def main(in_package=None):
         exit(0)
 
     ps = Permasigner(in_package, args)
-    ps.main()
+    print(ps.in_package)
+    ps.start()
 
 
 class Permasigner(object):
@@ -75,7 +76,8 @@ class Permasigner(object):
         self.logger = Logger(self.args)
         self.outputs = []
 
-    def main(self):
+    def start(self):
+        print(self.in_package)
         data_dir = self.utils.get_home_data_directory()
         Path(data_dir).mkdir(exist_ok=True, parents=True)
 
@@ -493,4 +495,4 @@ class Permasigner(object):
 
 
 if __name__ == "__main__":
-    main(True)
+    main(False)
