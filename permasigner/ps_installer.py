@@ -57,7 +57,7 @@ class Installer:
 
             with SCPClient(client.get_transport()) as scp:
                 self.logger.log(f"Sending {self.path} to device", color=Colors.yellow)
-                filename = self.path.split("/")[-1]
+                filename = self.path.name
                 self.logger.debug(f"Copying via scp from {self.path} to /var/mobile/Documents/")
                 scp.put(f'{self.path}',
                         remote_path='/var/mobile/Documents')
