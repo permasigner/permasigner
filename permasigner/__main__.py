@@ -292,7 +292,9 @@ class Permasigner(object):
         if sys.platform == "windows":
             self.logger.error(f"Script must be ran on macOS or Linux.")
             exit(1)
-
+        # Check if script is running on FreeBSD, if so, throw warning
+        if sys.platform == "freebsd13":
+            self.logger.log(f"You are running on FreeBSD, which is not fully supported. Before opening an issue, please make sure that: \n 1) 127.0.0.1 is localhost using the -t flag \n 2) usbmuxd is installed and running, and \n 3) iproxy 2222 22 is running and actively listening for connections", color=Colors.purple)
         # Check if codesign arg is added on Linux or iOS
         if self.args.codesign:
             if not self.utils.is_macos():
