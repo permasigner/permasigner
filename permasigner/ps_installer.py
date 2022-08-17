@@ -105,7 +105,7 @@ class Installer:
                     f"{command}", get_pty=True)
 
                 output = streams[1].channel.recv(2048).decode()
-                if "password".encode() in output or "Password".encode() in output:
+                if "password" in output or "Password" in output:
                     password = getpass()
                     streams[0].write(f'{password}\n')
                     streams[0].flush()
