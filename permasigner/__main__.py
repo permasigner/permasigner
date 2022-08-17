@@ -288,11 +288,6 @@ class Permasigner(object):
                 self.logger.log(f"Output file: {out_dir}", color=Colors.green)
 
     def checks(self, ldid, data_dir):
-        # Check if script is running on Windows, if so, fail
-        if sys.platform == "windows":
-            self.logger.error(f"Script must be ran on macOS or Linux.")
-            exit(1)
-
         # Check if codesign arg is added on Linux or iOS
         if self.args.codesign:
             if not self.utils.is_macos():
