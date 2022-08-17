@@ -216,13 +216,13 @@ class Permasigner(object):
                     ipa_name = self.logger.ask('    IPA name (ex. Taurine.ipa, DemoApp.ipa): ')
                     path = f"/permasigner/ipas/{ipa_name}"
                 else:
-                    path = self.logger.ask("Paste in the path to an IPA in your file system: ")
+                    path = self.logger.ask("Paste in the path to an IPA in your file system: ").replace(' ', '').strip("'")
 
-                path = Path(path).expanduser()
+                if path.startswith('~'):
+                    path = Path(path).expanduser()
 
-                if path.exists():
-                    path = str(path)
-                    if path.endswith(".deb"):
+                if Path(path).exists():
+                    if PurePath(path).suffix == ".deb":
                         if dpkg.in_path:
                             self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
                             subprocess.run(
@@ -238,7 +238,7 @@ class Permasigner(object):
                                          f"{tmpfolder}/app/Payload/{fname}")
 
                         is_extracted = True
-                    elif path.endswith(".ipa"):
+                    elif PurePath(path).suffix == ".ipa":
                         copy(path, f"{tmpfolder}/app.ipa")
                     else:
                         self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
