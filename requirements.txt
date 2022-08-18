@@ -7,6 +7,7 @@ charset-normalizer==2.1.0
 certifi==2022.6.15
 unix_ar==0.2.1
 autopep8==1.7.0
+oschmod==0.3.12
 
 # Packages only required for desktop
 scp==0.14.4 ; sys_platform == "linux" or sys_platform == "freebsd13" or sys_platform == "win32" or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")

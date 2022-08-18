@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import sys
 from functools import partial
 from io import BytesIO
 import tarfile
@@ -43,7 +44,7 @@ class DPKGBuilder(object):
 
     def __init__(self, output_directory, control, data_dirs, links, maintainer_scripts=None, output_name=None,
                  ignore_paths=None, configuration_files=None):
-        self.output_directory = os.path.expanduser(output_directory)
+        self.output_directory = Path(output_directory).expanduser()
         self.data_dirs = data_dirs or []
         self.links = links or {}
         self.maintainer_scripts = maintainer_scripts
@@ -88,6 +89,8 @@ class DPKGBuilder(object):
 
             dir_ti = tarfile.TarInfo()
             dir_ti.type = tarfile.DIRTYPE
+            if sys.platform == 'win32':
+                directory = directory.replace('\\', '/')
             dir_ti.name = directory
             dir_ti.mtime = int(time.time())
             dir_ti.mode = TAR_DEFAULT_MODE
@@ -124,14 +127,21 @@ class DPKGBuilder(object):
         file_md5s = []
 
         for dir_conf in self.data_dirs:
-            source_dir = os.path.expanduser(dir_conf['source'])
+            source_dir = str(Path(dir_conf['source']).expanduser())
 
             for source_file_path, source_file_name in self.list_data_dir(source_dir):
                 if source_file_name.startswith('/'):
                     source_file_name = source_file_name[1:]
-                archive_path = '.' + os.path.join(dir_conf['destination'], source_file_name)
+                destination = dir_conf['destination']
 
-                if os.path.islink(source_file_path) and not os.path.exists(source_file_path):
+                filepath = ('/' + source_file_name)
+
+                if sys.platform == 'win32':
+                    filepath = filepath[1:].replace('\\', '/')
+
+                archive_path = '.' + destination + filepath
+
+                if Path(source_file_path).is_symlink() and not Path(source_file_path).exists():
                     # this is a link to a file that doesn't exist but should when we deploy if we are on the same OS
                     # (e.g. venv build with docker and .deb assembled on host) so add it as a link
                     self.links.append({
@@ -140,10 +150,10 @@ class DPKGBuilder(object):
                     })
                 else:
                     self.add_directory_root_to_archive(data_tar_file, dir_conf, archive_path)
-                    if os.path.basename(source_file_name) in FORCE_DIRECTORY_INCLUSION_FILENAMES:
+                    if PurePath(source_file_name).name in FORCE_DIRECTORY_INCLUSION_FILENAMES:
                         continue
 
-                    file_size_bytes += os.path.getsize(source_file_path)
+                    file_size_bytes += Path(source_file_path).stat().st_size
 
                     file_md5s.append((md5_for_path(source_file_path), archive_path))
                     data_tar_file.add(source_file_path, arcname=archive_path, recursive=False,

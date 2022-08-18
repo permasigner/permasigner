@@ -1,6 +1,5 @@
 import argparse
 import os
-import stat
 import sys
 from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
@@ -24,8 +23,11 @@ from .ps_builder import Deb, Control
 """ Main Class """
 
 
-def main(in_package=None):
-    in_package = True if in_package is None else in_package
+def main(argv=None, in_package=None):
+    if argv is None:
+        in_package = True
+
+    in_package = False if in_package is None else in_package
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true',
@@ -64,7 +66,7 @@ def main(in_package=None):
         exit(0)
 
     ps = Permasigner(in_package, args)
-    ps.main()
+    ps.start()
 
 
 class Permasigner(object):
@@ -75,7 +77,7 @@ class Permasigner(object):
         self.logger = Logger(self.args)
         self.outputs = []
 
-    def main(self):
+    def start(self):
         data_dir = self.utils.get_home_data_directory()
         Path(data_dir).mkdir(exist_ok=True, parents=True)
 
@@ -141,10 +143,10 @@ class Permasigner(object):
                     self.logger.error(f"URL provided is not reachable. Error: {err}")
                     exit(1)
             elif self.args.path:
-                path = self.args.path
-                path = path.strip().lstrip("'").rstrip("'")
+                path = Path(self.args.path).expanduser()
 
-                if Path(path).exists():
+                if path.exists():
+                    path = str(path)
                     if path.endswith(".deb"):
                         self.logger.debug(f"Extracting deb package from {path} to {tmpfolder}/extractedDeb")
                         if dpkg.in_path:
@@ -214,15 +216,13 @@ class Permasigner(object):
                     ipa_name = self.logger.ask('    IPA name (ex. Taurine.ipa, DemoApp.ipa): ')
                     path = f"/permasigner/ipas/{ipa_name}"
                 else:
-                    path = self.logger.ask("Paste in the path to an IPA in your file system: ")
+                    path = self.logger.ask("Paste in the path to an IPA in your file system: ").replace(' ', '').strip("'")
 
-                path = path.strip().lstrip("'").rstrip("'")
-
-                if path.startswith("~"):
-                    path = os.path.expanduser("~") + path.strip().lstrip("~")
+                if path.startswith('~'):
+                    path = Path(path).expanduser()
 
                 if Path(path).exists():
-                    if path.endswith(".deb"):
+                    if PurePath(path).suffix == ".deb":
                         if dpkg.in_path:
                             self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
                             subprocess.run(
@@ -238,7 +238,7 @@ class Permasigner(object):
                                          f"{tmpfolder}/app/Payload/{fname}")
 
                         is_extracted = True
-                    elif path.endswith(".ipa"):
+                    elif PurePath(path).suffix == ".ipa":
                         copy(path, f"{tmpfolder}/app.ipa")
                     else:
                         self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
@@ -288,13 +288,12 @@ class Permasigner(object):
                 self.logger.log(f"Output file: {out_dir}", color=Colors.green)
 
     def checks(self, ldid, data_dir):
-        # Check if script is running on Windows, if so, fail
-        if sys.platform == "windows":
-            self.logger.error(f"Script must be ran on macOS or Linux.")
-            exit(1)
+<<<<<<< HEAD
         # Check if script is running on FreeBSD, if so, throw warning
         if sys.platform == "freebsd13":
             self.logger.log(f"You are running on FreeBSD, which is not fully supported; please be aware that some features may not work as expected. Before opening an issue, please make sure that: \n 0) If an ldid error is thrown, clone and compile https://github.com/itsnebulalol/ldid using gmake and copy the binary to ~/.local/share/permasigner \n 1) 127.0.0.1 is localhost using the -t flag \n 2) usbmuxd is installed and running, and \n 3) iproxy 2222 22 is running and actively listening for connections", color=Colors.purple)
+=======
+>>>>>>> upstream/main
         # Check if codesign arg is added on Linux or iOS
         if self.args.codesign:
             if not self.utils.is_macos():
@@ -417,28 +416,22 @@ class Permasigner(object):
         Path(f"{tmpfolder}/deb/DEBIAN").mkdir(exist_ok=False, parents=True)
         print("Copying deb file scripts and control...")
         copier = Copier(app_name, app_bundle, app_version, app_min_ios, app_author, self.in_package)
-        copier.copy_postrm(f"{tmpfolder}/deb/DEBIAN/postrm")
-        copier.copy_postinst(f"{tmpfolder}/deb/DEBIAN/postinst")
+        postrm_path = f"{tmpfolder}/deb/DEBIAN/postrm"
+        postinsts_path = f"{tmpfolder}/deb/DEBIAN/postinst"
+        control_path = f"{tmpfolder}/deb/DEBIAN/control"
+        copier.copy_postinst(postinsts_path)
+        copier.copy_control(control_path)
+        copier.copy_postrm(postrm_path)
         if dpkg.in_path:
-            copier.copy_control(f"{tmpfolder}/deb/DEBIAN/control")
+            print("Changing deb file scripts permissions...")
+            self.utils.set_executable_permission(postrm_path)
+            self.utils.set_executable_permission(postinsts_path)
         print("Copying app files...")
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
-        print("Changing deb file scripts permissions...")
-        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postrm")
-        mode = postrm.stat().st_mode
-        mode |= (mode & 0o444) >> 2
-        postrm.chmod(mode)
-        postrm = Path(f"{tmpfolder}/deb/DEBIAN/postinst")
-        mode = postrm.stat().st_mode
-        mode |= (mode & 0o444) >> 2
-        postrm.chmod(mode)
         if app_executable is not None:
             print("Changing app executable permissions...")
-            exec_path = Path(f"{full_app_path}/{app_executable}")
-            st = exec_path.stat().st_mode
-            mode |= (mode & 0o444) >> 2
-            exec_path.chmod(mode)
+            self.utils.set_executable_permission(full_app_path)
         print()
 
         # Sign the app
@@ -505,4 +498,4 @@ class Permasigner(object):
 
 
 if __name__ == "__main__":
-    main(True)
+    main()
