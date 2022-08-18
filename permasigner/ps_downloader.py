@@ -52,6 +52,8 @@ class Ldid(object):
     def get_arch(self):
         if self.utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
+        elif self.utils.is_linux() and platform.machine() == "x86_64":
+            return "ldid_freebsd13_x86_64"
         elif self.utils.is_linux() and platform.machine() == "aarch64":
             return "ldid_linux_aarch64"
         elif self.utils.is_linux() and platform.machine() == "armv7l":
