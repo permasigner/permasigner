@@ -308,7 +308,7 @@ class Permasigner(object):
             else:
                 self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
                 ldid = Ldid(data_dir, name, self.args, self.utils, False)
-            ldid.download()
+                ldid.download()
 
     def install(self, out_dir):
         if not self.utils.is_ios():
