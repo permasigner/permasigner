@@ -65,12 +65,9 @@ class Ldid(object):
             return "ldid_macos_arm64"
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
             return "ldid_win32_x86_64.exe"
-<<<<<<< HEAD
-=======
 
     def process(self, content):
         self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
->>>>>>> upstream/main
 
         if content is not None:
             with open(self.name, "wb") as f:

@@ -288,12 +288,10 @@ class Permasigner(object):
                 self.logger.log(f"Output file: {out_dir}", color=Colors.green)
 
     def checks(self, ldid, data_dir):
-<<<<<<< HEAD
         # Check if script is running on FreeBSD, if so, throw warning
         if sys.platform == "freebsd13":
             self.logger.log(f"You are running on FreeBSD, which is not fully supported; please be aware that some features may not work as expected. Before opening an issue, please make sure that: \n 0) If an ldid error is thrown, clone and compile https://github.com/itsnebulalol/ldid using gmake and copy the binary to ~/.local/share/permasigner \n 1) 127.0.0.1 is localhost using the -t flag \n 2) usbmuxd is installed and running, and \n 3) iproxy 2222 22 is running and actively listening for connections", color=Colors.purple)
-=======
->>>>>>> upstream/main
+        
         # Check if codesign arg is added on Linux or iOS
         if self.args.codesign:
             if not self.utils.is_macos():
