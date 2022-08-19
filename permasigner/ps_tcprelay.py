@@ -221,6 +221,8 @@ class MuxConnection(object):
                            str(mytag), 'received', str(recvtag))
         return data['Number']
 
+
+
     def listen(self):
         ret = self._exchange(self.proto.TYPE_LISTEN)
         if ret != 0:
@@ -332,7 +334,7 @@ class TCPRelay(socketserver.BaseRequestHandler):
             return
         dev = mux.devices[0]
         logger.debug(f"Connecting to device {str(dev)}")
-        dsock = mux.connect(dev, self.server.server_address[1])
+        dsock = mux.connect(dev, self.server.rport) #self.server.server_address[1])
         lsock = self.request
         logger.debug("Connection established, relaying data")
         try:
