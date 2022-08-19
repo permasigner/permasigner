@@ -58,6 +58,7 @@ def main(argv=None, in_package=None):
                         help="args for tcprelay rport:lport:host:socketpath (ex: 22:2222:localhost:/var/run/usbmuxd)")
     parser.add_argument('-e', '--entitlements', type=str,
                         help="path to entitlements file")
+    parser.add_argument('--ignore-hash', dest='ignorehash', action='store_true', help="ignore hash check")
     args = parser.parse_args()
 
     if args.version:
@@ -299,15 +300,16 @@ class Permasigner(object):
                 exit(1)
 
         # Auto download ldid
-        if not ldid.in_path:
-            name = 'ldid'
-            if self.utils.is_windows():
-                name = 'ldid.exe'
-            if Path(f"{data_dir}/{name}").exists():
-                ldid = Ldid(data_dir, name, self.args, self.utils, True)
-            else:
-                self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
-                ldid = Ldid(data_dir, name, self.args, self.utils, False)
+        if not self.args.ignorehash:
+            if not ldid.in_path:
+                name = 'ldid'
+                if self.utils.is_windows():
+                    name = 'ldid.exe'
+                if Path(f"{data_dir}/{name}").exists():
+                    ldid = Ldid(data_dir, name, self.args, self.utils, True)
+                else:
+                    self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
+                    ldid = Ldid(data_dir, name, self.args, self.utils, False)
                 ldid.download()
 
     def install(self, out_dir):
