@@ -1,4 +1,2 @@
 #!/bin/sh
 uicache -p /Applications/{APP_NAME}.app
-export EXECUTABLE="/Applications/{APP_NAME}.app/{APP_NAME}"
-if [ -f "$EXECUTABLE" ]; then sudo chmod +x "$EXECUTABLE"; fi
