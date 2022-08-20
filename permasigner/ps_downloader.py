@@ -66,17 +66,17 @@ class Ldid(object):
         self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
 
         if content is not None:
-            #with open(self.name, "wb") as f:
-            #    f.write(content)
-            #    self.logger.debug(f"Wrote file.")
+            with open(self.name, "wb") as f:
+                f.write(content)
+                self.logger.debug(f"Wrote file.")
 
             if self.exists:
                 self.logger.debug("Removing outdated version of ldid")
-                #Path(f"{self.data_dir}/{self.name}").unlink()
+                Path(f"{self.data_dir}/{self.name}").unlink()
 
-            #self.utils.set_executable_permission(self.name)
+            self.utils.set_executable_permission(self.name)
 
-            #move(self.name, Path(f'{self.data_dir}/{self.name}'))
+            move(self.name, Path(f'{self.data_dir}/{self.name}'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
 
     def download(self):
