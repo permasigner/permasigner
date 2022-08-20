@@ -221,8 +221,6 @@ class MuxConnection(object):
                            str(mytag), 'received', str(recvtag))
         return data['Number']
 
-
-
     def listen(self):
         ret = self._exchange(self.proto.TYPE_LISTEN)
         if ret != 0:
