@@ -416,10 +416,9 @@ class Permasigner(object):
         copier.copy_postinst(postinsts_path)
         copier.copy_control(control_path)
         copier.copy_postrm(postrm_path)
-        if dpkg.in_path:
-            print("Changing deb file scripts permissions...")
-            self.utils.set_executable_permission(postrm_path)
-            self.utils.set_executable_permission(postinsts_path)
+        print("Changing deb file scripts permissions...")
+        self.utils.set_executable_permission(postrm_path)
+        self.utils.set_executable_permission(postinsts_path)
         print("Copying app files...")
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
