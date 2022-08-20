@@ -89,7 +89,6 @@ class Ldid(object):
 
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{self.get_arch()}"
 
-        self.logger.debug(url)
         if self.exists:
             self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
 
