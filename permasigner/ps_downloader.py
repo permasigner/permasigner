@@ -58,7 +58,7 @@ class Ldid(object):
 
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
             system = "win32"
-            machine = "x86_64"
+            machine = "x86_64.exe"
         
         return "ldid_"+system+"_"+machine
 
