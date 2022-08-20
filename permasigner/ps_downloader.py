@@ -66,6 +66,10 @@ class Ldid(object):
         self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
 
         if content is not None:
+            if "Not Found" in str(content):
+                self.logger.log(f"File doesn't exist! Falling back to existing ldid...", color=Colors.red)
+                return
+            
             with open(self.name, "wb") as f:
                 f.write(content)
                 self.logger.debug(f"Wrote file.")
