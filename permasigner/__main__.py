@@ -423,9 +423,8 @@ class Permasigner(object):
         print("Copying app files...")
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
-        if app_executable is not None:
-            print("Changing app executable permissions...")
-            self.utils.set_executable_permission(full_app_path)
+        print("Changing app executable permissions...")
+        self.utils.set_executable_permission(f"{full_app_path}/{app_executable}")
         print()
 
         # Sign the app
