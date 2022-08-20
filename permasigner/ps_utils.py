@@ -32,10 +32,18 @@ class Utils(object):
 
     @staticmethod
     def is_linux():
+        if not sys.platform == "linux":
+            return False
+
         return sys.platform == "linux"
+        
     @staticmethod
-    def is_freebsd13():
-        return sys.platform == "freebsd13"
+    def is_freebsd():
+        if not sys.platform.startswith("freebsd"):
+            return False
+        
+        return sys.platform == sys.platform
+
     @staticmethod
     def is_windows():
         return sys.platform == "win32"
@@ -96,7 +104,7 @@ class Utils(object):
             return ps_home
 
         user_home = Path.home()
-        if self.is_linux() or self.is_freebsd13():
+        if self.is_linux() or self.is_freebsd():
             xdg_data_home = os.environ.get("XDG_DATA_HOME", PurePath(f'{user_home}/.local/share'))
             return PurePath(f'{xdg_data_home}/permasigner')
         elif self.is_ios() or self.is_macos():

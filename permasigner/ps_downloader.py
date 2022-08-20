@@ -2,6 +2,7 @@ from pathlib import Path
 import requests
 import hashlib
 import platform
+import sys
 from shutil import move
 from requests.exceptions import RequestException, ConnectionError
 from urllib3.exceptions import NewConnectionError
@@ -52,12 +53,16 @@ class Ldid(object):
     def get_arch(self):
         if self.utils.is_linux() and platform.machine() == "x86_64":
             return "ldid_linux_x86_64"
-        elif self.utils.is_freebsd13() and platform.machine() == "x86_64":
-            return "ldid_freebsd13_x86_64"
+
         elif self.utils.is_linux() and platform.machine() == "aarch64":
             return "ldid_linux_aarch64"
+        
         elif self.utils.is_linux() and platform.machine() == "armv7l":
             return "ldid_linux_armv7l"
+
+        elif self.utils.is_freebsd():
+            return "ldid_"+sys.platform+"_"+platform.machine()
+        
         elif self.utils.is_macos() and platform.machine() == "x86_64":
             return "ldid_macos_x86_64"
 
