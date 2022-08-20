@@ -8,8 +8,6 @@
     </array>
     <key>platform-application</key>
     <true/>
-    <key>get-task-allow</key>
-    <true/>
     <key>keychain-access-groups</key>
     <array>
       <string>{APP_KEYCHAIN_GROUPS}</string>

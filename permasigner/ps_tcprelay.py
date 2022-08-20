@@ -334,7 +334,7 @@ class TCPRelay(socketserver.BaseRequestHandler):
             return
         dev = mux.devices[0]
         logger.debug(f"Connecting to device {str(dev)}")
-        dsock = mux.connect(dev, self.server.rport) 
+        dsock = mux.connect(dev, self.server.rport)
         lsock = self.request
         logger.debug("Connection established, relaying data")
         try:
