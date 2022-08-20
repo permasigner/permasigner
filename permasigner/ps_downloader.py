@@ -51,41 +51,32 @@ class Ldid(object):
         self.hash = Hash(self.args)
 
     def get_arch(self):
-        if self.utils.is_linux() and platform.machine() == "x86_64":
-            return "ldid_linux_x86_64"
+        system = sys.platform
+        machine = platform.machine()
+        if self.utils.is_macos():
+            system = "macos"
 
-        elif self.utils.is_linux() and platform.machine() == "aarch64":
-            return "ldid_linux_aarch64"
-        
-        elif self.utils.is_linux() and platform.machine() == "armv7l":
-            return "ldid_linux_armv7l"
-
-        elif self.utils.is_freebsd():
-            return "ldid_"+sys.platform+"_"+platform.machine()
-        
-        elif self.utils.is_macos() and platform.machine() == "x86_64":
-            return "ldid_macos_x86_64"
-
-        elif self.utils.is_macos() and platform.machine() == "arm64":
-            return "ldid_macos_arm64"
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
-            return "ldid_win32_x86_64.exe"
+            system = "win32"
+            machine = "x86_64"
+        
+        return "ldid_"+system+"_"+machine
 
     def process(self, content):
         self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
 
         if content is not None:
-            with open(self.name, "wb") as f:
-                f.write(content)
-                self.logger.debug(f"Wrote file.")
+            #with open(self.name, "wb") as f:
+            #    f.write(content)
+            #    self.logger.debug(f"Wrote file.")
 
             if self.exists:
                 self.logger.debug("Removing outdated version of ldid")
-                Path(f"{self.data_dir}/{self.name}").unlink()
+                #Path(f"{self.data_dir}/{self.name}").unlink()
 
-            self.utils.set_executable_permission(self.name)
+            #self.utils.set_executable_permission(self.name)
 
-            move(self.name, Path(f'{self.data_dir}/{self.name}'))
+            #move(self.name, Path(f'{self.data_dir}/{self.name}'))
             self.logger.debug(f"Moved ldid to {self.data_dir}")
 
     def download(self):
@@ -98,6 +89,7 @@ class Ldid(object):
 
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{self.get_arch()}"
 
+        self.logger.debug(url)
         if self.exists:
             self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
 
