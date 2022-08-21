@@ -31,7 +31,7 @@ class Deb(object):
         self.args = args
         self.utils = Utils(self.args)
 
-    def build(self, postinst, postrm, control):
+    def build(self, postinst, prerm, control):
         dirs = [
             {
                 'source': self.source,
@@ -43,7 +43,7 @@ class Deb(object):
 
         scripts = {
             'postinst': postinst,
-            'postrm': postrm
+            'prerm': prerm
         }
 
         links = []

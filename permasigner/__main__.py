@@ -386,14 +386,14 @@ class Permasigner(object):
         Path(tmpfolder).joinpath('deb').joinpath('DEBIAN').mkdir(exist_ok=False, parents=True)
         print("Copying deb file scripts and control...")
         copier = Copier(app_name, app_bundle, app_version, app_min_ios, app_author, self.in_package)
-        postrm_path = PurePath(f'{tmpfolder}/deb/DEBIAN/postrm')
+        prerm_path = PurePath(f'{tmpfolder}/deb/DEBIAN/prerm')
         postinsts_path = PurePath(f'{tmpfolder}/deb/DEBIAN/postinst')
         control_path = PurePath(f'{tmpfolder}/deb/DEBIAN/control')
         copier.copy_postinst(postinsts_path)
         copier.copy_control(control_path)
-        copier.copy_postrm(postrm_path)
+        copier.copy_prerm(prerm_path)
         print("Changing deb file scripts permissions...")
-        self.utils.set_executable_permission(postrm_path)
+        self.utils.set_executable_permission(prerm_path)
         self.utils.set_executable_permission(postinsts_path)
         print("Copying app files...")
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
@@ -461,7 +461,7 @@ class Permasigner(object):
             control = Control(app_bundle, app_version, app_min_ios, app_name, app_author, app_executable)
             deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
             output_name = deb.build(PurePath(f"{tmpfolder}/deb/DEBIAN/postinst"),
-                                    PurePath(f"{tmpfolder}/deb/DEBIAN/postrm"), control)
+                                    PurePath(f"{tmpfolder}/deb/DEBIAN/prerm"), control)
             return PurePath(f'{out_dir}/{output_name}')
 
 

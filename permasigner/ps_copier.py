@@ -37,7 +37,7 @@ class Copier:
             for line in filedata.splitlines():
                 file.write(line + b'\n')
 
-    def copy_postrm(self, file_path):
+    def copy_prerm(self, file_path):
         """Copy postrm file.
 
         Args:
