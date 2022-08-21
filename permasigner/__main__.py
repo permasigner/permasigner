@@ -486,7 +486,8 @@ class Permasigner(object):
         else:
             control = Control(app_bundle, app_version, app_min_ios, app_name, app_author, app_executable)
             deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
-            output_name = deb.build(PurePath(f"{tmpfolder}/deb/DEBIAN/postinst"), PurePath(f"{tmpfolder}/deb/DEBIAN/postrm"), control)
+            output_name = deb.build(PurePath(f"{tmpfolder}/deb/DEBIAN/postinst"),
+                                    PurePath(f"{tmpfolder}/deb/DEBIAN/postrm"), control)
             return PurePath(f'{out_dir}/{output_name}')
 
 
