@@ -155,13 +155,14 @@ class Permasigner(object):
                             subprocess.run(
                                 ["dpkg-deb", "-X", path, PurePath(f'{tmpfolder}/extractedDeb')], stdout=DEVNULL)
                         else:
-                            deb = Deb(path, Path(f'{tmpfolder}/extractedDeb'), self.args)
+                            deb = Deb(path, PurePath(f'{tmpfolder}/extractedDeb'), self.args)
                             deb.extract()
                         Path(f"{tmpfolder}/app/Payload").mkdir(exist_ok=True)
                         for fname in Path(f"{tmpfolder}/extractedDeb/Applications").iterdir():
                             if fname.name.endswith(".app"):
                                 copytree(f"{tmpfolder}/extractedDeb/Applications/{fname}",
                                          f"{tmpfolder}/app/Payload/{fname}")
+                                break
 
                         is_extracted = True
                     elif path.endswith(".ipa"):
@@ -300,7 +301,7 @@ class Permasigner(object):
             name = 'ldid'
             if self.utils.is_windows():
                 name = 'ldid.exe'
-            if Path(f"{data_dir}/{name}").exists():
+            if Path(data_dir).joinpath(name).exists():
                 ldid = Ldid(data_dir, name, self.args, self.utils, True)
             else:
                 self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
@@ -347,7 +348,7 @@ class Permasigner(object):
         # Unzip the IPA file
         if not is_extracted:
             self.logger.log(f"Unzipping IPA...", color=Colors.yellow)
-            with zipfile.ZipFile(Path(f"{tmpfolder}/app.ipa"), 'r') as f:
+            with zipfile.ZipFile(PurePath(f'{tmpfolder}/app.ipa'), 'r') as f:
                 with Path(f"{tmpfolder}/app") as path:
                     path.mkdir(exist_ok=False)
                     f.extractall(path)
@@ -357,7 +358,7 @@ class Permasigner(object):
 
         # Read data from the plist
         app_dir = ''
-        payload = Path(f"{tmpfolder}/app/Payload")
+        payload = Path(tmpfolder).joinpath('app').joinpath('Payload')
         if payload.exists():
             for fname in payload.rglob('*.app'):
                 app_dir = fname
@@ -371,7 +372,7 @@ class Permasigner(object):
             self.logger.error(f"IPA/deb is not valid!")
             exit(1)
 
-        if Path(f'{app_dir}/Info.plist').exists():
+        if Path(app_dir).joinpath('Info.plist').exists():
             self.logger.log(f"Reading plist...", color=Colors.yellow)
             with open(f'{app_dir}/Info.plist', 'rb') as f:
                 info = plistlib.load(f)
@@ -407,13 +408,13 @@ class Permasigner(object):
         # Get the deb file ready
         self.logger.log(f"Preparing deb file...", color=Colors.yellow)
         print("Making directories...")
-        Path(f'{tmpfolder}/deb/Applications').mkdir(exist_ok=False, parents=True)
-        Path(f"{tmpfolder}/deb/DEBIAN").mkdir(exist_ok=False, parents=True)
+        Path(tmpfolder).joinpath('deb').joinpath('Applications').mkdir(exist_ok=False, parents=True)
+        Path(tmpfolder).joinpath('deb').joinpath('DEBIAN').mkdir(exist_ok=False, parents=True)
         print("Copying deb file scripts and control...")
         copier = Copier(app_name, app_bundle, app_version, app_min_ios, app_author, self.in_package)
-        postrm_path = f"{tmpfolder}/deb/DEBIAN/postrm"
-        postinsts_path = f"{tmpfolder}/deb/DEBIAN/postinst"
-        control_path = f"{tmpfolder}/deb/DEBIAN/control"
+        postrm_path = PurePath(f'{tmpfolder}/deb/DEBIAN/postrm')
+        postinsts_path = PurePath(f'{tmpfolder}/deb/DEBIAN/postinst')
+        control_path = PurePath(f'{tmpfolder}/deb/DEBIAN/control')
         copier.copy_postinst(postinsts_path)
         copier.copy_control(control_path)
         copier.copy_postrm(postrm_path)
@@ -424,7 +425,7 @@ class Permasigner(object):
         full_app_path = PurePath(f"{tmpfolder}/deb/Applications/{app_dir.name}")
         copytree(app_dir, full_app_path)
         print("Changing app executable permissions...")
-        self.utils.set_executable_permission(f"{full_app_path}/{app_executable}")
+        self.utils.set_executable_permission(PurePath(f'{full_app_path}/{app_executable}'))
         print()
 
         # Sign the app
@@ -433,7 +434,7 @@ class Permasigner(object):
         if self.in_package:
             cert_path = self.utils.get_resource_path(__name__, "data/certificate.p12")
         else:
-            cert_path = Path(f'{Path.cwd()}/permasigner/data/certificate.p12')
+            cert_path = PurePath(f'{Path.cwd()}/permasigner/data/certificate.p12')
 
         if self.args.codesign:
             print("Signing with codesign as it was specified...")
@@ -448,12 +449,12 @@ class Permasigner(object):
             if self.utils.is_ios() or ldid_in_path:
                 ldid_cmd = 'ldid'
             elif self.utils.is_windows():
-                ldid_cmd = Path(f'{data_dir}/ldid.exe')
+                ldid_cmd = PurePath(f'{data_dir}/ldid.exe')
             else:
-                ldid_cmd = Path(f'{data_dir}/ldid')
+                ldid_cmd = PurePath(f'{data_dir}/ldid')
 
             self.logger.debug(
-                f"Running command: {ldid_cmd} -S{Path(f'{tmpfolder}/entitlements.plist')} -M -K{cert_path} -Upassword '{full_app_path}'")
+                f"Running command: {ldid_cmd} -S{PurePath(f'{tmpfolder}/entitlements.plist')} -M -K{cert_path} -Upassword '{full_app_path}'")
 
             subprocess.run([f'{ldid_cmd}', f'-S{tmpfolder}/entitlements.plist', '-M',
                             f'-K{cert_path}', '-Upassword', f'{full_app_path}'], stdout=DEVNULL)
@@ -485,7 +486,7 @@ class Permasigner(object):
         else:
             control = Control(app_bundle, app_version, app_min_ios, app_name, app_author, app_executable)
             deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
-            output_name = deb.build(f"{tmpfolder}/deb/DEBIAN/postinst", f"{tmpfolder}/deb/DEBIAN/postrm", control)
+            output_name = deb.build(PurePath(f"{tmpfolder}/deb/DEBIAN/postinst"), PurePath(f"{tmpfolder}/deb/DEBIAN/postrm"), control)
             return PurePath(f'{out_dir}/{output_name}')
 
 
