@@ -232,7 +232,7 @@ class DPKGBuilder(object):
         control_tar = self.open_tar_file(self.control_archive_path)
 
         for script_name, script_path in maintainer_scripts.items():
-            control_tar.add(script_path, arcname=script_name, filter=self.filter_maintainer_script_tar_info)
+            control_tar.add(script_path, arcname='./' + script_name, filter=self.filter_maintainer_script_tar_info)
 
         control_tar.addfile(*self.build_member_from_string('./control', control_text.encode()))
 
