@@ -7,7 +7,7 @@ from .constrictor.dpkg import DPKGBuilder
 
 
 class Control:
-    def __init__(self, package, version, min_ios, name, author):
+    def __init__(self, package, version, min_ios, name, author, executable):
         self.package = package
         self.version = version
         self.section = "Applications"
@@ -21,6 +21,7 @@ class Control:
         self.tags = f"compatible_min::ios{self.min_ios}"
         self.name_encoded = urlparse(self.name).path
         self.depiction = f"https://permasigner-depictions.itsnebula.net/depiction?name={urlparse(self.name).path}"
+        self.executable = executable
 
 
 class Deb(object):
@@ -34,7 +35,9 @@ class Deb(object):
         dirs = [
             {
                 'source': self.source,
-                'destination': '/Applications'
+                'destination': '/Applications',
+                'executable': control.executable
+
             }
         ]
 

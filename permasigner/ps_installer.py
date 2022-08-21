@@ -104,7 +104,7 @@ class Installer:
                 streams = client.exec_command(
                     f"{command}", get_pty=True)
 
-                output = streams[1].channel.recv(2048).decode()
+                output = streams[1].channel.recv(2048)
                 if "password".encode() in output or "Password".encode() in output:
                     password = getpass()
                     streams[0].write(f'{password}\n')

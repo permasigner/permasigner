@@ -152,7 +152,7 @@ class Permasigner(object):
                         if dpkg.in_path:
                             self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
                             subprocess.run(
-                                ["dpkg-deb", "-X", path, Path(f'{tmpfolder}/extractedDeb')], stdout=DEVNULL)
+                                ["dpkg-deb", "-X", path, PurePath(f'{tmpfolder}/extractedDeb')], stdout=DEVNULL)
                         else:
                             deb = Deb(path, Path(f'{tmpfolder}/extractedDeb'), self.args)
                             deb.extract()
@@ -164,7 +164,7 @@ class Permasigner(object):
 
                         is_extracted = True
                     elif path.endswith(".ipa"):
-                        copy(path, Path(f"{tmpfolder}/app.ipa"))
+                        copy(path, PurePath(f"{tmpfolder}/app.ipa"))
                     else:
                         self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
                         exit(1)
@@ -180,7 +180,7 @@ class Permasigner(object):
                     if Path(f"{tmpfolder}/deb").exists():
                         rmtree(f"{tmpfolder}/deb")
 
-                    fname = Path(fpath).name
+                    fname = PurePath(fpath).name
                     self.logger.log(f"Signing {fname}...", color=Colors.yellow)
                     print()
 
@@ -304,7 +304,7 @@ class Permasigner(object):
             else:
                 self.logger.log("ldid binary is not found, downloading latest binary.", color=Colors.yellow)
                 ldid = Ldid(data_dir, name, self.args, self.utils, False)
-            ldid.download()
+            # ldid.download()
 
     def install(self, out_dir):
         if not self.utils.is_ios():
@@ -483,7 +483,7 @@ class Permasigner(object):
             subprocess.run(dpkg_cmd.split(), stdout=DEVNULL)
             return out_path
         else:
-            control = Control(app_bundle, app_version, app_min_ios, app_name, app_author)
+            control = Control(app_bundle, app_version, app_min_ios, app_name, app_author, app_executable)
             deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
             output_name = deb.build(f"{tmpfolder}/deb/DEBIAN/postinst", f"{tmpfolder}/deb/DEBIAN/postrm", control)
             return PurePath(f'{out_dir}/{output_name}')

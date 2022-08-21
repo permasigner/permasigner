@@ -79,6 +79,12 @@ class BinaryControl(object):
 
         return "{}: {}".format(field_name, field_value)
 
+    def get_control_line_value(self, field_name):
+        if field_name not in self._control_fields:
+            raise KeyError("{} is not set.".format(field_name))
+
+        return self._control_fields[field_name]
+
     def set_control_field(self, field_name, field_value):
         if field_name not in BINARY_CONTROL_ALLOWED_FIELDS:
             raise KeyError("{} is not a valid field for a binary control file".format(field_name))

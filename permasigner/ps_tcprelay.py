@@ -241,6 +241,7 @@ class MuxConnection(object):
     def connect(self, device, port):
         ret = self._exchange(self.proto.TYPE_CONNECT,
                              {'DeviceID': device.devid, 'PortNumber': ((port << 8) & 0xFF00) | (port >> 8)})
+        print(((port << 8) & 0xFF00) | (port >> 8))
         if ret != 0:
             raise MuxError(f"Connect failed: error {ret}")
         self.proto.connected = True
@@ -362,7 +363,7 @@ class Relayer(object):
         self.logger = Logger(self.args)
 
     def relay(self):
-        self.logger.log(f"Forwarding local port {self.lport} to remote port {self.rport}", color=Colors.yellow)
+        self.logger.log(f"Creating listening port {self.lport} for device port {self.rport}", color=Colors.yellow)
         server = TCPServer((self.host, self.lport), TCPRelay)
         server.rport = self.rport
         server.socketpath = self.socketpath

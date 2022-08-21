@@ -43,6 +43,7 @@ class Utils(object):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
     def set_executable_permission(self, path):
+        print(f'setting permission on {path}')
         self.logger.debug(f'Settings chmod +x on {path}')
         path = Path(path)
         mode = path.stat().st_mode
