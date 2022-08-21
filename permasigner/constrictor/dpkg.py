@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import sys
 from functools import partial
 from io import BytesIO
 import tarfile
@@ -144,6 +145,9 @@ class DPKGBuilder(object):
                 if source_file_name.startswith('/'):
                     source_file_name = source_file_name[1:]
                 archive_path = '.' + str(PurePath(dir_conf['destination']).joinpath(source_file_name))
+
+                if sys.platform == 'win32':
+                    archive_path = archive_path.replace('\\', '/')
 
                 print(f'archive path is: {archive_path}')
 
