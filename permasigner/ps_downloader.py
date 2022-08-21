@@ -71,21 +71,18 @@ class Ldid(object):
             return "ldid_freebsd13_amd64"
 
     def process(self, content):
-        self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
+        with open(self.name, "wb") as f:
+            f.write(content)
+            self.logger.debug(f"Wrote file.")
 
-        if content is not None:
-            with open(self.name, "wb") as f:
-                f.write(content)
-                self.logger.debug(f"Wrote file.")
+        if self.exists:
+            self.logger.debug("Removing outdated version of ldid")
+            Path(self.data_dir).joinpath(self.name).unlink()
 
-            if self.exists:
-                self.logger.debug("Removing outdated version of ldid")
-                Path(self.data_dir).joinpath(self.name).unlink()
-
-            self.utils.set_executable_permission(self.name)
-            destination = PurePath(self.data_dir).joinpath(self.name)
-            move(self.name, destination)
-            self.logger.debug(f"Moved ldid to {str(destination)}")
+        self.utils.set_executable_permission(self.name)
+        destination = PurePath(self.data_dir).joinpath(self.name)
+        move(self.name, destination)
+        self.logger.debug(f"Moved ldid to {str(destination)}")
 
     def download(self):
         if self.args.ldidfork:
