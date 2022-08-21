@@ -38,7 +38,7 @@ class Copier:
                 file.write(line + b'\n')
 
     def copy_prerm(self, file_path):
-        """Copy postrm file.
+        """Copy prerm file.
 
         Args:
             file_path (String): Path of the copy destination.
@@ -46,9 +46,9 @@ class Copier:
 
         # Read the file
         if self.in_package:
-            filedata = pkgutil.get_data(__name__, "data/DEBIAN/postrm")
+            filedata = pkgutil.get_data(__name__, "data/DEBIAN/prerm")
         else:
-            with open('permasigner/data/DEBIAN/postrm', 'rb') as file:
+            with open('permasigner/data/DEBIAN/prerm', 'rb') as file:
                 filedata = file.read()
 
         # Replace the target string
