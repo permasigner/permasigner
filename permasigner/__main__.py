@@ -1,5 +1,6 @@
 import argparse
 import os
+import time
 from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
 import plistlib
@@ -78,7 +79,7 @@ class Permasigner(object):
         self.logger = Logger(self.args)
         self.outputs = []
 
-    def extract_archive(self, source, tmpfolder, dpkg_in_path):
+    def unpack(self, source, tmpfolder, dpkg_in_path):
         path = source.strip('"').strip("'").strip()
         path = Path(path).expanduser()
 
@@ -101,19 +102,22 @@ class Permasigner(object):
                         break
             elif path.suffix == ".ipa":
                 copy(path, f"{tmpfolder}/app.ipa")
-                self.logger.log(f"Unzipping IPA...", color=Colors.yellow)
-                with zipfile.ZipFile(PurePath(f'{tmpfolder}/app.ipa'), 'r') as f:
-                    with Path(f"{tmpfolder}/app") as path:
-                        path.mkdir(exist_ok=False)
-                        f.extractall(path)
-                        for ds in Path(path).rglob('.DS_Store*'):
-                            Path(ds).unlink()
+                self.unzip(tmpfolder)
             else:
                 self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
                 exit(1)
         else:
             self.logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
             exit(1)
+
+    def unzip(self, tmpfolder):
+        self.logger.log(f"Unzipping IPA...", color=Colors.yellow)
+        with zipfile.ZipFile(PurePath(f'{tmpfolder}/app.ipa'), 'r') as f:
+            with Path(f"{tmpfolder}/app") as path:
+                path.mkdir(exist_ok=False)
+                f.extractall(path)
+                for ds in Path(path).rglob('.DS_Store*'):
+                    Path(ds).unlink()
 
     def start(self):
         data_dir = self.utils.get_home_data_directory()
@@ -172,6 +176,7 @@ class Permasigner(object):
 
                         with open(f"{tmpfolder}/app.ipa", "wb") as f:
                             f.write(res.content)
+                        self.unzip(tmpfolder)
                     else:
                         self.logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
                         exit(1)
@@ -179,7 +184,7 @@ class Permasigner(object):
                     self.logger.error(f"URL provided is not reachable. Error: {err}")
                     exit(1)
             elif self.args.path:
-                self.extract_archive(self.args.path, tmpfolder, dpkg_in_path)
+                self.unpack(self.args.path, tmpfolder, dpkg_in_path)
             elif self.args.folder:
                 for fpath in glob(f"{self.args.folder}/*.ipa"):
                     if Path(f"{tmpfolder}/app.ipa").exists():
@@ -227,7 +232,7 @@ class Permasigner(object):
                 else:
                     path = self.logger.ask("Paste in the path to an IPA in your file system: ").strip('"').strip("'").strip()
 
-                self.extract_archive(path, tmpfolder, dpkg_in_path)
+                self.unpack(path, tmpfolder, dpkg_in_path)
             else:
                 self.logger.error(f"That is not a valid option!")
                 exit(1)
@@ -328,6 +333,7 @@ class Permasigner(object):
         # Read data from the plist
         app_dir = ''
         payload = Path(tmpfolder).joinpath('app').joinpath('Payload')
+        time.sleep(60)
         if payload.exists():
             for fname in payload.rglob('*.app'):
                 app_dir = fname
