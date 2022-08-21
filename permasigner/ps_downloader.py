@@ -115,4 +115,3 @@ class Ldid(object):
             else:
                 self.logger.debug(f"Ldid hash failed to verify, saving newer version")
                 self.process(content)
-
