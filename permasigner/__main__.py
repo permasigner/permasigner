@@ -4,6 +4,8 @@ from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
 import plistlib
 import requests
+from requests import RequestException, ConnectionError
+from urllib3.exceptions import NewConnectionError
 from urllib.parse import urlparse
 import zipfile
 import subprocess
@@ -168,19 +170,18 @@ class Permasigner(object):
                     self.logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                     exit(1)
 
-                res = requests.get(url, stream=True)
                 try:
+                    self.logger.log(f"Downloading file...", color=Colors.yellow)
+                    res = requests.get(url, stream=True)
                     if res.status_code == 200:
-                        self.logger.log(f"Downloading file...", color=Colors.yellow)
-
                         with open(f"{tmpfolder}/app.ipa", "wb") as f:
                             f.write(res.content)
                         self.unzip(tmpfolder)
                     else:
-                        self.logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
+                        self.logger.error(f"Provided URL is not reachable. Status code: {res.status_code}")
                         exit(1)
-                except requests.exceptions.RequestException as err:
-                    self.logger.error(f"URL provided is not reachable. Error: {err}")
+                except (NewConnectionError, ConnectionError, RequestException) as err:
+                    self.logger.error(f"Provided URL is not reachable. Error: {err}")
                     exit(1)
             elif self.args.path:
                 self.unpack(self.args.path, tmpfolder, dpkg_in_path)
@@ -208,8 +209,8 @@ class Permasigner(object):
                     exit(1)
                 print()
 
-                res = requests.get(url, stream=True)
                 try:
+                    res = requests.get(url, stream=True)
                     if res.status_code == 200:
                         self.logger.log(f"Downloading file...", color=Colors.yellow)
 
@@ -218,7 +219,7 @@ class Permasigner(object):
                     else:
                         self.logger.error(f"URL provided is not reachable. Status code: {res.status_code}")
                         exit(1)
-                except requests.exceptions.RequestException as err:
+                except (NewConnectionError, ConnectionError, RequestException) as err:
                     self.logger.error(f"URL provided is not reachable. Error: {err}")
                     exit(1)
             elif option == "l":
