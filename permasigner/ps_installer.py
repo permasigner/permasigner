@@ -65,9 +65,9 @@ class Installer:
             self.logger.debug(f"Running command: sudo -nv")
             stdin, stdout, stderr = client.exec_command('sudo -nv')
             status = stdout.channel.recv_exit_status()
-            out = stderr.read().decode()
+            out = stderr.read()
 
-            if "password" in out:
+            if "password".encode() in out:
                 command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
                 self.logger.debug(f"Running command: {command}")
                 stdin, stdout, stderr = client.exec_command(

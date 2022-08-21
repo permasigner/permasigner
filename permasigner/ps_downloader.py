@@ -28,11 +28,14 @@ class Hash(object):
         else:
             try:
                 res = requests.get(url, stream=True)
-                content = bytearray()
-                for data in res.iter_content(4096):
-                    content += data
-                    m.update(data)
-                return m.hexdigest(), content
+                if res.status_code == 200:
+                    content = bytearray()
+                    for data in res.iter_content(4096):
+                        content += data
+                        m.update(data)
+                    return m.hexdigest(), content
+                else:
+                    return m.hexdigest(), None
             except (NewConnectionError, ConnectionError, RequestException) as err:
                 self.logger.error(f"ldid download URL is not reachable. Error: {err}")
                 return m.hexdigest(), None
@@ -62,6 +65,10 @@ class Ldid(object):
             return "ldid_macos_arm64"
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
             return "ldid_win32_x86_64.exe"
+        elif self.utils.is_freebsd12() and platform.machine() == "amd64":
+            return "ldid_freebsd12_amd64"
+        elif self.utils.is_freebsd13 and platform.machine() == "amd64":
+            return "ldid_freebsd13_amd64"
 
     def process(self, content):
         self.logger.log(f"ldid is outdated or malformed, downloading latest version...", color=Colors.yellow)
@@ -90,25 +97,22 @@ class Ldid(object):
 
         url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{self.get_arch()}"
 
-        if self.exists:
-            self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
+        self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
 
-            remote_hash, content = self.hash.get_hash(None, url)
-            local_hash = self.hash.get_hash(f"{self.data_dir}/{self.name}", None)
+        remote_hash, content = self.hash.get_hash(None, url)
+        local_hash = self.hash.get_hash(f"{self.data_dir}/{self.name}", None)
 
-            if remote_hash == local_hash:
-                self.logger.debug(f"ldid hash successfully verified.")
-            else:
-                self.logger.debug(f"ldid hash failed to verify.")
-                self.process(content)
+        if remote_hash == local_hash:
+            self.logger.debug(f"ldid hash successfully verified.")
         else:
-            self.logger.debug(f"Downloading {self.get_arch()} from {url}")
-            try:
-                res = requests.get(url, stream=True)
-                if res is not None and res.status_code == 200:
-                    self.process(res.content)
+            if content is None:
+                if self.exists:
+                    self.logger.log('Could not verify remote hash, falling back to ldid found in path',
+                                    color=Colors.yellow)
                 else:
-                    raise RequestException
-            except (NewConnectionError, ConnectionError, RequestException) as err:
-                self.logger.error(f"ldid download URL is not reachable. Error: {err}")
-                exit(1)
+                    self.logger.error('Download url is not reachable, and no ldid found in path, exiting.')
+                    exit(1)
+            else:
+                self.logger.debug(f"Ldid hash failed to verify, saving newer version")
+                self.process(content)
+

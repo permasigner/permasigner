@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
 import plistlib
@@ -58,6 +57,8 @@ def main(argv=None, in_package=None):
                         help="args for tcprelay rport:lport:host:socketpath (ex: 22:2222:localhost:/var/run/usbmuxd)")
     parser.add_argument('-e', '--entitlements', type=str,
                         help="path to entitlements file")
+    parser.add_argument('--no-ldid-check', dest='nocheckldid', action='store_true',
+                        help="disable ldid auto update")
     args = parser.parse_args()
 
     if args.version:
@@ -86,19 +87,19 @@ class Permasigner(object):
 
         is_extracted = False
 
-        ldid = self.utils.cmd_in_path('ldid')
-        dpkg = self.utils.cmd_in_path('dpkg-deb')
-        git = self.utils.cmd_in_path('git')
+        ldid_in_path = self.utils.cmd_in_path('ldid')
+        dpkg_in_path = self.utils.cmd_in_path('dpkg-deb')
+        git_in_path = self.utils.cmd_in_path('git')
 
-        if git.in_path:
+        if git_in_path:
             self.logger.debug(f"Git is in PATH")
 
             if self.in_package:
                 ver_string = f"{__version__.__version__}"
-            elif "main" not in subprocess.getoutput([f'{git.path}', 'rev-parse', '--abbrev-ref', 'HEAD']):
-                ver_string = f"{subprocess.check_output([f'{git.path}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git.path}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+            elif "main" not in subprocess.getoutput([f'git', 'rev-parse', '--abbrev-ref', 'HEAD']):
+                ver_string = f"{subprocess.check_output([f'git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
             else:
-                ver_string = f"{__version__.__version__}_rev-{subprocess.check_output([f'{git.path}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+                ver_string = f"{__version__.__version__}_rev-{subprocess.check_output([f'git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
             self.logger.debug(f"Git is not in PATH")
             if os.environ.get('IS_DOCKER_CONTAINER'):
@@ -112,7 +113,7 @@ class Permasigner(object):
         print()
 
         # Run checks
-        self.checks(ldid, data_dir)
+        self.checks(ldid_in_path, data_dir)
 
         # Prompt the user if they'd like to use an external IPA or a local IPA
         if not (self.args.url or self.args.path or self.args.folder):
@@ -149,7 +150,7 @@ class Permasigner(object):
                     path = str(path)
                     if path.endswith(".deb"):
                         self.logger.debug(f"Extracting deb package from {path} to {tmpfolder}/extractedDeb")
-                        if dpkg.in_path:
+                        if dpkg_in_path:
                             self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
                             subprocess.run(
                                 ["dpkg-deb", "-X", path, PurePath(f'{tmpfolder}/extractedDeb')], stdout=DEVNULL)
@@ -185,7 +186,7 @@ class Permasigner(object):
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
-                    out_dir = self.run(tmpfolder, ldid, dpkg, data_dir, is_extracted)
+                    out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
                     self.outputs.append(out_dir)
             elif option == "e":
                 url = self.logger.ask("Paste in the *direct* path to an IPA online: ")
@@ -223,7 +224,7 @@ class Permasigner(object):
 
                 if Path(path).exists():
                     if PurePath(path).suffix == ".deb":
-                        if dpkg.in_path:
+                        if dpkg_in_path:
                             self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
                             subprocess.run(
                                 ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
@@ -255,7 +256,7 @@ class Permasigner(object):
 
             is_installed = False
             if not self.args.folder:
-                out_dir = self.run(tmpfolder, ldid, dpkg, data_dir, is_extracted)
+                out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
 
                 if self.args.install:
                     is_installed = self.install(out_dir)
@@ -287,7 +288,7 @@ class Permasigner(object):
             else:
                 self.logger.log(f"Output file: {out_dir}", color=Colors.green)
 
-    def checks(self, ldid, data_dir):
+    def checks(self, ldid_in_path, data_dir):
         # Check if codesign arg is added on Linux or iOS
         if self.args.codesign:
             if not self.utils.is_macos():
@@ -295,7 +296,7 @@ class Permasigner(object):
                 exit(1)
 
         # Auto download ldid
-        if not ldid.in_path:
+        if not ldid_in_path and not self.args.nocheckldid:
             name = 'ldid'
             if self.utils.is_windows():
                 name = 'ldid.exe'
@@ -342,7 +343,7 @@ class Permasigner(object):
 
         return is_installed
 
-    def run(self, tmpfolder, ldid, dpkg, data_dir, is_extracted):
+    def run(self, tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted):
         # Unzip the IPA file
         if not is_extracted:
             self.logger.log(f"Unzipping IPA...", color=Colors.yellow)
@@ -444,9 +445,8 @@ class Permasigner(object):
                            stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            if self.utils.is_ios() or ldid.in_path:
-                print(f'ldid in path {ldid.path}')
-                ldid_cmd = ldid.path
+            if self.utils.is_ios() or ldid_in_path:
+                ldid_cmd = 'ldid'
             elif self.utils.is_windows():
                 ldid_cmd = Path(f'{data_dir}/ldid.exe')
             else:
@@ -476,7 +476,7 @@ class Permasigner(object):
             Path("output").mkdir(exist_ok=True)
             out_dir = PurePath(f"{Path.cwd()}/output")
 
-        if dpkg.in_path:
+        if dpkg_in_path:
             out_path = PurePath(f"{out_dir}/{app_name.replace(' ', '') + f'_{app_version}' + '.deb'}")
             dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {out_path}"
             self.logger.debug(f"Running command: {dpkg_cmd}")

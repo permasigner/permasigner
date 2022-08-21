@@ -6,7 +6,6 @@ import importlib
 from importlib import util
 from pathlib import Path, PurePath
 from shutil import which
-import oschmod
 
 from permasigner.ps_logger import Logger
 
@@ -39,6 +38,14 @@ class Utils(object):
         return sys.platform == "win32"
 
     @staticmethod
+    def is_freebsd12():
+        return sys.platform == "freebsd12"
+
+    @staticmethod
+    def is_freebsd13():
+        return sys.platform == "freebsd13"
+
+    @staticmethod
     def is_dpkg_installed(pkg):
         return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
 
@@ -54,7 +61,6 @@ class Utils(object):
         self.logger.debug(f"Checking if command {cmd} is in PATH...")
 
         path = which(cmd)
-        utility = Utility(path)
 
         if cmd == "ldid":
             if self.is_ios():
@@ -68,26 +74,21 @@ class Utils(object):
 
                 if self.is_dpkg_installed("ldid"):
                     self.logger.debug(f"ldid is installed via dpkg")
-                    utility.in_path = True
-                    return utility
+                    return True
                 else:
                     self.logger.error("ldid is required on iOS, but it is not installed. Please install it from Procursus.")
                     exit(1)
 
-            if utility.path is not None:
-                if "procursus" not in subprocess.getoutput([utility.path]):
-                    utility.in_path = False
-                    return utility
+            if path is not None:
+                if "procursus" not in subprocess.getoutput(path):
+                    return False
 
                 self.logger.debug(f"Procursus ldid is installed")
-                utility.in_path = True
-                return utility
+                return True
 
-            utility.in_path = False
-            return utility
+            return False
 
-        utility.in_path = path is not None
-        return utility
+        return path is not None
 
     def get_home_data_directory(self):
         ps_home = os.environ.get("PERMASIGNER_HOME")
@@ -95,13 +96,14 @@ class Utils(object):
             return ps_home
 
         user_home = Path.home()
-        if self.is_linux():
+        if self.is_linux() or self.is_freebsd12() or self.is_freebsd13():
             xdg_data_home = os.environ.get("XDG_DATA_HOME", PurePath(f'{user_home}/.local/share'))
             return PurePath(f'{xdg_data_home}/permasigner')
         elif self.is_ios() or self.is_macos():
             return PurePath(f'{user_home}/Library/Application Support/permasigner')
         elif self.is_windows():
             return PurePath(f"{os.getenv('APPDATA')}/permasigner")
+
 
     @staticmethod
     def get_resource_path(package, resource):
