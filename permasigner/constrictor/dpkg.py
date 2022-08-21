@@ -44,13 +44,13 @@ class DPKGBuilder(object):
 
     def __init__(self, output_directory, control, data_dirs, links, maintainer_scripts=None, output_name=None,
                  ignore_paths=None, configuration_files=None):
-        self.output_directory = os.path.expanduser(output_directory)
+        self.output_directory = Path(output_directory).expanduser()
         self.data_dirs = data_dirs or []
         self.links = links or {}
         self.maintainer_scripts = maintainer_scripts
         self.seen_data_dirs = set()
-        self.working_dir = tempfile.mkdtemp()
         self.control = control
+        self.working_dir = None
         self.output_name = output_name or control.get_default_output_name()
         self.ignore_paths = ignore_paths or []
         self.configuration_files = configuration_files or []
@@ -91,7 +91,6 @@ class DPKGBuilder(object):
             dir_ti = tarfile.TarInfo()
             dir_ti.type = tarfile.DIRTYPE
             dir_ti.name = directory
-            print(f'dis is= {directory}')
             dir_ti.mtime = int(time.time())
             dir_ti.mode = TAR_DEFAULT_MODE
             dir_ti = self.filter_tar_info(dir_ti, dir_conf)
@@ -100,14 +99,11 @@ class DPKGBuilder(object):
             self.seen_data_dirs.add(directory)
 
     def filter_tar_info(self, tar_info, dir_conf):
-
-        destination = dir_conf['destination']
-        executable = dir_conf['executable']
         app_name = self.control.get_control_line_value('Name')
-        executable_path = '.' + str(PurePath(destination).joinpath(f'{app_name}.app').joinpath(executable))
+        executable_path = '.' + str(PurePath(dir_conf['destination']).joinpath(f'{app_name}.app').joinpath(dir_conf['executable']))
+        executable_path = executable_path.replace('\\', '/')
 
         if tar_info.name == executable_path:
-            print(f'tar info is = {tar_info.name}')
             setattr(tar_info, TAR_INFO_KEYS[4], TAR_DEFAULT_MODE)
 
         for tar_info_key in TAR_INFO_KEYS:
@@ -124,7 +120,7 @@ class DPKGBuilder(object):
 
     @property
     def data_archive_path(self):
-        return os.path.join(self.working_dir, 'data.tar.gz')
+        return Path(self.working_dir).joinpath('data.tar.gz')
 
     @staticmethod
     def open_tar_file(path):
@@ -142,29 +138,22 @@ class DPKGBuilder(object):
             source_dir = str(Path(dir_conf['source']).expanduser())
 
             for source_file_path, source_file_name in self.list_data_dir(source_dir):
-                if source_file_name.startswith('/'):
-                    source_file_name = source_file_name[1:]
-                archive_path = '.' + str(PurePath(dir_conf['destination']).joinpath(source_file_name))
-
-                if sys.platform == 'win32':
-                    archive_path = archive_path.replace('\\', '/')
-
-                print(f'archive path is: {archive_path}')
-
-                if os.path.islink(source_file_path) and not os.path.exists(source_file_path):
+                archive_path = '.' + dir_conf['destination'] + source_file_name
+                archive_path = archive_path.replace('\\', '/')
+                if Path(source_file_path).is_symlink() and not Path(source_file_path).exists():
                     # this is a link to a file that doesn't exist but should when we deploy if we are on the same OS
                     # (e.g. venv build with docker and .deb assembled on host) so add it as a link
                     self.links.append({
                         LINK_PATH_KEY: archive_path,
-                        LINK_TARGET_KEY: os.readlink(source_file_path)
+                        LINK_TARGET_KEY: str(Path(source_file_path).readlink())
                     })
                 else:
                     self.add_directory_root_to_archive(data_tar_file, dir_conf, archive_path)
 
-                    if os.path.basename(source_file_name) in FORCE_DIRECTORY_INCLUSION_FILENAMES:
+                    if PurePath(source_file_name).name in FORCE_DIRECTORY_INCLUSION_FILENAMES:
                         continue
 
-                    file_size_bytes += os.path.getsize(source_file_path)
+                    file_size_bytes += Path(source_file_path).stat().st_size
 
                     file_md5s.append((md5_for_path(source_file_path), archive_path))
                     data_tar_file.add(source_file_path, arcname=archive_path, recursive=False,
@@ -233,7 +222,7 @@ class DPKGBuilder(object):
 
     @property
     def control_archive_path(self):
-        return os.path.join(self.working_dir, 'control.tar.gz')
+        return Path(self.working_dir).joinpath('control.tar.gz')
 
     def build_control_archive(self, control_text, file_md5s, maintainer_scripts):
         maintainer_scripts = maintainer_scripts or {}
@@ -256,10 +245,10 @@ class DPKGBuilder(object):
         control_tar.close()
 
     def assemble_deb_archive(self, control_archive_path, data_archive_path):
-        if not os.path.exists(self.output_directory):
-            os.makedirs(self.output_directory)
+        if not Path(self.output_directory).exists():
+            Path(self.output_directory).mkdir()
 
-        pkg_path = os.path.join(self.output_directory, self.output_name)
+        pkg_path = Path(self.output_directory).joinpath(self.output_name)
 
         with open(pkg_path, 'wb') as ar_fp:
             ar_writer = ARWriter(ar_fp)
@@ -272,11 +261,13 @@ class DPKGBuilder(object):
         return pkg_path
 
     def build_package(self):
-        file_size_bytes, file_md5s = self.build_data_archive()
+        with tempfile.TemporaryDirectory() as tmpfolder:
+            self.working_dir = tmpfolder
+            file_size_bytes, file_md5s = self.build_data_archive()
 
-        if not self.control.is_field_defined(FIELD_INSTALLED_SIZE):
-            self.control.installed_size_bytes = file_size_bytes
+            if not self.control.is_field_defined(FIELD_INSTALLED_SIZE):
+                self.control.installed_size_bytes = file_size_bytes
 
-        self.build_control_archive(self.control.get_control_text(), file_md5s, self.maintainer_scripts)
+            self.build_control_archive(self.control.get_control_text(), file_md5s, self.maintainer_scripts)
 
-        return self.assemble_deb_archive(self.control_archive_path, self.data_archive_path)
+            return self.assemble_deb_archive(self.control_archive_path, self.data_archive_path)
