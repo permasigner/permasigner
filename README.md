@@ -37,8 +37,6 @@ This script makes a deb file for you based on an IPA. Tested only with Taurine, 
 
 Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei/CoreTrustDemo/tree/resign_taurine), please note that certificates are not copyrightable.
 
-**Note:** ~~unc0ver will probably fail to jailbreak. It works for some people but not everyone.~~ unc0ver support is now fixed!
-
 # Prerequsites
 
 1. A computer or jailbroken iDevice with Procursus
