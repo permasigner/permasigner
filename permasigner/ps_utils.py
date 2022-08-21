@@ -119,9 +119,3 @@ class Utils(object):
         parts = resource.split('/')
         parts.insert(0, PurePath(mod.__file__).parent)
         return f"{PurePath(*parts)}"
-
-
-class Utility:
-    def __init__(self, path, in_path=False):
-        self.path = path
-        self.in_path = in_path
