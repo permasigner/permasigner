@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePath
 import requests
 import hashlib
 import platform
@@ -80,12 +80,12 @@ class Ldid(object):
 
             if self.exists:
                 self.logger.debug("Removing outdated version of ldid")
-                Path(f"{self.data_dir}/{self.name}").unlink()
+                Path(self.data_dir).joinpath(self.name).unlink()
 
             self.utils.set_executable_permission(self.name)
-
-            move(self.name, Path(f'{self.data_dir}/{self.name}'))
-            self.logger.debug(f"Moved ldid to {self.data_dir}")
+            destination = PurePath(self.data_dir).joinpath(self.name)
+            move(self.name, destination)
+            self.logger.debug(f"Moved ldid to {str(destination)}")
 
     def download(self):
         if self.args.ldidfork:
@@ -100,7 +100,10 @@ class Ldid(object):
         self.logger.debug(f"Comparing {self.get_arch()} hash with {url}")
 
         remote_hash, content = self.hash.get_hash(None, url)
-        local_hash = self.hash.get_hash(f"{self.data_dir}/{self.name}", None)
+        local_hash = None
+
+        if self.exists:
+            local_hash = self.hash.get_hash(PurePath(self.data_dir).joinpath(self.name), None)
 
         if remote_hash == local_hash:
             self.logger.debug(f"ldid hash successfully verified.")
