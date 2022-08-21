@@ -104,7 +104,6 @@ class Utils(object):
         elif self.is_windows():
             return PurePath(f"{os.getenv('APPDATA')}/permasigner")
 
-
     @staticmethod
     def get_resource_path(package, resource):
         spec = importlib.util.find_spec(package)
