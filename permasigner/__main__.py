@@ -78,14 +78,49 @@ class Permasigner(object):
         self.logger = Logger(self.args)
         self.outputs = []
 
+    def extract_archive(self, source, tmpfolder, dpkg_in_path):
+        path = source.strip('"').strip("'").strip()
+        path = Path(path).expanduser()
+
+        if path.exists():
+            if path.suffix == ".deb":
+                self.logger.debug(f"Extracting deb package from {path} to {tmpfolder}/extractedDeb")
+                if dpkg_in_path:
+                    self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
+                    subprocess.run(
+                        ["dpkg-deb", "-X", path, PurePath(f'{tmpfolder}/extractedDeb')], stdout=DEVNULL)
+                else:
+                    deb = Deb(path, PurePath(f'{tmpfolder}/extractedDeb'), self.args)
+                    deb.extract()
+
+                Path(f"{tmpfolder}/app/Payload").mkdir(parents=True, exist_ok=False)
+                for fname in Path(f"{tmpfolder}/extractedDeb/Applications").iterdir():
+                    if fname.name.endswith(".app"):
+                        copytree(f"{tmpfolder}/extractedDeb/Applications/{fname.name}",
+                                 f"{tmpfolder}/app/Payload/{fname.name}")
+                        break
+            elif path.suffix == ".ipa":
+                copy(path, f"{tmpfolder}/app.ipa")
+                self.logger.log(f"Unzipping IPA...", color=Colors.yellow)
+                with zipfile.ZipFile(PurePath(f'{tmpfolder}/app.ipa'), 'r') as f:
+                    with Path(f"{tmpfolder}/app") as path:
+                        path.mkdir(exist_ok=False)
+                        f.extractall(path)
+                        for ds in Path(path).rglob('.DS_Store*'):
+                            Path(ds).unlink()
+            else:
+                self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                exit(1)
+        else:
+            self.logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
+            exit(1)
+
     def start(self):
         data_dir = self.utils.get_home_data_directory()
         Path(data_dir).mkdir(exist_ok=True, parents=True)
 
         if self.in_package:
             self.logger.debug(f"Running from package, not cloned repo.")
-
-        is_extracted = False
 
         ldid_in_path = self.utils.cmd_in_path('ldid')
         dpkg_in_path = self.utils.cmd_in_path('dpkg-deb')
@@ -144,35 +179,7 @@ class Permasigner(object):
                     self.logger.error(f"URL provided is not reachable. Error: {err}")
                     exit(1)
             elif self.args.path:
-                path = Path(self.args.path).expanduser()
-
-                if path.exists():
-                    path = str(path)
-                    if path.endswith(".deb"):
-                        self.logger.debug(f"Extracting deb package from {path} to {tmpfolder}/extractedDeb")
-                        if dpkg_in_path:
-                            self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
-                            subprocess.run(
-                                ["dpkg-deb", "-X", path, PurePath(f'{tmpfolder}/extractedDeb')], stdout=DEVNULL)
-                        else:
-                            deb = Deb(path, PurePath(f'{tmpfolder}/extractedDeb'), self.args)
-                            deb.extract()
-                        Path(f"{tmpfolder}/app/Payload").mkdir(exist_ok=True)
-                        for fname in Path(f"{tmpfolder}/extractedDeb/Applications").iterdir():
-                            if fname.name.endswith(".app"):
-                                copytree(f"{tmpfolder}/extractedDeb/Applications/{fname}",
-                                         f"{tmpfolder}/app/Payload/{fname}")
-                                break
-
-                        is_extracted = True
-                    elif path.endswith(".ipa"):
-                        copy(path, PurePath(f"{tmpfolder}/app.ipa"))
-                    else:
-                        self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
-                        exit(1)
-                else:
-                    self.logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
-                    exit(1)
+                self.extract_archive(self.args.path, tmpfolder, dpkg_in_path)
             elif self.args.folder:
                 for fpath in glob(f"{self.args.folder}/*.ipa"):
                     if Path(f"{tmpfolder}/app.ipa").exists():
@@ -187,7 +194,7 @@ class Permasigner(object):
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
-                    out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
+                    out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir)
                     self.outputs.append(out_dir)
             elif option == "e":
                 url = self.logger.ask("Paste in the *direct* path to an IPA online: ")
@@ -218,36 +225,9 @@ class Permasigner(object):
                     ipa_name = self.logger.ask('    IPA name (ex. Taurine.ipa, DemoApp.ipa): ')
                     path = f"/permasigner/ipas/{ipa_name}"
                 else:
-                    path = self.logger.ask("Paste in the path to an IPA in your file system: ").replace(' ', '').strip("'")
+                    path = self.logger.ask("Paste in the path to an IPA in your file system: ").strip('"').strip("'").strip()
 
-                if path.startswith('~'):
-                    path = Path(path).expanduser()
-
-                if Path(path).exists():
-                    if PurePath(path).suffix == ".deb":
-                        if dpkg_in_path:
-                            self.logger.debug(f"Running command: dpkg-deb -X {path} {tmpfolder}/extractedDeb")
-                            subprocess.run(
-                                ["dpkg-deb", "-X", path, f"{tmpfolder}/extractedDeb"], stdout=DEVNULL)
-                        else:
-                            deb = Deb(path, f"{tmpfolder}/extractedDeb", self.args)
-                            deb.extract()
-                        self.logger.debug(f"Extracted deb file from {path} to {tmpfolder}/extractedDeb")
-                        Path(f"{tmpfolder}/app/Payload").mkdir(exist_ok=False)
-                        for fname in Path(f"{tmpfolder}/extractedDeb/Applications").iterdir():
-                            if fname.name.endswith(".app"):
-                                copytree(f"{tmpfolder}/extractedDeb/Applications/{fname}",
-                                         f"{tmpfolder}/app/Payload/{fname}")
-
-                        is_extracted = True
-                    elif PurePath(path).suffix == ".ipa":
-                        copy(path, f"{tmpfolder}/app.ipa")
-                    else:
-                        self.logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
-                        exit(1)
-                else:
-                    self.logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
-                    exit(1)
+                self.extract_archive(path, tmpfolder, dpkg_in_path)
             else:
                 self.logger.error(f"That is not a valid option!")
                 exit(1)
@@ -257,7 +237,7 @@ class Permasigner(object):
 
             is_installed = False
             if not self.args.folder:
-                out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted)
+                out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir)
 
                 if self.args.install:
                     is_installed = self.install(out_dir)
@@ -344,18 +324,7 @@ class Permasigner(object):
 
         return is_installed
 
-    def run(self, tmpfolder, ldid_in_path, dpkg_in_path, data_dir, is_extracted):
-        # Unzip the IPA file
-        if not is_extracted:
-            self.logger.log(f"Unzipping IPA...", color=Colors.yellow)
-            with zipfile.ZipFile(PurePath(f'{tmpfolder}/app.ipa'), 'r') as f:
-                with Path(f"{tmpfolder}/app") as path:
-                    path.mkdir(exist_ok=False)
-                    f.extractall(path)
-                    for ds in Path(path).rglob('.DS_Store*'):
-                        Path(ds).unlink()
-            print()
-
+    def run(self, tmpfolder, ldid_in_path, dpkg_in_path, data_dir):
         # Read data from the plist
         app_dir = ''
         payload = Path(tmpfolder).joinpath('app').joinpath('Payload')

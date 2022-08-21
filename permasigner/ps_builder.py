@@ -62,7 +62,7 @@ class Deb(object):
         return d.output_name
 
     def extract(self):
-        ar_file = unix_ar.open(str(self.source[0]))
+        ar_file = unix_ar.open(self.source)
         try:
             try:
                 tarball = ar_file.open('data.tar.xz')
