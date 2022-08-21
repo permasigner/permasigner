@@ -55,6 +55,7 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
 -   [Run on iOS](https://permasigner.itsnebula.net/usage/run-on-ios)
 -   [Run on macOS](https://permasigner.itsnebula.net/usage/run-on-macos)
 -   [Run on Linux](https://permasigner.itsnebula.net/usage/run-on-linux)
+-   [Run on FreeBSD](https://permasigner.itsnebula.net/usage/run-on-linux)
 -   [Run on Windows](https://permasigner.itsnebula.net/usage/run-on-windows)
 
 # In Progress
