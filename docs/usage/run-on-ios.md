@@ -29,15 +29,13 @@ description: Run Permasigner on a jailbroken iDevice using the Procursus bootstr
 * Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
 * Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
    * If this fails, install git with `sudo apt install git`.
-* Install all requirements with `python3 -m pip install -r requirements.txt`
+* Run the script with `python3 -m permasigner`
    * If this fails, install python3 with `sudo apt install python3` and pip with `python3 -m ensurepip`.
 
 {% hint style="info" %}
-If you have extra entitlements, add them in `data/entitlements.xml`. If you don't know what this means, you can keep it as is.
+If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
 {% endhint %}
 
-* Run the script with `python3 main.py`
-   * If you get an error that curl isn't found, install it with `sudo apt install curl`.
 * Install the newly created deb file
    * You can use something like Filza to find it, it's in /var/mobile/permasigner/output.
 * Reboot to stock, the app will still work!

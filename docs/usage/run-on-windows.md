@@ -2,10 +2,28 @@
 description: Run Permasigner on Windows using WSL or Docker.
 ---
 
-## Docker (recommended)
+## Run from Package (Recommended)
 
-Read the [Run in Docker](run-in-docker.md) guide.
+* Open a Powershell window from the start menu
+* Install the package with `python -m pip install permasigner`
+    * If this fails, install the latest Python 3 version from [here](https://python.org).
+* Run the script with `python -m permasigner`
+* Install the newly created deb file on your iDevice
+    * You can use something like Dropbox or Mega; advanced users can use `openssh-sftp-server` from Procursus.
+* Reboot to stock, the app will still work!
 
-## WSL
+## Run from Source
 
-[Install WSL](https://docs.microsoft.com/en-us/windows/wsl/install), then read the [Run on Linux](run-on-linux.md) guide.
+* Open a Powershell window from the start menu
+* Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
+    * If this fails, install git for Windows from [here](https://git-scm.com/download/win).
+
+{% hint style="info" %}
+If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
+{% endhint %}
+
+* Run the script with `python -m permasigner`
+    * If this fails, install the latest Python 3 version from [here](https://python.org).
+* Install the newly created deb file on your iDevice
+    * You can use something like Dropbox or Mega; advanced users can use `openssh-sftp-server` from Procursus.
+* Reboot to stock, the app will still work!

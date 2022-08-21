@@ -21,11 +21,11 @@ description: Run Permasigner on macOS.
 * Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
    * If this fails, install git with Xcode dev tools on macOS.
 * Install dpkg using [brew](https://brew.sh) with `brew install dpkg`
-* Install all requirements with `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
+* Run the script with `python -m permasigner` or `python3 -m permasigner`
    * If this fails, install python3 using brew with `brew install python3`.
 
 {% hint style="info" %}
-If you have extra entitlements, add them in `data/entitlements.xml`. If you don't know what this means, you can keep it as is.
+If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
 {% endhint %}
 
 * Run the script with `python main.py` or `python3 main.py`
