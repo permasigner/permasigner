@@ -1,6 +1,5 @@
 import argparse
 import os
-import time
 from pathlib import Path, PurePath
 from shutil import copy, copytree, rmtree
 import plistlib
@@ -333,7 +332,6 @@ class Permasigner(object):
         # Read data from the plist
         app_dir = ''
         payload = Path(tmpfolder).joinpath('app').joinpath('Payload')
-        time.sleep(60)
         if payload.exists():
             for fname in payload.rglob('*.app'):
                 app_dir = fname
