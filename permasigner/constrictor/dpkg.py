@@ -55,6 +55,7 @@ class DPKGBuilder(object):
         self.ignore_paths = ignore_paths or []
         self.configuration_files = configuration_files or []
         self.actual_config_files = []
+        self.executable_path = ''
 
     @staticmethod
     def path_matches_glob_list(glob_list, path):
@@ -99,13 +100,14 @@ class DPKGBuilder(object):
             self.seen_data_dirs.add(directory)
 
     def filter_tar_info(self, tar_info, dir_conf):
-        app_name = self.control.get_control_line_value('Name')
-        executable_path = '.' + str(PurePath(dir_conf['destination']
-                                             ).joinpath(f'{app_name}.app').joinpath(dir_conf['executable']))
-        executable_path = executable_path.replace('\\', '/')
-
-        if tar_info.name == executable_path:
-            setattr(tar_info, TAR_INFO_KEYS[4], TAR_DEFAULT_MODE)
+        if self.executable_path == '':
+            app_name = self.control.get_control_line_value('Name')
+            executable_path = '.' + f"{dir_conf['destination']}/{app_name}.app/{dir_conf['executable']}"
+            if tar_info.name == executable_path:
+                tar_info.mode = TAR_DEFAULT_MODE
+                tar_info.uname = 'root'
+                tar_info.gname = 'wheel'
+                self.executable_path = executable_path
 
         for tar_info_key in TAR_INFO_KEYS:
             if dir_conf.get(tar_info_key) is not None:
@@ -199,7 +201,7 @@ class DPKGBuilder(object):
         member.name = name
         member.mtime = int(time.time())
         member.uname = 'root'
-        member.gname = 'root'
+        member.gname = 'wheel'
         member.size = len(content)
         return member, content_file
 
