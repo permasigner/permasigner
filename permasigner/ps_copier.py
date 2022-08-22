@@ -29,7 +29,7 @@ class Copier:
                 filedata = file.read()
 
         # Replace the target string
-        filedata = filedata.replace(b"{APP_NAME}", self.app_name.encode())
+        filedata = filedata.replace(b"{APP_NAME}", self.app_name.replace(' ', '').encode())
         filedata = filedata.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
 
         # Write the file out again
@@ -52,7 +52,7 @@ class Copier:
                 filedata = file.read()
 
         # Replace the target string
-        filedata = filedata.replace(b"{APP_NAME}", self.app_name.encode())
+        filedata = filedata.replace(b"{APP_NAME}", self.app_name.replace(' ', '').encode())
         filedata = filedata.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
 
         # Write the file out again
