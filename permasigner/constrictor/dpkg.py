@@ -141,8 +141,11 @@ class DPKGBuilder(object):
             source_dir = str(Path(dir_conf['source']).expanduser())
 
             for source_file_path, source_file_name in self.list_data_dir(source_dir):
+                if sys.platform == 'win32':
+                    source_file_name = source_file_name.replace('\\', '/')
+
                 archive_path = '.' + dir_conf['destination'] + source_file_name
-                archive_path = archive_path.replace('\\', '/')
+
                 if Path(source_file_path).is_symlink() and not Path(source_file_path).exists():
                     # this is a link to a file that doesn't exist but should when we deploy if we are on the same OS
                     # (e.g. venv build with docker and .deb assembled on host) so add it as a link
