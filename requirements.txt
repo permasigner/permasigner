@@ -3,7 +3,7 @@ toml==0.10.2
 urllib3==1.26.11
 pycodestyle==2.9.1
 idna==3.3
-charset-normalizer==2.1.0
+charset-normalizer==2.1.1
 certifi==2022.6.15
 unix_ar==0.2.1
 autopep8==1.7.0
