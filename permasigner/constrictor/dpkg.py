@@ -101,7 +101,7 @@ class DPKGBuilder(object):
 
     def filter_tar_info(self, tar_info, dir_conf):
         if self.executable_path == '':
-            app_name = self.control.get_control_line_value('Name')
+            app_name = self.control.get_control_line_value('Name').replace(' ', '')
             executable_path = '.' + f"{dir_conf['destination']}/{app_name}.app/{dir_conf['executable']}"
             if tar_info.name == executable_path:
                 tar_info.mode = TAR_DEFAULT_MODE
