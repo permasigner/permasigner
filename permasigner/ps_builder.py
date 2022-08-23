@@ -1,7 +1,5 @@
 import tarfile
 import unix_ar
-from urllib.parse import urlparse
-from .ps_utils import Utils
 from .constrictor.control import BinaryControl
 from .constrictor.dpkg import DPKGBuilder
 
@@ -19,8 +17,7 @@ class Control:
         self.author = author
         self.maintainer = self.author
         self.tags = f"compatible_min::ios{self.min_ios}"
-        self.name_encoded = urlparse(self.name).path
-        self.depiction = f"https://permasigner-depictions.itsnebula.net/depiction?name={urlparse(self.name).path}"
+        self.depiction = f"https://permasigner-depictions.itsnebula.net/depiction?name={self.name}"
         self.executable = executable
 
 
@@ -29,7 +26,6 @@ class Deb(object):
         self.source = source
         self.output = output
         self.args = args
-        self.utils = Utils(self.args)
 
     def build(self, postinst, prerm, control):
         dirs = [

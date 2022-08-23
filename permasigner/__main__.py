@@ -6,7 +6,6 @@ import plistlib
 import requests
 from requests import RequestException, ConnectionError
 from urllib3.exceptions import NewConnectionError
-from urllib.parse import urlparse
 import zipfile
 import subprocess
 import tempfile
@@ -164,15 +163,13 @@ class Permasigner(object):
             # If the user's choice is external, download an IPA
             # Otherwise, copy the IPA to the temporary directory
             if self.args.url:
-                url = self.args.url
-
-                if not PurePath(urlparse(url).path).suffix == ".ipa":
+                if not self.args.url.endswith(".ipa"):
                     self.logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                     exit(1)
 
                 try:
                     self.logger.log(f"Downloading file...", color=Colors.yellow)
-                    res = requests.get(url, stream=True)
+                    res = requests.get(self.args.url, stream=True)
                     if res.status_code == 200:
                         with open(f"{tmpfolder}/app.ipa", "wb") as f:
                             f.write(res.content)
@@ -204,7 +201,7 @@ class Permasigner(object):
             elif option == "e":
                 url = self.logger.ask("Paste in the *direct* path to an IPA online: ")
 
-                if not PurePath(urlparse(url).path).suffix == ".ipa":
+                if not url.endswith(".ipa"):
                     self.logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                     exit(1)
                 print()
@@ -400,6 +397,7 @@ class Permasigner(object):
         copytree(app_dir, full_app_path)
         print("Changing app executable permissions...")
         self.utils.set_executable_permission(PurePath(f'{full_app_path}/{app_executable}'))
+
         print()
 
         # Sign the app
