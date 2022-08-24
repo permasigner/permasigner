@@ -48,8 +48,10 @@ def main(argv=None, in_package=None):
                         help="specify output path")
     parser.add_argument('-b', '--bundleid', type=str,
                         help="specify new bundle id")
-    parser.add_argument('-N', '--name', type=str,
+    parser.add_argument('-n', '--name', type=str,
                         help="specify new app name")
+    parser.add_argument('-a', '--author', type=str,
+                        help="specify new app author")
     parser.add_argument('-m', '--minver', type=str,
                         help="specify new minimum app version (14.0 recommended)")
     parser.add_argument('-v', '--version', action='store_true',
@@ -60,8 +62,8 @@ def main(argv=None, in_package=None):
                         help="args for tcprelay rport:lport:host:socketpath (ex: 22:2222:localhost:/var/run/usbmuxd)")
     parser.add_argument('-e', '--entitlements', type=str,
                         help="path to entitlements file")
-    parser.add_argument('--no-ldid-check', dest='nocheckldid', action='store_true',
-                        help="disable ldid auto update")
+    parser.add_argument('-N', '--no-ldid-check', dest='nocheckldid', action='store_true',
+                        help="disable ldid hash checking")
     args = parser.parse_args()
 
     if args.version:
@@ -352,8 +354,6 @@ class Permasigner(object):
 
                 if self.args.bundleid:
                     app_bundle = self.args.bundleid
-                elif "science.xnu.undecimus" in info["CFBundleIdentifier"]:
-                    app_bundle = "8H69ZMY835.science.xnu.undecimus.8H69ZMY835"
                 else:
                     app_bundle = info["CFBundleIdentifier"]
 
@@ -364,7 +364,10 @@ class Permasigner(object):
                 else:
                     app_min_ios = info["MinimumOSVersion"]
 
-                app_author = app_bundle.split(".")[1]
+                if self.args.author:
+                    app_author = self.args.author
+                else:
+                    app_author = app_bundle.split(".")[1]
 
                 app_executable = info["CFBundleExecutable"]
                 print("Found information about the app!")
