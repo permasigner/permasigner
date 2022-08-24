@@ -30,14 +30,18 @@ def main(argv=None, in_package=None):
     in_package = False if in_package is None else in_package
 
     parser = argparse.ArgumentParser()
+
+    input_group = parser.add_mutually_exclusive_group(required=False)
+    input_group.add_argument('-f', '--folder', type=str,
+                             help="sign multiple IPAs from a direct path to a folder")
+    input_group.add_argument('-u', '--url', type=str,
+                             help="the direct URL of the IPA to be signed")
+    input_group.add_argument('-p', '--path', type=str,
+                             help="the direct local path of the IPA to be signed")
     parser.add_argument('-d', '--debug', action='store_true',
                         help="shows some debug info, only useful for testing")
     parser.add_argument('-c', '--codesign', action='store_true',
                         help="uses codesign instead of ldid")
-    parser.add_argument('-u', '--url', type=str,
-                        help="the direct URL of the IPA to be signed")
-    parser.add_argument('-p', '--path', type=str,
-                        help="the direct local path of the IPA to be signed")
     parser.add_argument('-i', '--install', action='store_true',
                         help="installs the application to your device")
     parser.add_argument('-o', '--output', type=str,
@@ -52,8 +56,6 @@ def main(argv=None, in_package=None):
                         help='show current version and exit', )
     parser.add_argument('-l', '--ldidfork', type=str,
                         help="specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])")
-    parser.add_argument('-f', '--folder', type=str,
-                        help="sign multiple IPAs from a direct path to a folder")
     parser.add_argument('-t', '--tcprelay', type=str,
                         help="args for tcprelay rport:lport:host:socketpath (ex: 22:2222:localhost:/var/run/usbmuxd)")
     parser.add_argument('-e', '--entitlements', type=str,
@@ -456,7 +458,6 @@ class Permasigner(object):
             deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
             return deb.build(PurePath(f"{tmpfolder}/deb/DEBIAN/postinst"),
                              PurePath(f"{tmpfolder}/deb/DEBIAN/prerm"), control)
-
 
 
 if __name__ == "__main__":
