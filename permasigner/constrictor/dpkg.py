@@ -7,7 +7,7 @@ from io import BytesIO
 import tarfile
 import tempfile
 import time
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from .ar import ARWriter
 
@@ -54,7 +54,7 @@ class DPKGBuilder(object):
     def generate_directories(self, path, existing_dirs=None):
         """Recursively build a list of directories inside a path."""
         existing_dirs = existing_dirs or []
-        directory_name = os.path.dirname(path)
+        directory_name = str(PurePath(path).parent)
 
         if directory_name == '.':
             return
@@ -64,7 +64,8 @@ class DPKGBuilder(object):
 
         return existing_dirs
 
-    def list_data_dir(self, source_dir):
+    @staticmethod
+    def list_data_dir(source_dir):
         """
         Iterator to recursively list all files in a directory that should be included. Returns a tuple of absolute
         file_path (on local) and the relative path (relative to source).
@@ -72,7 +73,7 @@ class DPKGBuilder(object):
         """
         for root_dir, dirs, files in os.walk(source_dir):
             for file_name in files:
-                file_path = os.path.join(root_dir, file_name)
+                file_path = str(PurePath(root_dir).joinpath(file_name))
                 relative_path = file_path[len(source_dir):]
 
                 yield file_path, relative_path
@@ -206,7 +207,7 @@ class DPKGBuilder(object):
         with open(pkg_path, 'wb') as ar_fp:
             ar_writer = ARWriter(ar_fp)
 
-            ar_writer.archive_text("debian-binary", "{}\n".format(DEBIAN_BINARY_VERSION), int(time.time()), 0, 0,
+            ar_writer.archive_text("debian-binary", f"{DEBIAN_BINARY_VERSION}\n", int(time.time()), 0, 0,
                                    AR_DEFAULT_MODE)
             ar_writer.archive_file(control_archive_path, int(time.time()), 0, 0, AR_DEFAULT_MODE)
             ar_writer.archive_file(data_archive_path, int(time.time()), 0, 0, AR_DEFAULT_MODE)

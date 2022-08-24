@@ -1,8 +1,6 @@
 from pathlib import PurePath, Path
 from shutil import copyfileobj
 
-AR_HEADER_TEXT = "!<arch>\n"
-
 
 class ARWriter(object):
     def __init__(self, fp):
@@ -12,7 +10,7 @@ class ARWriter(object):
     def write_header(self):
         if not self.archive_ready:
             raise RuntimeError("Archive not yet created.")
-        self.fp.write(AR_HEADER_TEXT.encode("ascii"))
+        self.fp.write("!<arch>\n".encode("ascii"))
 
     def create_archive(self):
         if self.archive_ready:
@@ -24,10 +22,9 @@ class ARWriter(object):
         if not self.archive_ready:
             self.create_archive()
 
-        mode_string = '{:04o}'.format(mode)
+        mode_string = f'{mode:04o}'
 
-        file_header = '{: <16}{: <12}{: <6}{: <6}{: <8}{: <10}`\n'.format(file_name, mod_timestamp, uid, gid,
-                                                                          mode_string, file_size)
+        file_header = f"{file_name: <16}{mod_timestamp: <12}{uid: <6}{gid: <6}{mode_string: <8}{file_size: <10}`\n"
 
         self.fp.write(file_header.encode('ascii'))
 
