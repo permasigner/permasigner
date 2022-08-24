@@ -116,8 +116,6 @@ class Permasigner(object):
             with Path(f"{tmpfolder}/app") as path:
                 path.mkdir(exist_ok=False)
                 f.extractall(path)
-                for ds in Path(path).rglob('.DS_Store*'):
-                    Path(ds).unlink()
 
     def start(self):
         data_dir = self.utils.get_home_data_directory()

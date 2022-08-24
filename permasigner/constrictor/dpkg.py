@@ -25,8 +25,7 @@ class DPKGBuilder(object):
     Finds files to use, builds tar archive and then archives into ar format. Builds + includes debian control files.
     """
 
-    def __init__(self, output_directory, control, data_dirs, maintainer_scripts=None,
-                 ignore_paths=None):
+    def __init__(self, output_directory, control, data_dirs, maintainer_scripts=None):
         self.output_directory = Path(output_directory).expanduser()
         self.data_dirs = data_dirs or []
         self.maintainer_scripts = maintainer_scripts
@@ -34,8 +33,6 @@ class DPKGBuilder(object):
         self.control = control
         self.working_dir = None
         self.output_name = control.get_default_output_name()
-        self.ignore_paths = ignore_paths or []
-        self.actual_config_files = []
         self.executable_path = ''
 
     @staticmethod
@@ -53,9 +50,6 @@ class DPKGBuilder(object):
     def path_matches_glob_list(glob_list, path):
         path_matcher = partial(fnmatch.fnmatch, path)
         return any(map(path_matcher, glob_list))
-
-    def should_skip_path(self, path):
-        return self.path_matches_glob_list(self.ignore_paths, path)
 
     def generate_directories(self, path, existing_dirs=None):
         """Recursively build a list of directories inside a path."""
@@ -80,9 +74,6 @@ class DPKGBuilder(object):
             for file_name in files:
                 file_path = os.path.join(root_dir, file_name)
                 relative_path = file_path[len(source_dir):]
-
-                if self.should_skip_path(relative_path):
-                    continue
 
                 yield file_path, relative_path
 
@@ -203,10 +194,6 @@ class DPKGBuilder(object):
 
         md5sum_text = '\n'.join(['  '.join(md5_file_pair) for md5_file_pair in file_md5s]) + '\n'
         control_tar.addfile(*self.build_member_from_string('./md5sums', md5sum_text.encode()))
-
-        if self.actual_config_files:
-            conf_file_text = '\n'.join(self.actual_config_files) + "\n"
-            control_tar.addfile(*self.build_member_from_string('./conffiles', conf_file_text.encode()))
 
         control_tar.close()
 
