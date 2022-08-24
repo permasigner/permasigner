@@ -54,7 +54,7 @@ class DPKGBuilder(object):
     def generate_directories(self, path, existing_dirs=None):
         """Recursively build a list of directories inside a path."""
         existing_dirs = existing_dirs or []
-        directory_name = str(PurePath(path).parent)
+        directory_name = os.path.dirname(path)
 
         if directory_name == '.':
             return
@@ -74,11 +74,11 @@ class DPKGBuilder(object):
         for root_dir, dirs, files in os.walk(source_dir):
             for file_name in files:
                 file_path = str(PurePath(root_dir).joinpath(file_name))
-                relative_path = file_path[len(source_dir):]
+                relative_path = file_path[len(str(source_dir)):]
 
                 yield file_path, relative_path
 
-    def add_directory_root_to_archive(self, archive, dir_conf, file_path):
+    def add_directory_root_to_archive(self, archive, file_path):
         for directory in reversed(self.generate_directories(file_path)):
             if directory in self.seen_data_dirs:
                 continue
@@ -88,7 +88,6 @@ class DPKGBuilder(object):
             dir_ti.name = directory
             dir_ti.mtime = int(time.time())
             dir_ti.mode = TAR_DEFAULT_MODE
-            dir_ti = self.filter_tar_info(dir_ti, dir_conf)
             archive.addfile(dir_ti)
 
             self.seen_data_dirs.add(directory)
@@ -103,16 +102,6 @@ class DPKGBuilder(object):
                 tar_info.gname = 'wheel'
                 self.executable_path = executable_path
 
-        for tar_info_key in TAR_INFO_KEYS:
-            if dir_conf.get(tar_info_key) is not None:
-                setattr(tar_info, tar_info_key, dir_conf[tar_info_key])
-
-        if 'uid' in dir_conf and 'uname' not in dir_conf:
-            tar_info.uname = ''
-
-        if 'gid' in dir_conf and 'gname' not in dir_conf:
-            tar_info.gname = ''
-
         return tar_info
 
     @property
@@ -122,7 +111,7 @@ class DPKGBuilder(object):
     @staticmethod
     def open_tar_file(path):
         tf = tarfile.open(path, 'w:gz')
-        tf.format = tarfile.USTAR_FORMAT
+        tf.format = tarfile.PAX_FORMAT
         return tf
 
     def build_data_archive(self):
@@ -132,7 +121,7 @@ class DPKGBuilder(object):
         file_md5s = []
 
         for dir_conf in self.data_dirs:
-            source_dir = str(Path(dir_conf['source']).expanduser())
+            source_dir = Path(dir_conf['source']).expanduser()
 
             for source_file_path, source_file_name in self.list_data_dir(source_dir):
                 if sys.platform == 'win32':
@@ -140,7 +129,7 @@ class DPKGBuilder(object):
 
                 archive_path = '.' + dir_conf['destination'] + source_file_name
 
-                self.add_directory_root_to_archive(data_tar_file, dir_conf, archive_path)
+                self.add_directory_root_to_archive(data_tar_file, archive_path)
 
                 file_size_bytes += Path(source_file_path).stat().st_size
 
@@ -151,15 +140,6 @@ class DPKGBuilder(object):
         data_tar_file.close()
 
         return file_size_bytes, file_md5s
-
-    def build_link_tarinfo(self, symlink_conf, target, path):
-        link_ti = tarfile.TarInfo()
-        link_ti.type = tarfile.SYMTYPE
-        link_ti.linkname = target
-        link_ti.name = path
-        link_ti.mtime = int(time.time())
-        link_ti = self.filter_tar_info(link_ti, symlink_conf)
-        return link_ti
 
     @staticmethod
     def build_member_from_string(name, content):
