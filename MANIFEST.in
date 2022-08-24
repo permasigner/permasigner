@@ -1,3 +1,3 @@
 include permasigner/data/*
 include permasigner/data/DEBIAN/*
-include permasigner/constrictor/LICENSE
+include permasigner/constrictor/LICENCE
