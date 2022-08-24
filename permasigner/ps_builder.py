@@ -42,20 +42,21 @@ class Deb(object):
             'prerm': prerm
         }
 
-        links = []
-
-        c = BinaryControl(control.package, control.version, control.arch, control.maintainer, control.description)
-        c.set_control_fields({'Name': control.name,
-                              'Author': control.author,
-                              'Section': control.section,
-                              'Depends': control.depends,
-                              'Tags': control.tags,
-                              'Depiction': control.depiction
-                              })
-        output_name = control.name.replace(' ', '') + '_' + control.version + '.deb'
-        d = DPKGBuilder(self.output, c, dirs, links, scripts, output_name=output_name)
-        d.build_package()
-        return d.output_name
+        ctrl = BinaryControl()
+        ctrl.set_control_fields({'Name': control.name,
+                                 'Package': control.package,
+                                 'Version': control.version,
+                                 'Architecture': control.arch,
+                                 'Maintainer': control.maintainer,
+                                 'Description': control.description,
+                                 'Author': control.author,
+                                 'Section': control.section,
+                                 'Depends': control.depends,
+                                 'Tags': control.tags,
+                                 'Depiction': control.depiction
+                                 })
+        d = DPKGBuilder(self.output, ctrl, dirs, scripts)
+        return d.build_package()
 
     def extract(self):
         ar_file = unix_ar.open(self.source)

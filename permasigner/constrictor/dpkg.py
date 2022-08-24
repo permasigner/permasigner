@@ -1,3 +1,4 @@
+import hashlib
 import os
 import fnmatch
 import sys
@@ -6,15 +7,11 @@ from io import BytesIO
 import tarfile
 import tempfile
 import time
-from pathlib import Path, PurePath
+from pathlib import Path
 
 from .ar import ARWriter
-from .control import FIELD_INSTALLED_SIZE
-from .helpers import md5_for_path
 
-MAINTAINER_SCRIPT_NAMES = ('preinst', 'postinst', 'prerm', 'postrm')
 TAR_INFO_KEYS = ('uname', 'gname', 'uid', 'gid', 'mode')
-FORCE_DIRECTORY_INCLUSION_FILENAMES = (".debkeep", ".gitkeep")
 DEBIAN_BINARY_VERSION = '2.0'
 TAR_DEFAULT_MODE = 0o755
 AR_DEFAULT_MODE = 0o644
@@ -23,39 +20,34 @@ LINK_PATH_KEY = "path"
 LINK_TARGET_KEY = "target"
 
 
-def generate_directories(path, existing_dirs=None):
-    """Recursively build a list of directories inside a path."""
-    existing_dirs = existing_dirs or []
-    directory_name = os.path.dirname(path)
-
-    if directory_name == '.':
-        return
-
-    existing_dirs.append(directory_name)
-    generate_directories(directory_name, existing_dirs)
-
-    return existing_dirs
-
-
 class DPKGBuilder(object):
     """
     Finds files to use, builds tar archive and then archives into ar format. Builds + includes debian control files.
     """
 
-    def __init__(self, output_directory, control, data_dirs, links, maintainer_scripts=None, output_name=None,
-                 ignore_paths=None, configuration_files=None):
+    def __init__(self, output_directory, control, data_dirs, maintainer_scripts=None,
+                 ignore_paths=None):
         self.output_directory = Path(output_directory).expanduser()
         self.data_dirs = data_dirs or []
-        self.links = links or {}
         self.maintainer_scripts = maintainer_scripts
         self.seen_data_dirs = set()
         self.control = control
         self.working_dir = None
-        self.output_name = output_name or control.get_default_output_name()
+        self.output_name = control.get_default_output_name()
         self.ignore_paths = ignore_paths or []
-        self.configuration_files = configuration_files or []
         self.actual_config_files = []
         self.executable_path = ''
+
+    @staticmethod
+    def md5_for_path(path, block_size=1048576):
+        with open(path, 'rb') as f:
+            md5 = hashlib.md5()
+            while True:
+                data = f.read(block_size)
+                if not data:
+                    break
+                md5.update(data)
+        return md5.hexdigest()
 
     @staticmethod
     def path_matches_glob_list(glob_list, path):
@@ -65,8 +57,18 @@ class DPKGBuilder(object):
     def should_skip_path(self, path):
         return self.path_matches_glob_list(self.ignore_paths, path)
 
-    def path_is_config(self, path):
-        return self.path_matches_glob_list(self.configuration_files, path)
+    def generate_directories(self, path, existing_dirs=None):
+        """Recursively build a list of directories inside a path."""
+        existing_dirs = existing_dirs or []
+        directory_name = os.path.dirname(path)
+
+        if directory_name == '.':
+            return
+
+        existing_dirs.append(directory_name)
+        self.generate_directories(directory_name, existing_dirs)
+
+        return existing_dirs
 
     def list_data_dir(self, source_dir):
         """
@@ -85,7 +87,7 @@ class DPKGBuilder(object):
                 yield file_path, relative_path
 
     def add_directory_root_to_archive(self, archive, dir_conf, file_path):
-        for directory in reversed(generate_directories(file_path)):
+        for directory in reversed(self.generate_directories(file_path)):
             if directory in self.seen_data_dirs:
                 continue
 
@@ -146,42 +148,13 @@ class DPKGBuilder(object):
 
                 archive_path = '.' + dir_conf['destination'] + source_file_name
 
-                if Path(source_file_path).is_symlink() and not Path(source_file_path).exists():
-                    # this is a link to a file that doesn't exist but should when we deploy if we are on the same OS
-                    # (e.g. venv build with docker and .deb assembled on host) so add it as a link
-                    self.links.append({
-                        LINK_PATH_KEY: archive_path,
-                        LINK_TARGET_KEY: str(Path(source_file_path).readlink())
-                    })
-                else:
-                    self.add_directory_root_to_archive(data_tar_file, dir_conf, archive_path)
+                self.add_directory_root_to_archive(data_tar_file, dir_conf, archive_path)
 
-                    if PurePath(source_file_name).name in FORCE_DIRECTORY_INCLUSION_FILENAMES:
-                        continue
+                file_size_bytes += Path(source_file_path).stat().st_size
 
-                    file_size_bytes += Path(source_file_path).stat().st_size
-
-                    file_md5s.append((md5_for_path(source_file_path), archive_path))
-                    data_tar_file.add(source_file_path, arcname=archive_path, recursive=False,
-                                      filter=lambda ti: self.filter_tar_info(ti, dir_conf))
-
-                    config_path = archive_path[1:] if archive_path.startswith(".") else archive_path
-
-                    if config_path not in self.actual_config_files and self.path_is_config(config_path):
-                        self.actual_config_files.append(config_path)
-
-        for symlink_conf in self.links:
-            target = symlink_conf[LINK_TARGET_KEY]
-            path = symlink_conf[LINK_PATH_KEY]
-
-            if not path.startswith('.'):
-                path = '.' + path
-
-            self.add_directory_root_to_archive(data_tar_file, symlink_conf, path)
-            link_ti = self.build_link_tarinfo(symlink_conf, target, path)
-
-            data_tar_file.addfile(link_ti)
-            file_size_bytes += len(path)
+                file_md5s.append((self.md5_for_path(source_file_path), archive_path))
+                data_tar_file.add(source_file_path, arcname=archive_path, recursive=False,
+                                  filter=lambda ti: self.filter_tar_info(ti, dir_conf))
 
         data_tar_file.close()
 
@@ -209,20 +182,9 @@ class DPKGBuilder(object):
         return member, content_file
 
     @staticmethod
-    def validate_maintainer_scripts(maintainer_scripts):
-        for script_name in maintainer_scripts.keys():
-            if script_name not in MAINTAINER_SCRIPT_NAMES:
-                raise ValueError("Unknown maintainer script {}".format(script_name))
-
-    @staticmethod
     def filter_maintainer_script_tar_info(tar_info):
         tar_info.uid = 0
         tar_info.gid = 0
-        tar_info.mode = TAR_DEFAULT_MODE
-        return tar_info
-
-    @staticmethod
-    def filter_executable_tar_info(tar_info):
         tar_info.mode = TAR_DEFAULT_MODE
         return tar_info
 
@@ -232,8 +194,6 @@ class DPKGBuilder(object):
 
     def build_control_archive(self, control_text, file_md5s, maintainer_scripts):
         maintainer_scripts = maintainer_scripts or {}
-        self.validate_maintainer_scripts(maintainer_scripts)
-
         control_tar = self.open_tar_file(self.control_archive_path)
 
         for script_name, script_path in maintainer_scripts.items():
@@ -270,10 +230,7 @@ class DPKGBuilder(object):
         with tempfile.TemporaryDirectory() as tmpfolder:
             self.working_dir = tmpfolder
             file_size_bytes, file_md5s = self.build_data_archive()
-
-            if not self.control.is_field_defined(FIELD_INSTALLED_SIZE):
-                self.control.installed_size_bytes = file_size_bytes
-
+            self.control.installed_size_bytes = file_size_bytes
             self.build_control_archive(self.control.get_control_text(), file_md5s, self.maintainer_scripts)
 
             return self.assemble_deb_archive(self.control_archive_path, self.data_archive_path)
