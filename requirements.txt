@@ -11,7 +11,7 @@ autopep8==1.7.0
 # Packages only required for desktop
 scp==0.14.4 ; sys_platform == "linux" or sys_platform == "win32" or "freebsd" in sys_platform or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
 six==1.16.0 ; sys_platform == "linux" or sys_platform == "win32" or "freebsd" in sys_platform or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
-bcrypt==3.2.2 ; sys_platform == "linux" or sys_platform == "win32" or "freebsd" in sys_platform or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
+bcrypt==4.0.0 ; sys_platform == "linux" or sys_platform == "win32" or "freebsd" in sys_platform or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
 cffi==1.15.1 ; sys_platform == "linux" or sys_platform == "win32" or "freebsd" in sys_platform or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
 cryptography==37.0.4 ; sys_platform == "linux" or sys_platform == "win32" or "freebsd" in sys_platform or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
 paramiko==2.11.0 ; sys_platform == "linux" or sys_platform == "win32" or "freebsd" in sys_platform or (sys_platform == "darwin" and platform_machine == "x86_64") or (sys_platform == "darwin" and platform_machine == "arm64")
