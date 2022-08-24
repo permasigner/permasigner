@@ -194,6 +194,7 @@ class Permasigner(object):
                     print()
 
                     copy(fpath, f"{tmpfolder}/app.ipa")
+                    self.unzip(tmpfolder)
                     out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir)
                     self.outputs.append(out_dir)
             elif option == "e":
@@ -261,11 +262,8 @@ class Permasigner(object):
             if self.args.folder:
                 final_outputs = ""
                 for output in self.outputs:
-                    if final_outputs == "":
-                        final_outputs = f"{output}"
-                    else:
-                        final_outputs = f"{final_outputs}, {output}"
-                self.logger.log(f"Output files: {final_outputs}", color=Colors.green)
+                    final_outputs += f'{output}\n'
+                self.logger.log(f"Output files:\n{final_outputs}", color=Colors.green)
             else:
                 self.logger.log(f"Output file: {out_dir}", color=Colors.green)
 
@@ -456,9 +454,9 @@ class Permasigner(object):
         else:
             control = Control(app_bundle, app_version, app_min_ios, app_name, app_author, app_executable)
             deb = Deb(f"{tmpfolder}/deb/Applications/", out_dir, self.args)
-            output_name = deb.build(PurePath(f"{tmpfolder}/deb/DEBIAN/postinst"),
-                                    PurePath(f"{tmpfolder}/deb/DEBIAN/prerm"), control)
-            return PurePath(f'{out_dir}/{output_name}')
+            return deb.build(PurePath(f"{tmpfolder}/deb/DEBIAN/postinst"),
+                             PurePath(f"{tmpfolder}/deb/DEBIAN/prerm"), control)
+
 
 
 if __name__ == "__main__":
