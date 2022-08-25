@@ -67,7 +67,7 @@ class Ldid(object):
             return "ldid_freebsd_x86_64"
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
             return "ldid_w64_x86_64.exe"
-        elif self.utils.is_ios() and "64" in platform.architecture():
+        elif self.utils.is_ios() and "64bit" in platform.platform():
             return "ldid_iphoneos_arm64"
 
     def save(self, content):
