@@ -60,17 +60,17 @@ class Ldid(object):
         elif self.utils.is_linux() and platform.machine() == "armv7l":
             return "ldid_linux_armv7l"
         elif self.utils.is_macos() and platform.machine() == "x86_64":
-            return "ldid_macos_x86_64"
+            return "ldid_macosx_x86_64"
         elif self.utils.is_macos() and platform.machine() == "arm64":
-            return "ldid_macos_arm64"
+            return "ldid_macosx_arm64"
+        elif self.utils.is_freebsd() and platform.machine() == "amd64":
+            return "ldid_freebsd_x86_64"
         elif self.utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
-            return "ldid_win32_x86_64.exe"
-        elif self.utils.is_freebsd12() and platform.machine() == "amd64":
-            return "ldid_freebsd12_amd64"
-        elif self.utils.is_freebsd13 and platform.machine() == "amd64":
-            return "ldid_freebsd13_amd64"
+            return "ldid_w64_x86_64.exe"
+        elif self.utils.is_ios() and "64bit" in platform.platform():
+            return "ldid_iphoneos_arm64"
 
-    def process(self, content):
+    def save(self, content):
         with open(self.name, "wb") as f:
             f.write(content)
             self.logger.debug(f"Wrote file.")
@@ -80,7 +80,7 @@ class Ldid(object):
             Path(self.data_dir).joinpath(self.name).unlink()
 
         self.utils.set_executable_permission(self.name)
-        destination = PurePath(self.data_dir).joinpath(self.name)
+        destination = PurePath(f'{self.data_dir}/{self.name}')
         move(self.name, destination)
         self.logger.debug(f"Moved ldid to {str(destination)}")
 
@@ -114,4 +114,4 @@ class Ldid(object):
                     exit(1)
             else:
                 self.logger.debug(f"Ldid hash failed to verify, saving newer version")
-                self.process(content)
+                self.save(content)

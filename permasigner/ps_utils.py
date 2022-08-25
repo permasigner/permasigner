@@ -38,12 +38,8 @@ class Utils(object):
         return sys.platform == "win32"
 
     @staticmethod
-    def is_freebsd12():
-        return sys.platform == "freebsd12"
-
-    @staticmethod
-    def is_freebsd13():
-        return sys.platform == "freebsd13"
+    def is_freebsd():
+        return "freebsd" in sys.platform
 
     @staticmethod
     def is_dpkg_installed(pkg):
@@ -62,22 +58,6 @@ class Utils(object):
         path = which(cmd)
 
         if cmd == "ldid":
-            if self.is_ios():
-                self.logger.debug(f"Checking for ldid on iOS")
-
-                if Path("/.bootstrapped").exists():
-                    self.logger.error(
-                        "Your device seems to be strapped with Elucubratus. Unfortunately, we do not support these devices. You can switch to a device that uses Procursus (Taurine, odysseyra1n), or use the online method on our GitHub.")
-                    print("    https://github.com/itsnebulalol/permasigner/wiki/Run-Online")
-                    exit(1)
-
-                if self.is_dpkg_installed("ldid"):
-                    self.logger.debug(f"ldid is installed via dpkg")
-                    return True
-                else:
-                    self.logger.error("ldid is required on iOS, but it is not installed. Please install it from Procursus.")
-                    exit(1)
-
             if path is not None:
                 if "procursus" not in subprocess.getoutput(path):
                     return False
@@ -95,7 +75,7 @@ class Utils(object):
             return ps_home
 
         user_home = Path.home()
-        if self.is_linux() or self.is_freebsd12() or self.is_freebsd13():
+        if self.is_linux() or self.is_freebsd():
             xdg_data_home = os.environ.get("XDG_DATA_HOME", PurePath(f'{user_home}/.local/share'))
             return PurePath(f'{xdg_data_home}/permasigner')
         elif self.is_ios() or self.is_macos():

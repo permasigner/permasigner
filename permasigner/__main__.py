@@ -237,9 +237,6 @@ class Permasigner(object):
                 self.logger.error(f"That is not a valid option!")
                 exit(1)
 
-            if not self.args.folder:
-                print()
-
             is_installed = False
             if not self.args.folder:
                 out_dir = self.run(tmpfolder, ldid_in_path, dpkg_in_path, data_dir)
@@ -342,6 +339,7 @@ class Permasigner(object):
         else:
             self.logger.error(f"IPA/deb is not valid!")
             exit(1)
+        print()
 
         if Path(app_dir).joinpath('Info.plist').exists():
             self.logger.log(f"Reading plist...", color=Colors.yellow)
@@ -374,7 +372,6 @@ class Permasigner(object):
         else:
             self.logger.error("Unable to find Info.plist, can't read application data")
             exit(1)
-
         print()
 
         # Get the deb file ready
@@ -398,7 +395,6 @@ class Permasigner(object):
         copytree(app_dir, full_app_path)
         print("Changing app executable permissions...")
         self.utils.set_executable_permission(PurePath(f'{full_app_path}/{app_executable}'))
-
         print()
 
         # Sign the app
@@ -419,10 +415,8 @@ class Permasigner(object):
                            stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            if self.utils.is_ios() or ldid_in_path:
+            if ldid_in_path:
                 ldid_cmd = 'ldid'
-            elif self.utils.is_windows():
-                ldid_cmd = PurePath(f'{data_dir}/ldid.exe')
             else:
                 ldid_cmd = PurePath(f'{data_dir}/ldid')
 
