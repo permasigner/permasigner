@@ -419,10 +419,8 @@ class Permasigner(object):
                            stdout=DEVNULL)
         else:
             print("Signing with ldid...")
-            if self.utils.is_ios() or ldid_in_path:
+            if ldid_in_path:
                 ldid_cmd = 'ldid'
-            elif self.utils.is_windows():
-                ldid_cmd = PurePath(f'{data_dir}/ldid.exe')
             else:
                 ldid_cmd = PurePath(f'{data_dir}/ldid')
 
