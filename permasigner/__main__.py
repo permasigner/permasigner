@@ -122,7 +122,7 @@ class Permasigner(object):
                 f.extractall(path)
 
     def start(self):
-        data_dir = self.utils.get_home_data_directory()
+        data_dir = self.utils.get_data_directory()
         Path(data_dir).mkdir(exist_ok=True, parents=True)
 
         if self.in_package:

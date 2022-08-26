@@ -5,7 +5,7 @@ import subprocess
 import importlib
 from importlib import util
 from pathlib import Path, PurePath
-from shutil import which
+import shutil
 
 from permasigner.ps_logger import Logger
 
@@ -16,75 +16,89 @@ class Utils(object):
         self.logger = Logger(self.args)
 
     @staticmethod
-    def is_ios():
+    def is_ios() -> bool:
+        # Check if script is running on iOS
         if not sys.platform == "darwin":
             return False
 
         return platform.machine().startswith("i")
 
     @staticmethod
-    def is_macos():
+    def is_macos() -> bool:
+        # Check if script is running on macOS
         if platform.machine().startswith("i"):
             return False
 
         return sys.platform == "darwin"
 
     @staticmethod
-    def is_linux():
+    def is_linux() -> bool:
+        # Check if script is running on linux
         return sys.platform == "linux"
 
     @staticmethod
-    def is_windows():
+    def is_windows() -> bool:
+        # Check if script is running on windows
         return sys.platform == "win32"
 
     @staticmethod
-    def is_freebsd():
+    def is_freebsd() -> bool:
+        # Check if script is running on freebsd
         return "freebsd" in sys.platform
 
     @staticmethod
-    def is_dpkg_installed(pkg):
-        return (os.system("dpkg -s " + pkg + "> /dev/null 2>&1")) == 0
-
-    def set_executable_permission(self, path):
+    def set_executable_permission(path: str) -> None:
+        # Take a file on a given path and make it executable
         file = Path(path)
         mode = file.stat().st_mode
         mode |= (mode & 0o444) >> 2
         file.chmod(mode)
-        self.logger.debug(f'Set chmod +x on {file}')
 
-    def cmd_in_path(self, cmd):
-        self.logger.debug(f"Checking if command {cmd} is in PATH...")
+    @staticmethod
+    def cmd_in_path(cmd: str) -> bool:
+        # Check if command is in PATH
+        path = shutil.which(cmd)
 
-        path = which(cmd)
-
-        if cmd == "ldid":
-            if path is not None:
-                if "procursus" not in subprocess.getoutput(path):
-                    return False
-
-                self.logger.debug(f"Procursus ldid is installed")
-                return True
-
+        # If command was not found in Path return False
+        if path is None:
             return False
 
-        return path is not None
+        # Check if ldid is from procursus
+        if cmd == "ldid":
+            if "procursus" in subprocess.getoutput(path):
+                return True
+            return False
 
-    def get_home_data_directory(self):
+        # Return True if command was found in PATH
+        return True
+
+    def get_data_directory(self) -> Path:
+        # Get path to data directory
+
+        # Get the value of PERMASIGNER_HOME variable and if it's exported use it as data directory
         ps_home = os.environ.get("PERMASIGNER_HOME")
         if ps_home:
             return ps_home
 
-        user_home = Path.home()
+        # Get path to user's $HOME
+        home = Path.home()
+
+        # Use XDG_DATA_HOME as data directory on freebsd and linux if it's exported
+        # otherwise default to $HOME/.local/share
         if self.is_linux() or self.is_freebsd():
-            xdg_data_home = os.environ.get("XDG_DATA_HOME", PurePath(f'{user_home}/.local/share'))
-            return PurePath(f'{xdg_data_home}/permasigner')
+            if xdg := os.environ.get("XDG_DATA_HOME"):
+                return Path(xdg).joinpath("permasigner")
+            return home / ".local/share/permasigner"
+        # Use $HOME/Library/Application Support/permasigner as data directory on macOS and iOS
         elif self.is_ios() or self.is_macos():
-            return PurePath(f'{user_home}/Library/Application Support/permasigner')
+            return home / "Library/Application Support/permasigner"
+        # Use %APPDATA%/permasigner as data directory on Windows OS
         elif self.is_windows():
-            return PurePath(f"{os.getenv('APPDATA')}/permasigner")
+            return home / "AppData/Roaming/permasigner"
 
     @staticmethod
-    def get_resource_path(package, resource):
+    def get_resource_path(package: str, resource: str):
+        # Get path to resource in the package
         spec = importlib.util.find_spec(package)
         if spec is None:
             return None
@@ -98,4 +112,4 @@ class Utils(object):
 
         parts = resource.split('/')
         parts.insert(0, PurePath(mod.__file__).parent)
-        return f"{PurePath(*parts)}"
+        return PurePath(*parts)
