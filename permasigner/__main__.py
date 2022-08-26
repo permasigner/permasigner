@@ -245,6 +245,7 @@ class Permasigner(object):
                     is_installed = self.install(out_dir)
 
             # Done, print end message
+            print()
             self.logger.log(f"We are finished!", color=Colors.green)
 
             if is_installed:

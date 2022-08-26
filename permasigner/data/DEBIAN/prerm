@@ -1,2 +1,2 @@
 #!/bin/sh
-uicache -u /Applications/{APP_NAME}.app
+uicache -v -u /Applications/{APP_NAME}.app

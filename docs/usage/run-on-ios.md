@@ -1,20 +1,26 @@
 ---
-description: Run Permasigner on a jailbroken iDevice using the Procursus bootstrap.
+description: Run Permasigner on a jailbroken iDevice.
 ---
 
-**Note:** A jailbreak using Procursus is required (eg. Taurine, odysseyra1n).
+{% hint style="info" %}
+If asked, the default root password is `alpine`.
+{% endhint %}
 
 ## Run from Package
 
 * Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
 * Install permasigner with `python3 -m pip install permasigner`
-   * If this fails, install python3 with `sudo apt install python3` and install pip with `python3 -m ensurepip`.
+   * If this fails, install python3 with `su root -c apt install python3` and install pip with `python3 -m ensurepip`.
 * Run the script with `python3 -m permasigner`
 * Install the newly created deb file
    * Find it in Filza at `/var/mobile/.permasigner/output`
 * Reboot to stock, the app will still work!
 
 ## Run with Shortcut
+
+{% hint style="warning" %}
+This will only work on Procursus jailbreaks for now.
+{% endhint %}
 
 * Import the shortcut from [here](https://routinehub.co/shortcut/12520/)
    * Make sure to pay attention to the import questions.
@@ -28,9 +34,9 @@ description: Run Permasigner on a jailbroken iDevice using the Procursus bootstr
 
 * Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
 * Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
-   * If this fails, install git with `sudo apt install git`.
+   * If this fails, install git with `su root -c apt install git`.
 * Run the script with `python3 -m permasigner`
-   * If this fails, install python3 with `sudo apt install python3` and pip with `python3 -m ensurepip`.
+   * If this fails, install python3 with `su root -c apt install python3` and pip with `python3 -m ensurepip`.
 
 {% hint style="info" %}
 If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
