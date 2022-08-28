@@ -37,26 +37,26 @@ def log(message, color=None):
     if color is None:
         print(f"[*] {message}")
     else:
-        print(color + colors["bold"] + "[*] " + colors["reset"] + color + message + colors["reset"])
+        print(color + colors["bold"] + "[*] " + colors["reset"] + color + f"{message}" + colors["reset"])
 
 
 def debug(message, dbg):
     if dbg:
         print(
-            colors["lightcyan"] + colors["bold"] + "[DEBUG] " + colors["reset"] + colors["lightcyan"] + message + colors["reset"])
+            colors["lightcyan"] + colors["bold"] + "[DEBUG] " + colors["reset"] + colors["lightcyan"] + f"{message}" + colors["reset"])
 
 
 def error(message):
-    print(colors["lightred"] + colors["bold"] + "[!] " + colors["reset"] + colors["lightred"] + message + colors["reset"])
+    print(colors["lightred"] + colors["bold"] + "[!] " + colors["reset"] + colors["lightred"] + f"{message}" + colors["reset"])
 
 
 def ask(message):
-    return input(colors["orange"] + colors["bold"] + "[?] " + colors["reset"] + colors["orange"] + message + colors["reset"])
+    return input(colors["orange"] + colors["bold"] + "[?] " + colors["reset"] + colors["orange"] + f"{message}" + colors["reset"])
 
 
 def log_header(message):
-    print(colors["bold"] + colors["bold"] + "[*] " + colors["reset"] + colors["bold"] + message + colors["reset"])
+    print(colors["bold"] + colors["bold"] + "[*] " + colors["reset"] + colors["bold"] + f"{message}" + colors["reset"])
 
 
 def log_footer(message):
-    print(colors["green"] + colors["bold"] + "[*] " + colors["reset"] + colors["green"] + message + colors["reset"])
+    print(colors["green"] + colors["bold"] + "[*] " + colors["reset"] + colors["green"] + f"{message}" + colors["reset"])
