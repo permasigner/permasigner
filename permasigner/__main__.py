@@ -1,5 +1,6 @@
 import argparse
-from permasigner import Permasigner
+import permasigner
+from permasigner import utils
 
 
 def main(argv=None, in_package=None) -> None:
@@ -47,11 +48,10 @@ def main(argv=None, in_package=None) -> None:
     args = parser.parse_args()
 
     if args.version:
-        from permasigner import utils
         print(f"Permasigner v{utils.get_version(in_package)}")
         exit(0)
 
-    ps = Permasigner(in_package, args)
+    ps = permasigner.Permasigner(in_package, args)
     ps.main()
 
 
