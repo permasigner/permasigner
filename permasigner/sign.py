@@ -1,6 +1,6 @@
 import subprocess
 from argparse import Namespace
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import Union
 
 import requests
@@ -10,8 +10,7 @@ from shutil import move
 from requests.exceptions import RequestException, ConnectionError
 from urllib3.exceptions import NewConnectionError
 
-from . import utils
-from . import logger
+from . import utils, logger
 from .logger import colors
 
 

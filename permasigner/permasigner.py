@@ -1,24 +1,23 @@
 import array
 import shutil
-import subprocess
 import tempfile
 import zipfile
 from argparse import Namespace
-from pathlib import Path, PurePath
+from pathlib import Path
 from shutil import copytree
 
 import requests
 from requests import RequestException
 from urllib3.exceptions import NewConnectionError
 
-from permasigner import logger
-from permasigner import utils
-from permasigner.sign import Signer
-from permasigner.installer import install_on_ios, install_from_pc
-from permasigner.dpkg import Dpkg, Deb
-from permasigner.copy import Copier
-from permasigner.sign import Ldid
-from permasigner.logger import colors
+from . import logger
+from . import utils
+from .sign import Signer
+from .installer import install_on_ios, install_from_pc
+from .dpkg import Dpkg, Deb
+from .copy import Copier
+from .sign import Ldid
+from .logger import colors
 
 
 class Permasigner:

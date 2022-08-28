@@ -1,14 +1,16 @@
 import plistlib
+import shutil
+import subprocess
 import sys
 import platform
 import os
 import importlib
 from importlib import util
+from pathlib import PurePath, Path
 from typing import Union
 import pkg_resources
 
-from .__version__ import __version__
-from .permasigner import *
+from . import __version__
 
 
 def is_ios() -> bool:

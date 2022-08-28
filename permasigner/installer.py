@@ -1,7 +1,7 @@
 import subprocess
 from argparse import Namespace
 from pathlib import Path
-from .permasigner import logger, utils
+from . import logger, utils
 from .logger import colors
 
 if not utils.is_ios():
@@ -9,9 +9,9 @@ if not utils.is_ios():
     from getpass import getpass
     from threading import Thread
     from paramiko.client import AutoAddPolicy, SSHClient
-    from paramiko.ssh_exception import AuthenticationException, SSHException, NoValidConnectionsError
+    from paramiko.ssh_exception import AuthenticationException, SSHException
     from scp import SCPClient
-    from permasigner.tcprelay import Relayer
+    from . import tcprelay
 
 
 def install_on_ios(output_path: Path, args: Namespace) -> bool:
@@ -85,7 +85,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
         socketpath = '/var/run/usbmuxd'
 
     # Start TCPRelay in a separate thread
-    relayer = Relayer(rport, lport, args, host, socketpath)
+    relayer = tcprelay.Relayer(rport, lport, args, host, socketpath)
     thread = Thread(target=relayer.relay, daemon=True)
     thread.start()
     time.sleep(1)
@@ -243,4 +243,3 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
                 logger.debug(output, args.debug)
 
         return True
-
