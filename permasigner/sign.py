@@ -1,6 +1,6 @@
-import zipfile
+import subprocess
 from argparse import Namespace
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Union
 
 import requests
@@ -71,22 +71,22 @@ class Ldid:
             return "ldid_iphoneos_arm64"
 
     @property
-    def local_filepath(self) -> str:
+    def local_name(self) -> str:
         # Get local ldid name based on the platform
         if utils.is_windows():
             return "ldid.exe"
         else:
             return "ldid"
 
-    def find_in_data_dir(self) -> bool:
+    def exists_in_data_dir(self) -> bool:
         # Check if ldid is present in the data dir
-        ldid_name = self.local_filepath
+        ldid_name = self.local_name
 
         return (self.data_dir / ldid_name).exists()
 
     def save_file(self, content: bytearray) -> None:
         # Get local ldid name
-        ldid_name = self.local_filepath
+        ldid_name = self.local_name
 
         # Write bytearray to a new file
         with open(ldid_name, "wb") as f:
@@ -116,10 +116,10 @@ class Ldid:
             ldid_fork = "itsnebulalol"
 
         # Check for ldid's presence in data directory
-        exists = self.find_in_data_dir()
+        exists = self.exists_in_data_dir()
 
         # Get name and extension of a local ldid
-        local_filepath = self.data_dir / self.local_filepath
+        local_filepath = self.data_dir / self.local_name
 
         # Get name of a remote ldid
         remote_filename = self.remote_filename
@@ -150,3 +150,59 @@ class Ldid:
             else:
                 logger.debug(f"Ldid hash failed to verify, saving newer version", self.args.debug)
                 self.save_file(content)
+
+
+class Signer:
+    def __init__(self, cert: Path, bundle_path: Path, data_dir: Path, tmp: Path, args) -> None:
+        self.cert = cert
+        self.bundle_path = bundle_path
+        self.data_dir = data_dir
+        self.tmp = tmp
+        self.args = args
+
+    def sign_with_ldid(self, ldid: Path) -> None:
+        # Determine path to ldid
+        if ldid_path := ldid:
+            ldid_cmd = ldid_path
+        else:
+            ldid_cmd = self.data_dir / "ldid"
+
+        logger.debug(
+            f"Running command: {ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword '{self.bundle_path}'",
+            self.args.debug)
+
+        # Sign the bundle with ldid
+        subprocess.run([
+                        ldid_cmd,
+                        f"-S{self.tmp / 'entitlements.plist'}",
+                        "-M",
+                        f"-K{self.cert}",
+                        "-Upassword",
+                        self.bundle_path],
+                       stdout=subprocess.DEVNULL)
+
+        # Check if entitlements arg was passed
+        # then, resign and merge the entitlements
+        if self.args.entitlements:
+            logger.debug(f"Signing with extra entitlements located in {self.args.entitlements}", self.args.debug)
+            subprocess.run([
+                            f'{ldid_cmd}',
+                            f'-S{self.args.entitlements}',
+                            '-M',
+                            f'-K{self.cert}',
+                            '-Upassword', f'{self.bundle_path}'
+                            ],
+                           stdout=subprocess.DEVNULL)
+
+    def sign_with_codesign(self) -> None:
+        # Import the certificate
+        logger.debug(f"Running command: security import {self.cert} -P password -A", self.args.debug)
+        subprocess.run(
+            ['security', 'import', self.cert, '-P', 'password', '-A'], stdout=subprocess.DEVNULL)
+
+        # Sign with codesign using imported certificate
+        logger.debug(f"Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing "
+                     f"--force --deep --preserve-metadata=entitlements {self.bundle_path}", self.args.debug)
+        subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
+                        '--force', '--deep', '--preserve-metadata=entitlements', f'{self.bundle_path}'],
+                       stdout=subprocess.DEVNULL)

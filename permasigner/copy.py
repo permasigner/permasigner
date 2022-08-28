@@ -56,7 +56,7 @@ class Copier:
             with open('permasigner/data/DEBIAN/control', 'rb') as file:
                 filedata = file.read()
 
-        # Replace the target strings
+        # Replace target strings
         filedata = filedata.replace(b"{APP_NAME}", self.app_name.encode())
         filedata = filedata.replace(b"{APP_NAME_ENCODED}", urlparse(self.app_name).path.encode())
         filedata = filedata.replace(b"{APP_BUNDLE}", self.bundle_id.encode())

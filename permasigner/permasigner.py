@@ -11,21 +11,13 @@ import requests
 from requests import RequestException
 from urllib3.exceptions import NewConnectionError
 
-from permasigner import (
-    logger,
-    utils,
-)
+from permasigner import logger
+from permasigner import utils
+from permasigner.sign import Signer
 from permasigner.installer import install_on_ios, install_from_pc
-
-from permasigner.packager import (
-    Builder,
-    extract_with_dpkg,
-    extract_with_ar
-)
-
-from permasigner.copier import Copier
-from permasigner.downloader import Ldid
-
+from permasigner.dpkg import Dpkg, Deb
+from permasigner.copy import Copier
+from permasigner.sign import Ldid
 from permasigner.logger import colors
 
 
@@ -175,20 +167,22 @@ class Permasigner:
         # Check if codesign arg was specified
         # then, check if the script runs on macOS
         # then, sign with codesign
+        signer = Signer(cert, full_app_path, self.data_dir, self.tmp, self.args)
         if self.args.codesign and utils.is_macos():
             print("Signing bundle with codesign...")
-            self.sign_with_codesign(cert, full_app_path)
+            signer.sign_with_codesign()
         # In other cases sign with ldid
         else:
             print("Signing bundle with ldid...")
-            self.sign_with_ldid(self.ldid, cert, full_app_path, self.data_dir)
+            signer.sign_with_ldid(self.ldid)
 
         print()
 
         # Package the deb file
         logger.log(f"Packaging the deb file...", color=colors["yellow"])
-        builder = Builder(bundle, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args)
-        return builder.package()
+        dpkg = Dpkg(bundle, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args)
+
+        return dpkg.package()
 
     def check_path_arguments(self, source: str) -> None:
         path = source.strip('"').strip("'").strip()
@@ -200,14 +194,15 @@ class Permasigner:
             # then, extract it
             if path.suffix == ".deb":
                 logger.debug(f"Extracting deb package from {path} to {self.tmp / 'extractedDeb'}", self.args.debug)
+                deb = Deb(path, self.tmp / "extractedDeb", self.args.debug)
                 # Check if dpkg is in PATH
                 # then, extract with dpkg-deb
                 if self.dpkg:
-                    extract_with_dpkg(path, self.tmp / "extractedDeb", self.args.debug)
+                    deb.extract_with_dpkg()
                 # If dpkg is not inpath
                 # then, extract with unix-ar
                 else:
-                    extract_with_ar(path, self.tmp / "extractedDeb", self.args.debug)
+                    deb.extract_with_ar()
 
                 # Check if extracted deb file contains an app bundle
                 # then, extract it to Payload directory
@@ -227,53 +222,6 @@ class Permasigner:
         # Exit with an error if path does not exist
         else:
             exit("That file does not exist! Make sure you're using a direct path to the IPA file.")
-
-    def sign_with_ldid(self, ldid, cert_path, application_path, data_dir) -> None:
-        # Determine path to ldid
-        if ldid_path := ldid:
-            ldid_cmd = ldid_path
-        else:
-            ldid_cmd = data_dir / "ldid"
-
-        logger.debug(
-            f"Running command: {ldid_cmd} -S{PurePath(f'{self.tmp}/entitlements.plist')} -M -K{cert_path} -Upassword '{application_path}'",
-            self.args.debug)
-
-        # Sign the bundle with ldid
-        subprocess.run([
-                        ldid_cmd,
-                        f"-S{self.tmp / 'entitlements.plist'}",
-                        "-M",
-                        f"-K{cert_path}",
-                        "-Upassword",
-                        application_path],
-                       stdout=subprocess.DEVNULL)
-
-        # Check if entitlements arg was passed
-        # then, resign and merge the entitlements
-        if self.args.entitlements:
-            logger.debug(f"Signing with extra entitlements located in {self.args.entitlements}", self.args.debug)
-            subprocess.run([
-                            f'{ldid_cmd}',
-                            f'-S{self.args.entitlements}',
-                            '-M',
-                            f'-K{cert_path}',
-                            '-Upassword', f'{application_path}'
-                            ],
-                           stdout=subprocess.DEVNULL)
-
-    def sign_with_codesign(self, cert_path, applications_path: Path) -> None:
-        # Import the certificate
-        logger.debug(f"Running command: security import {cert_path} -P password -A", self.args.debug)
-        subprocess.run(
-            ['security', 'import', cert_path, '-P', 'password', '-A'], stdout=subprocess.DEVNULL)
-
-        # Sign with codesign using imported certificate
-        logger.debug(f"Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing "
-                     f"--force --deep --preserve-metadata=entitlements {applications_path}", self.args.debug)
-        subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
-                        '--force', '--deep', '--preserve-metadata=entitlements', f'{applications_path}'],
-                       stdout=subprocess.DEVNULL)
 
     def sign_folder(self, tmp: Path) -> array:
         # Itterate over each ipa in specified folder
