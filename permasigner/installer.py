@@ -111,63 +111,98 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
                            look_for_keys=False,
                            compress=True)
 
-            # Send deb file to device using SCP
-            # Default destination is /var/mobile/Documents
-            with SCPClient(client.get_transport()) as scp:
-                logger.log(f"Sending {path} to device", color=colors["yellow"])
-                filename = path.name
-                logger.debug(f"Copying via scp from {path} to /var/mobile/Documents/", args.debug)
-                scp.put(f'{path}',
-                        remote_path='/var/mobile/Documents')
+        except (SSHException, AuthenticationException) as e:
+            logger.error(e)
+            return False
 
-            # Check if user is in sudoers file by running sudo -nv
-            logger.debug(f"Running command: sudo -nv", args.debug)
-            stdin, stdout, stderr = client.exec_command('sudo -nv')
-            status = stdout.channel.recv_exit_status()
+        # Send deb file to device using SCP
+        # Default destination is /var/mobile/Documents
+        with SCPClient(client.get_transport()) as scp:
+            logger.log(f"Sending {path} to device", color=colors["yellow"])
+            filename = path.name
+            logger.debug(f"Copying via scp from {path} to /var/mobile/Documents/", args.debug)
+            scp.put(f'{path}',
+                    remote_path='/var/mobile/Documents')
 
-            # Password required prompt: user has sudo rights but password is required
-            if "password" in stderr.read().decode():
-                command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
-                logger.debug(f"Running command: {command}", args.debug)
-                stdin, stdout, stderr = client.exec_command(
-                    f"{command}", get_pty=True)
+        # Check if user is in sudoers file by running sudo -nv
+        logger.debug(f"Running command: sudo -nv", args.debug)
+        stdin, stdout, stderr = client.exec_command('sudo -nv')
+        status = stdout.channel.recv_exit_status()
 
-                # Sleep to prevent echoing password
-                time.sleep(0.2)
+        # Password required prompt: user has sudo rights but password is required
+        if "password" in stderr.read().decode():
+            command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
+            logger.debug(f"Running command: {command}", args.debug)
+            stdin, stdout, stderr = client.exec_command(
+                f"{command}", get_pty=True)
 
-                # Write password to stdin
+            # Sleep to prevent echoing password
+            time.sleep(0.2)
+
+            # Write password to stdin
+            stdin.write(f'{password}\n')
+            stdin.flush()
+
+            logger.log("Installing... this may take some time", color=colors["yellow"])
+
+            # Read output from stdout
+            output = stdout.read().decode()
+
+            logger.debug(output, args.debug)
+
+            # Is needed on elucubratus
+            # so that the package does not end up
+            # in half-installed state
+            logger.debug(f"Running command: sudo apt-get install -f", args.debug)
+            stdin, stdout, stderr = client.exec_command('sudo apt-get install -f', get_pty=True)
+
+            # Sleep to prevent echoing password
+            time.sleep(0.2)
+
+            # Write password to stdin
+            stdin.write(f'{password}\n')
+            stdin.flush()
+
+            # Read output from stdout
+            output = stdout.read().decode()
+
+            logger.debug(output, args.debug)
+        # Exit status 0: user has sudo rights and NOPASSWD
+        elif status == 0:
+            # Install by invoking dpkg with sudo
+            logger.debug(f"Running command: sudo dpkg -i /var/mobile/Documents/{filename}", args.debug)
+            stdin, stdout, stderr = client.exec_command(f"sudo dpkg -i /var/mobile/Documents/{filename}")
+
+            logger.log("Installing... this may take some time", color=colors["yellow"])
+
+            # Block until we can read the output from stdout
+            output = stdout.read().decode()
+            logger.debug(output, args.debug)
+
+            # Needed on elucuratus
+            # to prevent half-installed state
+            logger.debug(f"Running command: sudo apt-get install -f", args.debug)
+            stdin, stdout, stderr = client.exec_command('sudo apt-get install -f')
+
+            logger.debug(stdout.read().decode(), args.debug)
+        # User does not have sudo rights
+        # Fallback to su
+        else:
+            # Install with dpkg by invoking su as root user
+            logger.debug(f"Running command: su root -c 'dpkg -i /var/mobile/Documents/{filename}", args.debug)
+            stdin, stdout, stderr = client.exec_command(
+                f"su root -c 'dpkg -i /var/mobile/Documents/{filename}", get_pty=True)
+
+            # Read output from the channel
+            output = stdout.channel.recv(2048)
+
+            # Check if we got a password prompt
+            if "password".encode() in output or "Password".encode() in output:
+                # Read password from cli
+                # and write it to stdin
+                password = getpass()
                 stdin.write(f'{password}\n')
                 stdin.flush()
-
-                logger.log("Installing... this may take some time", color=colors["yellow"])
-
-                # Read output from stdout
-                output = stdout.read().decode()
-
-                logger.debug(output, args.debug)
-
-                # Is needed on elucubratus
-                # so that the package does not end up
-                # in half-installed state
-                logger.debug(f"Running command: sudo apt-get install -f", args.debug)
-                stdin, stdout, stderr = client.exec_command('sudo apt-get install -f', get_pty=True)
-
-                # Sleep to prevent echoing password
-                time.sleep(0.2)
-
-                # Write password to stdin
-                stdin.write(f'{password}\n')
-                stdin.flush()
-
-                # Read output from stdout
-                output = stdout.read().decode()
-
-                logger.debug(output, args.debug)
-            # Exit status 0: user has sudo rights and NOPASSWD
-            elif status == 0:
-                # Install by invoking dpkg with sudo
-                logger.debug(f"Running command: sudo dpkg -i /var/mobile/Documents/{filename}", args.debug)
-                stdin, stdout, stderr = client.exec_command(f"sudo dpkg -i /var/mobile/Documents/{filename}")
 
                 logger.log("Installing... this may take some time", color=colors["yellow"])
 
@@ -177,69 +212,35 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
 
                 # Needed on elucuratus
                 # to prevent half-installed state
-                logger.debug(f"Running command: sudo apt-get install -f", args.debug)
-                stdin, stdout, stderr = client.exec_command('sudo apt-get install -f')
-
-                logger.debug(stdout.read().decode(), args.debug)
-            # User does not have sudo rights
-            # Fallback to su
-            else:
-                # Install with dpkg by invoking su as root user
-                logger.debug(f"Running command: su root -c 'dpkg -i /var/mobile/Documents/{filename}", args.debug)
                 stdin, stdout, stderr = client.exec_command(
-                    f"su root -c 'dpkg -i /var/mobile/Documents/{filename}", get_pty=True)
+                    "su root -c 'apt-get install -f'", get_pty=True)
+                time.sleep(0.2)
 
-                # Read output from the channel
-                output = stdout.channel.recv(2048)
+                # Write password to stdin
+                stdin.write(f'{password}\n')
+                stdin.flush()
 
-                # Check if we got a password prompt
-                if "password".encode() in output or "Password".encode() in output:
-                    # Read password from cli
-                    # and write it to stdin
-                    password = getpass()
-                    stdin.write(f'{password}\n')
-                    stdin.flush()
+                # Block until we can read the output from the channel
+                output = stdout.channel.recv(2048).decode()
 
-                    logger.log("Installing... this may take some time", color=colors["yellow"])
+                logger.debug(output, args.debug)
+            else:
+                logger.log("Installing... this may take some time", color=colors["yellow"])
 
-                    # Block until we can read the output from stdout
-                    output = stdout.read().decode()
-                    logger.debug(output, args.debug)
+                # Block until we can read the output from stdout
+                output = stdout.read().decode()
 
-                    # Needed on elucuratus
-                    # to prevent half-installed state
-                    stdin, stdout, stderr = client.exec_command(
-                        "su root -c 'apt-get install -f'", get_pty=True)
-                    time.sleep(0.2)
+                logger.debug(output, args.debug)
 
-                    # Write password to stdin
-                    stdin.write(f'{password}\n')
-                    stdin.flush()
+                # Needed on elucuratus
+                # to prevent half-installed state
+                logger.debug(f"Running command: sudo apt-get install -f", args.debug)
+                stdin, stdout, stderr = client.exec_command('sudo apt-get install -f')[1]
 
-                    # Block until we can read the output from the channel
-                    output = stdout.channel.recv(2048).decode()
+                # Block until we can read the output from stdout
+                output = stdout.read().decode()
 
-                    logger.debug(output, args.debug)
-                else:
-                    logger.log("Installing... this may take some time", color=colors["yellow"])
+                logger.debug(output, args.debug)
 
-                    # Block until we can read the output from stdout
-                    output = stdout.read().decode()
+        return True
 
-                    logger.debug(output, args.debug)
-
-                    # Needed on elucuratus
-                    # to prevent half-installed state
-                    logger.debug(f"Running command: sudo apt-get install -f", args.debug)
-                    stdin, stdout, stderr = client.exec_command('sudo apt-get install -f')[1]
-
-                    # Block until we can read the output from stdout
-                    output = stdout.read().decode()
-
-                    logger.debug(output, args.debug)
-
-            return True
-
-        except (SSHException, NoValidConnectionsError, AuthenticationException) as e:
-            logger.error(e)
-            return False
