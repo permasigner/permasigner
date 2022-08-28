@@ -68,7 +68,10 @@ View the [GitHub Projects board](https://github.com/users/itsnebulalol/projects/
 -   [superrnovae](https://github.com/superrnovae) for contributing lots of fixes and features
 -   [verygenericname](https://github.com/verygenericname) for the ldid downloader and support
 -   the [Procursus Team](https://github.com/ProcursusTeam) for the amazing bootstrap and the ldid fork
--   anyone who sent a pull request or issue! Your contribution helps a lot!
+
+Plus, big thanks to all of the contributors that made this project possible.
+
+<a href="https://github.com/itsnebulalol/permasigner/graphs/contributors"><img src="https://contributors-img.web.app/image?repo=itsnebulalol/permasigner" /></a>
 
 # Other Stuff
 

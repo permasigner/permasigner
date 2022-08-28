@@ -85,7 +85,7 @@ def get_data_directory() -> Path:
     # Check if OS is iOS or macOS
     # then, use $HOME/Library/Application Support/permasigner as data directory
     elif is_ios() or is_macos():
-        return home / "Library/Application Support/permasigner"
+        return home / ".permasigner"
     # Check if OS is Windows
     # then, use %APPDATA%/permasigner as data directory
     elif is_windows():
