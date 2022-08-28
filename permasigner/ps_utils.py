@@ -79,7 +79,7 @@ class Utils(object):
             xdg_data_home = os.environ.get("XDG_DATA_HOME", PurePath(f'{user_home}/.local/share'))
             return PurePath(f'{xdg_data_home}/permasigner')
         elif self.is_ios() or self.is_macos():
-            return PurePath(f'{user_home}/Library/Application Support/permasigner')
+            return PurePath(f'{user_home}/.permasigner')
         elif self.is_windows():
             return PurePath(f"{os.getenv('APPDATA')}/permasigner")
 
