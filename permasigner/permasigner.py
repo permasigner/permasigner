@@ -122,7 +122,7 @@ class Permasigner:
         # then, read the app info from it
         bundle = {}
         if (plist_path := bundle_path / "Info.plist").exists():
-            logger.log(f"Reading plist...", color=colors["yellow"])
+            logger.log(f"Reading plist...\n", color=colors["yellow"])
             bundle = utils.read_plist(plist_path, self.args)
         # If it doesn't exist
         # then, exit with an erro
@@ -130,7 +130,7 @@ class Permasigner:
             exit("Unable to find Info.plist, can't read application data")
 
         # Create directories in tmp dir
-        logger.log(f"Making deb directories...\n", color=colors["yellow"])
+        logger.log(f"Making deb directories...", color=colors["yellow"])
         (self.tmp / 'deb/Applications').mkdir(exist_ok=True, parents=True)
         (self.tmp / 'deb/DEBIAN').mkdir(exist_ok=True, parents=True)
 
@@ -155,9 +155,8 @@ class Permasigner:
         copytree(bundle_path, full_app_path, dirs_exist_ok=True)
 
         # Set chmod 755 on application executable
-        print("Changing app executable permissions...")
+        print("Changing app executable permissions...\n")
         utils.make_executable(full_app_path / bundle["executable"])
-
         # Get path to certificate file
         cert = utils.get_certificate_path(self.in_package)
 
@@ -179,7 +178,7 @@ class Permasigner:
         print()
 
         # Package the deb file
-        logger.log(f"Packaging the deb file...", color=colors["yellow"])
+        logger.log(f"Packaging the deb file...\n", color=colors["yellow"])
         dpkg = Dpkg(bundle, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args)
 
         return dpkg.package()
