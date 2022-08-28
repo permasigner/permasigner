@@ -2,7 +2,6 @@ import os
 import fnmatch
 import sys
 from functools import partial
-from io import BytesIO
 import tarfile
 import tempfile
 import time
