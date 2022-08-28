@@ -446,8 +446,8 @@ class Permasigner(object):
             out_dir = PurePath(f"{Path.cwd()}/output")
 
         if dpkg_in_path:
-            out_path = PurePath(f"{out_dir}/{app_name.replace(' ', '') + f'_{app_version}' + '.deb'}")
-            dpkg_cmd = f'dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {out_path.replace(" ", "\\ ")}'
+            out_path = PurePath(f"{out_dir}/{app_name.replace(' ', '') + f'_{app_version}' + '.deb'}".replace(" ", "\\ "))
+            dpkg_cmd = f'dpkg-deb -Zxz --root-owner-group -b {tmpfolder}/deb {out_path}'
             self.logger.debug(f"Running command: {dpkg_cmd}")
             subprocess.run(dpkg_cmd.split(), stdout=DEVNULL)
             return out_path
