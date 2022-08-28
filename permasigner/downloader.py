@@ -1,0 +1,152 @@
+import zipfile
+from argparse import Namespace
+from pathlib import Path
+from typing import Union
+
+import requests
+import hashlib
+import platform
+from shutil import move
+from requests.exceptions import RequestException, ConnectionError
+from urllib3.exceptions import NewConnectionError
+
+from . import utils
+from . import logger
+from .logger import colors
+
+
+class Ldid:
+    def __init__(self, data_dir: Path, args: Namespace) -> None:
+        self.data_dir = data_dir
+        self.args = args
+        self.exists = False
+
+    @staticmethod
+    def get_hash(filepath, url):
+        # Get remote hash if a url is provided
+        # otherwise, get hash of a local file
+        m = hashlib.md5()
+        if url is None:
+            with open(filepath, 'rb') as fh:
+                m = hashlib.md5()
+                while True:
+                    data = fh.read(8192)
+                    if not data:
+                        break
+                    m.update(data)
+                return m.hexdigest()
+        else:
+            try:
+                res = requests.get(url, stream=True)
+                if res.status_code == 200:
+                    content = bytearray()
+                    for data in res.iter_content(4096):
+                        content += data
+                        m.update(data)
+                    return m.hexdigest(), content
+                else:
+                    return m.hexdigest(), None
+            except (NewConnectionError, ConnectionError, RequestException) as err:
+                logger.error(f"ldid download URL is not reachable. Error: {err}")
+                return m.hexdigest(), None
+
+    @property
+    def remote_filename(self) -> Union[str, None]:
+        # Get remote ldid name based on the platform
+        if utils.is_linux() and platform.machine() == "x86_64":
+            return "ldid_linux_x86_64"
+        elif utils.is_linux() and platform.machine() == "aarch64":
+            return "ldid_linux_aarch64"
+        elif utils.is_linux() and platform.machine() == "armv7l":
+            return "ldid_linux_armv7l"
+        elif utils.is_macos() and platform.machine() == "x86_64":
+            return "ldid_macosx_x86_64"
+        elif utils.is_macos() and platform.machine() == "arm64":
+            return "ldid_macosx_arm64"
+        elif utils.is_freebsd() and platform.machine() == "amd64":
+            return "ldid_freebsd_x86_64"
+        elif utils.is_windows() and platform.machine() in ["AMD64", "x86_64"]:
+            return "ldid_w64_x86_64.exe"
+        elif utils.is_ios() and "64bit" in platform.platform():
+            return "ldid_iphoneos_arm64"
+
+    @property
+    def local_filepath(self) -> str:
+        # Get local ldid name based on the platform
+        if utils.is_windows():
+            return "ldid.exe"
+        else:
+            return "ldid"
+
+    def find_in_data_dir(self) -> bool:
+        # Check if ldid is present in the data dir
+        ldid_name = self.local_filepath
+
+        return (self.data_dir / ldid_name).exists()
+
+    def save_file(self, content: bytearray) -> None:
+        # Get local ldid name
+        ldid_name = self.local_filepath
+
+        # Write bytearray to a new file
+        with open(ldid_name, "wb") as f:
+            f.write(content)
+            logger.debug(f"Wrote file.", self.args.debug)
+
+        # Remove outdated version of ldid it's present in the data dir
+        if self.exists:
+            logger.debug("Removing outdated version of ldid", self.args.debug)
+            (self.data_dir / "ldid_name").unlink()
+
+        # Make downloaded ldid executable
+        utils.make_executable(ldid_name)
+        destination_dir = self.data_dir / f"{ldid_name}"
+
+        # Move downloaded ldid to data dir
+        move(ldid_name, destination_dir)
+        logger.debug(f"Moved ldid to {destination_dir}", self.args.debug)
+
+    def download(self) -> None:
+        # Check if ldidfork arg was passed
+        # then, use it's value to construct a url
+        if self.args.ldidfork:
+            ldid_fork = self.args.ldidfork
+        # Otherwise, use nebula's fork
+        else:
+            ldid_fork = "itsnebulalol"
+
+        # Check for ldid's presence in data directory
+        exists = self.find_in_data_dir()
+
+        # Get name and extension of a local ldid
+        local_filepath = self.data_dir / self.local_filepath
+
+        # Get name of a remote ldid
+        remote_filename = self.remote_filename
+
+        url = f"https://github.com/{ldid_fork}/ldid/releases/latest/download/{remote_filename}"
+        logger.debug(f"Comparing {local_filepath} hash with {url}", self.args.debug)
+
+        # Get remote hash of ldid
+        remote_hash, content = self.get_hash(None, url)
+        local_hash = None
+
+        # Determine ldid's hash if it's present in the data directory
+        if exists:
+            local_hash = self.get_hash(local_filepath, None)
+
+        # Check if both hashes match, and if so proceed to the signing stage
+        if remote_hash == local_hash:
+            logger.debug(f"ldid hash successfully verified.", self.args.debug)
+        else:
+            # If hashes do no match, and the content is empty, fallback to existent ldid found in PATH/data dir
+            if content is None:
+                if exists:
+                    logger.log('Could not verify remote hash, falling back to ldid found in path',
+                               color=colors["yellow"])
+                else:
+                    exit('Download url is not reachable, and no ldid found in path, exiting.')
+            # If hashes do not match but the content is not empty, save it to a file
+            else:
+                logger.debug(f"Ldid hash failed to verify, saving newer version", self.args.debug)
+                self.save_file(content)

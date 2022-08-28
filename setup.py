@@ -19,7 +19,7 @@ with open(os.path.join(here, "requirements.txt"), encoding="utf-8") as f:
 setup(
     name='permasigner',
     version=version,
-    description=('Permanently signs IPAs on jailbroken iDevices (persists on stock).'),
+    description='Permanently signs IPAs on jailbroken iDevices (persists on stock).',
     license='BSD-3-Clause',
     url='https://github.com/itsnebulalol/permasigner',
     python_requires=">=3.7",

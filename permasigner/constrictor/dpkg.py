@@ -1,4 +1,3 @@
-import hashlib
 import os
 import fnmatch
 import sys
@@ -25,26 +24,15 @@ class DPKGBuilder(object):
     Finds files to use, builds tar archive and then archives into ar format. Builds + includes debian control files.
     """
 
-    def __init__(self, output_directory, control, data_dirs, maintainer_scripts=None):
+    def __init__(self, output_directory, bundle, data_dirs, control, scripts):
         self.output_directory = Path(output_directory).expanduser()
+        self.bundle = bundle
         self.data_dirs = data_dirs or []
-        self.maintainer_scripts = maintainer_scripts
-        self.seen_data_dirs = set()
         self.control = control
+        self.maintainer_scripts = scripts
+        self.seen_data_dirs = set()
         self.working_dir = None
-        self.output_name = control.get_default_output_name()
         self.executable_path = ''
-
-    @staticmethod
-    def md5_for_path(path, block_size=1048576):
-        with open(path, 'rb') as f:
-            md5 = hashlib.md5()
-            while True:
-                data = f.read(block_size)
-                if not data:
-                    break
-                md5.update(data)
-        return md5.hexdigest()
 
     @staticmethod
     def path_matches_glob_list(glob_list, path):
@@ -94,8 +82,11 @@ class DPKGBuilder(object):
 
     def filter_tar_info(self, tar_info, dir_conf):
         if self.executable_path == '':
-            app_name = self.control.get_control_line_value('Name').replace(' ', '')
-            executable_path = '.' + f"{dir_conf['destination']}/{app_name}.app/{dir_conf['executable']}"
+            app_name = self.bundle['name'].replace(' ', '')
+            destination = dir_conf['destination']
+            executable = dir_conf['executable']
+            executable_path = '.' + f"{destination}/{app_name}.app/{executable}"
+
             if tar_info.name == executable_path:
                 tar_info.mode = TAR_DEFAULT_MODE
                 tar_info.uname = 'root'
@@ -106,19 +97,23 @@ class DPKGBuilder(object):
 
     @property
     def data_archive_path(self):
-        return Path(self.working_dir).joinpath('data.tar.gz')
+        return self.working_dir / 'data.tar.xz'
+
+    @property
+    def default_output_name(self):
+        name = self.bundle['name'].replace(' ', '')
+        version = self.bundle['version']
+
+        return f"{name}_{version}.deb"
 
     @staticmethod
     def open_tar_file(path):
-        tf = tarfile.open(path, 'w:gz')
+        tf = tarfile.open(path, 'w:xz')
         tf.format = tarfile.PAX_FORMAT
         return tf
 
     def build_data_archive(self):
         data_tar_file = self.open_tar_file(self.data_archive_path)
-        file_size_bytes = 0
-
-        file_md5s = []
 
         for dir_conf in self.data_dirs:
             source_dir = Path(dir_conf['source']).expanduser()
@@ -131,27 +126,18 @@ class DPKGBuilder(object):
 
                 self.add_directory_root_to_archive(data_tar_file, archive_path)
 
-                file_size_bytes += Path(source_file_path).stat().st_size
-
-                file_md5s.append((self.md5_for_path(source_file_path), archive_path))
                 data_tar_file.add(source_file_path, arcname=archive_path, recursive=False,
                                   filter=lambda ti: self.filter_tar_info(ti, dir_conf))
 
         data_tar_file.close()
 
-        return file_size_bytes, file_md5s
-
     @staticmethod
-    def build_member_from_string(name, content):
-        content_file = BytesIO(content)
-        member = tarfile.TarInfo()
-        member.type = tarfile.REGTYPE
-        member.name = name
-        member.mtime = int(time.time())
-        member.uname = 'root'
-        member.gname = 'wheel'
-        member.size = len(content)
-        return member, content_file
+    def filter_control_tar_info(tar_info):
+        tar_info.type = tarfile.REGTYPE
+        tar_info.mtime = int(time.time())
+        tar_info.uname = 'root'
+        tar_info.gname = 'wheel'
+        return tar_info
 
     @staticmethod
     def filter_maintainer_script_tar_info(tar_info):
@@ -162,27 +148,23 @@ class DPKGBuilder(object):
 
     @property
     def control_archive_path(self):
-        return Path(self.working_dir).joinpath('control.tar.gz')
+        return self.working_dir / 'control.tar.xz'
 
-    def build_control_archive(self, control_text, file_md5s, maintainer_scripts):
-        maintainer_scripts = maintainer_scripts or {}
+    def build_control_archive(self, maintainer_scripts):
         control_tar = self.open_tar_file(self.control_archive_path)
 
         for script_name, script_path in maintainer_scripts.items():
             control_tar.add(script_path, arcname='./' + script_name, filter=self.filter_maintainer_script_tar_info)
 
-        control_tar.addfile(*self.build_member_from_string('./control', control_text.encode()))
-
-        md5sum_text = '\n'.join(['  '.join(md5_file_pair) for md5_file_pair in file_md5s]) + '\n'
-        control_tar.addfile(*self.build_member_from_string('./md5sums', md5sum_text.encode()))
+        control_tar.add(self.control, arcname='./control', filter=self.filter_control_tar_info)
 
         control_tar.close()
 
     def assemble_deb_archive(self, control_archive_path, data_archive_path):
-        if not Path(self.output_directory).exists():
-            Path(self.output_directory).mkdir()
+        if not self.output_directory.exists():
+            self.output_directory.mkdir()
 
-        pkg_path = Path(self.output_directory).joinpath(self.output_name)
+        pkg_path = self.output_directory / f"{self.default_output_name}"
 
         with open(pkg_path, 'wb') as ar_fp:
             ar_writer = ARWriter(ar_fp)
@@ -196,9 +178,8 @@ class DPKGBuilder(object):
 
     def build_package(self):
         with tempfile.TemporaryDirectory() as tmpfolder:
-            self.working_dir = tmpfolder
-            file_size_bytes, file_md5s = self.build_data_archive()
-            self.control.installed_size_bytes = file_size_bytes
-            self.build_control_archive(self.control.get_control_text(), file_md5s, self.maintainer_scripts)
+            self.working_dir = Path(tmpfolder)
+            self.build_data_archive()
+            self.build_control_archive(self.maintainer_scripts)
 
             return self.assemble_deb_archive(self.control_archive_path, self.data_archive_path)
