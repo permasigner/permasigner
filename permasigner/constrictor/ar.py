@@ -24,7 +24,7 @@ class ARWriter(object):
 
         mode_string = f'{mode:04o}'
 
-        file_header = f"{file_name: <16}{mod_timestamp: <12}{uid: <6}{gid: <6}{mode_string: <8}{file_size: <10}`\n"
+        file_header = f'{file_name: <16}{mod_timestamp: <12}{uid: <6}{gid: <6}{mode_string: <8}{file_size: <10}`\n'
 
         self.fp.write(file_header.encode('ascii'))
 

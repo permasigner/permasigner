@@ -108,7 +108,7 @@ class DPKGBuilder(object):
     @staticmethod
     def open_tar_file(path):
         tf = tarfile.open(path, 'w:xz')
-        tf.format = tarfile.PAX_FORMAT
+        tf.format = tarfile.GNU_FORMAT
         return tf
 
     def build_data_archive(self):
