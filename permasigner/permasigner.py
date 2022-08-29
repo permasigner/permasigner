@@ -82,7 +82,7 @@ class Permasigner:
             # Check if folder arg was specified
             # then, sign each ipa in the folder
             elif self.args.folder:
-                self.outputs = self.sign_folder(self.tmp)
+                self.outputs = self.sign_folder()
 
             if not self.args.folder:
                 out_dir = self.permasign()
@@ -130,8 +130,8 @@ class Permasigner:
 
         # Create directories in tmp dir
         logger.log(f"Making deb directories...", color=colors["yellow"])
-        (self.tmp / 'deb/Applications').mkdir(exist_ok=True, parents=True)
-        (self.tmp / 'deb/DEBIAN').mkdir(exist_ok=True, parents=True)
+        (self.tmp / 'deb/Applications').mkdir(parents=True)
+        (self.tmp / 'deb/DEBIAN').mkdir(parents=True)
 
         # Copy control file and scripts into DEBIAN directory
         print("Copying control file and maintainer scripts...")
@@ -151,7 +151,7 @@ class Permasigner:
         # Copy application bundle to temporary directory
         print("Copying application bundle...")
         full_app_path = self.tmp / f"deb/Applications/{bundle_path.name}"
-        copytree(bundle_path, full_app_path, dirs_exist_ok=True)
+        copytree(bundle_path, full_app_path)
 
         # Set chmod 755 on application executable
         print("Changing app executable permissions...\n")
@@ -204,7 +204,7 @@ class Permasigner:
 
                 # Check if extracted deb file contains an app bundle
                 # then, extract it to Payload directory
-                (self.tmp / "app/Payload").mkdir(parents=True, exist_ok=False)
+                (self.tmp / "app/Payload").mkdir(parents=True)
                 for fname in Path(f"{self.tmp}/extractedDeb/Applications").iterdir():
                     if fname.name.endswith(".app"):
                         shutil.copytree(f"{self.tmp}/extractedDeb/Applications/{fname.name}",
@@ -221,12 +221,16 @@ class Permasigner:
         else:
             exit("That file does not exist! Make sure you're using a direct path to the IPA file.")
 
-    def sign_folder(self, tmp: Path) -> array:
+    def sign_folder(self) -> array:
         # Itterate over each ipa in specified folder
-        # then, extract and permasign it
-        for ipa in Path(self.args.folder).iterdir():
-            shutil.rmtree(tmp)
-            Path(tmp).mkdir()
+        # then, cleanup the tmp directory
+        # then, extract ipa and permasign it
+        for ipa in Path(self.args.folder).rglob("*.ipa"):
+            for path in self.tmp.iterdir():
+                if path.is_dir():
+                    shutil.rmtree(path)
+                elif path.is_file():
+                    path.unlink()
 
             logger.log(f"Extracting ipa to temporary directory", color=colors["yellow"])
             self.extract_ipa(ipa, self.tmp)
@@ -256,5 +260,5 @@ class Permasigner:
         # Extract ipa to destination
         with zipfile.ZipFile(src, 'r') as f:
             with Path(f"{dest}/app") as path:
-                path.mkdir(exist_ok=True)
+                path.mkdir()
                 f.extractall(path)
