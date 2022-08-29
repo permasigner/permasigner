@@ -72,13 +72,13 @@ class Permasigner:
                 if not self.args.url.endswith(".ipa"):
                     exit("URL provided is not an IPA, make sure to provide a direct link.")
                 logger.log(f"Downloading ipa from {self.args.url}...", color=colors["yellow"])
-                self.download_ipa(self.args.url, self.tmp)
+                save_path = self.download_ipa()
                 logger.log(f"Extracting IPA...", color=colors["yellow"])
-                self.extract_ipa((self.tmp / "app.ipa"), self.tmp)
+                self.extract_ipa(save_path)
             # Check if path arg was specified
             # then, check if path is a deb or an ipa
             elif self.args.path:
-                self.check_path_arguments(self.args.path)
+                self.check_path_arguments()
             # Check if folder arg was specified
             # then, sign each ipa in the folder
             elif self.args.folder:
@@ -182,23 +182,22 @@ class Permasigner:
 
         return dpkg.package()
 
-    def check_path_arguments(self, source: str) -> None:
-        path = source.strip('"').strip("'").strip()
+    def check_path_arguments(self) -> None:
+        path = self.args.path.strip('"').strip("'").strip()
         path = Path(path).expanduser()
 
-        # Check if file exists
+        # Checks if file exists
         if path.exists():
-            # Check if given path is a deb file
-            # then, extract it
+            # Checks if given path is a deb file
             if path.suffix == ".deb":
                 logger.debug(f"Extracting deb package from {path} to {self.tmp / 'extractedDeb'}", self.args.debug)
                 deb = Deb(path, self.tmp / "extractedDeb", self.args.debug)
-                # Check if dpkg is in PATH
-                # then, extract with dpkg-deb
+                # Extracts with dpkg-deb
+                # if it's available in PATH
                 if self.dpkg:
                     deb.extract_with_dpkg()
-                # If dpkg is not inpath
-                # then, extract with unix-ar
+                # Extracts with unix-ar
+                # if dpkg is not in PATH
                 else:
                     deb.extract_with_ar()
 
@@ -210,10 +209,10 @@ class Permasigner:
                         shutil.copytree(f"{self.tmp}/extractedDeb/Applications/{fname.name}",
                                         f"{self.tmp}/app/Payload/{fname.name}")
                         break
-            # Check if given path is an ipa
-            # then, copy it to tmp dir and extract
+            # Checks if given path is an ipa
+            # then extracts it to tmp
             elif path.suffix == ".ipa":
-                self.extract_ipa(path, self.tmp)
+                self.extract_ipa(path)
             # Exit win an error if path is neither an ipa nor a deb file
             else:
                 exit("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
@@ -222,9 +221,9 @@ class Permasigner:
             exit("That file does not exist! Make sure you're using a direct path to the IPA file.")
 
     def sign_folder(self) -> array:
-        # Itterate over each ipa in specified folder
-        # then, cleanup the tmp directory
-        # then, extract ipa and permasign it
+        # Itterates over each ipa in the specified folder
+        # cleans up the tmp directory
+        # then, extracts ipa to tmp and permasigns it
         for ipa in Path(self.args.folder).rglob("*.ipa"):
             for path in self.tmp.iterdir():
                 if path.is_dir():
@@ -232,33 +231,32 @@ class Permasigner:
                 elif path.is_file():
                     path.unlink()
 
-            logger.log(f"Extracting ipa to temporary directory", color=colors["yellow"])
-            self.extract_ipa(ipa, self.tmp)
+            logger.log(f"Extracting ipa to temporary directory\n", color=colors["yellow"])
+            self.extract_ipa(ipa)
 
             output = self.permasign()
             self.outputs.append(output)
 
         return self.outputs
 
-    @staticmethod
-    def download_ipa(url: str, dest: Path) -> None:
+    def download_ipa(self) -> Path:
         # Attempt to download ipa from specified url
-        # then, if status code is 200, save response content to a file
+        # then write content to file on 200 OK
         # otherwise, exit with an error
         try:
-            res = requests.get(url, stream=True)
+            res = requests.get(self.args.url, stream=True)
             if res.status_code == 200:
-                with open(f"{dest}/app.ipa", "wb") as f:
+                with open(save_path := (self.tmp / "app.ipa"), "wb") as f:
                     f.write(res.content)
+                    return save_path
             else:
                 exit(f"Provided URL is not reachable. Status code: {res.status_code}")
         except (NewConnectionError, ConnectionError, RequestException) as err:
             exit(f"Provided URL is not reachable. Error: {err}")
 
-    @staticmethod
-    def extract_ipa(src: Path, dest: Path) -> None:
-        # Extract ipa to destination
+    def extract_ipa(self, src: Path) -> None:
+        # Extracts ipa to folder in tmp
         with zipfile.ZipFile(src, 'r') as f:
-            with Path(f"{dest}/app") as path:
+            with (self.tmp / "app") as path:
                 path.mkdir()
                 f.extractall(path)
