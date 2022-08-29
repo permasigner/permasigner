@@ -44,15 +44,17 @@ def is_freebsd() -> bool:
 
 
 def make_executable(path: Path) -> None:
-    """Set chmod 755 on a given path"""
-    Path(path).chmod(0o755)
+    """Set chmod +x on a given path"""
+    file = Path(path)
+    mode = file.stat().st_mode
+    mode |= (mode & 0o444) >> 2
+    file.chmod(mode)
 
 
 def cmd_in_path(cmd: str) -> Union[bool, str]:
-    # Check if command is in PATH
+    """Check if command is in PATH"""
     path = shutil.which(cmd)
 
-    # If command was not found in Path return False
     if path is None:
         return False
 
@@ -62,7 +64,6 @@ def cmd_in_path(cmd: str) -> Union[bool, str]:
             return path
         return False
 
-    # Return True if command was found in PATH
     return path
 
 
