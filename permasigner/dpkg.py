@@ -3,10 +3,10 @@ import tarfile
 from argparse import Namespace
 from pathlib import Path
 
-import unix_ar
-
 from . import logger
-from .constrictor.dpkg import DPKGBuilder
+from .logger import colors
+from .bundled.unix_ar import unix_ar
+from .bundled.constrictor.dpkg import DPKGBuilder
 
 
 class Dpkg:
@@ -74,23 +74,20 @@ class Deb:
 
     def extract_with_dpkg(self) -> None:
         # Extract deb contents with dpkg-deb -X
+        logger.log("Extracting deb file...\n", color=colors["yellow"])
         logger.debug(f"Running command: dpkg-deb -X {self.src} {self.dest}", self.debug)
         subprocess.run(
             ["dpkg-deb", "-X", self.src, self.dest], stdout=subprocess.DEVNULL)
 
     def extract_with_ar(self) -> None:
-        # Extract deb file with unix-ar
-        # This needs a better aproach
+        logger.log("Extracting deb file...\n", color=colors["yellow"])
         logger.debug(f"Extracting {self.src} with unix-ar", self.debug)
 
-        ar_file = unix_ar.open(self.src)
-        try:
-            try:
-                tarball = ar_file.open('data.tar.xz')
-            except KeyError:
-                tarball = ar_file.open('data.tar.gz')
-        except KeyError:
-            tarball = ar_file.open('data.tar.bz2')
-        with tarfile.open(fileobj=tarball) as data:
-            data.extractall(path=self.dest)
+        ar_file = unix_ar.open(self.src, 'r')
+        for member in ar_file.infolist():
+            if b"data.tar" in ar_file.getinfo(member).name:
+                tarball = ar_file.open(member)
+                tar_file = tarfile.open(fileobj=tarball)
+                tar_file.extractall(path=self.dest)
+                break
         ar_file.close()
