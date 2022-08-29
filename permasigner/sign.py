@@ -159,7 +159,7 @@ class Signer:
         self.tmp = tmp
         self.args = args
 
-    def sign_with_ldid(self, ldid: Path) -> None:
+    def sign_with_ldid(self, ldid: str) -> None:
         # Determine path to ldid
         if ldid:
             ldid_cmd = ldid
@@ -172,7 +172,7 @@ class Signer:
 
         # Sign the bundle with ldid
         subprocess.run([
-                        ldid_cmd,
+                        f"{ldid_cmd}",
                         f"-S{self.tmp / 'entitlements.plist'}",
                         "-M",
                         f"-K{self.cert}",
