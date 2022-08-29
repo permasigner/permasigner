@@ -56,7 +56,7 @@ class Permasigner:
         # Determine path to output directory
         # then, create dir if it doesn't exist
         self.output_dir = utils.get_output_directory(self.data_dir, self.in_package, self.args.output)
-        Path(self.output_dir).mkdir(exist_ok=True, parents=True)
+        self.output_dir.mkdir(exist_ok=True, parents=True)
 
         # Download ldid if it's not in PATH and no skip argument is passed
         if not self.ldid and not self.args.nocheckldid:
@@ -71,7 +71,7 @@ class Permasigner:
             if self.args.url:
                 if not self.args.url.endswith(".ipa"):
                     exit("URL provided is not an IPA, make sure to provide a direct link.")
-                logger.log(f"Downloading ipa from {self.args.url}...", color=colors["yellow"])
+                logger.log(f"Downloading IPA from {self.args.url} ...", color=colors["yellow"])
                 save_path = self.download_ipa()
                 logger.log(f"Extracting IPA...", color=colors["yellow"])
                 self.extract_ipa(save_path)

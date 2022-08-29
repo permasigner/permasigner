@@ -181,16 +181,14 @@ def get_version(in_package: bool) -> str:
 
 def get_output_directory(data_dir, in_package, output_arg: str) -> Path:
     # Check if output arg was specified
-    # then, return it's value
+    # then, return it's value as a Path
     if output_arg:
-        return output_arg
+        return Path(output_arg)
     # Check if running from a package
-    # then, create output dir in data dir
-    # if it doesn't exist yet
+    # then, return path to output dir in data dir
     elif in_package:
         return data_dir / "output"
-    # Create output dir in current working directory
-    # if it doesn't exist yet
+    # Return path to output dir in cwd
     else:
         return Path.cwd() / "output"
 
