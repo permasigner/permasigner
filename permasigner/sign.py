@@ -177,7 +177,7 @@ class Signer:
                         "-M",
                         f"-K{self.cert}",
                         "-Upassword",
-                        self.bundle_path],
+                        f"{self.bundle_path}"],
                        stdout=subprocess.DEVNULL)
 
         # Check if entitlements arg was passed
