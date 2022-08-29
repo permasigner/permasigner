@@ -161,8 +161,8 @@ class Signer:
 
     def sign_with_ldid(self, ldid: Path) -> None:
         # Determine path to ldid
-        if ldid_path := ldid:
-            ldid_cmd = ldid_path
+        if ldid:
+            ldid_cmd = ldid
         else:
             ldid_cmd = self.data_dir / "ldid"
 

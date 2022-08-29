@@ -120,11 +120,12 @@ class Permasigner:
         # Check if Info.plist exists
         # then, read the app info from it
         bundle = {}
-        if (plist_path := bundle_path / "Info.plist").exists():
+        plist_path = bundle_path / "Info.plist"
+        if plist_path.exists():
             logger.log(f"Reading plist...\n", color=colors["yellow"])
             bundle = utils.read_plist(plist_path, self.args)
         # If it doesn't exist
-        # then, exit with an erro
+        # then, exit with an error
         else:
             exit("Unable to find Info.plist, can't read application data")
 
@@ -246,7 +247,8 @@ class Permasigner:
         try:
             res = requests.get(self.args.url, stream=True)
             if res.status_code == 200:
-                with open(save_path := (self.tmp / "app.ipa"), "wb") as f:
+                save_path = self.tmp / "app.ipa"
+                with open(save_path, "wb") as f:
                     f.write(res.content)
                     return save_path
             else:

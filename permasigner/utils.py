@@ -71,7 +71,8 @@ def get_data_directory() -> Path:
     """ Get path to data directory"""
 
     # Get the value of PERMASIGNER_HOME variable and if it's exported use it as data directory
-    if ps_home := os.environ.get("PERMASIGNER_HOME"):
+    ps_home = os.environ.get("PERMASIGNER_HOME")
+    if ps_home:
         return ps_home
 
     # Get path to user's $HOME
@@ -81,8 +82,9 @@ def get_data_directory() -> Path:
     # then, use $XDG_DATA_HOME as data directory
     # otherwise, default to $HOME/.local/share
     if is_linux() or is_freebsd():
-        if xdg := os.environ.get("XDG_DATA_HOME"):
-            return Path(xdg).joinpath("permasigner")
+        xdg_data = os.environ.get("XDG_DATA_HOME")
+        if xdg_data:
+            return Path(xdg_data).joinpath("permasigner")
         return home / ".local/share/permasigner"
     # Check if OS is iOS or macOS
     # then, use $HOME/Library/Application Support/permasigner as data directory
@@ -168,7 +170,8 @@ def get_version(in_package: bool) -> str:
         # Check if running from a git repository,
         # then, construct version in the following format: version-branch-hash
         if Path('.git').resolve().exists():
-            if git := cmd_in_path("git"):
+            git = cmd_in_path("git")
+            if git:
                 version = f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
         else:
             # Check if running from a Docker container
@@ -182,8 +185,8 @@ def get_version(in_package: bool) -> str:
 def get_output_directory(data_dir, in_package, output_arg: str) -> Path:
     # Check if output arg was specified
     # then, return it's value
-    if out_dir := output_arg:
-        return out_dir
+    if output_arg:
+        return output_arg
     # Check if running from a package
     # then, create output dir in data dir
     # if it doesn't exist yet
