@@ -13,6 +13,16 @@ _open = open
 CHUNKSIZE = 4096
 
 
+def try_parse_int(s, base=10, val=None):
+    """
+    Try to parse an integer, return `val` on failure.
+    """
+    try:
+        return int(s, base)
+    except ValueError:
+        return val
+
+
 def utf8(s):
     """
     Keeps bytes, converts unicode into UTF-8.
@@ -76,12 +86,14 @@ class ArInfo(object):
         # 48  10  File size in bytes              Decimal
         # 58  2   File magic                      0x60 0x0A
         name, mtime, uid, gid, perms, size, magic = (struct.unpack('16s12s6s6s8s10s2s', buffer))
+        name = utf8(name).rstrip(b' ')
+        mtime = try_parse_int(mtime, 10)
+        uid = try_parse_int(uid, 10)
+        gid = try_parse_int(gid, 10)
+        perms = try_parse_int(perms, 8)
+        size = try_parse_int(size, 10)
         if magic != b'\x60\n':
             raise ValueError("Invalid file signature")
-        name = utf8(name).rstrip(b' ')
-        bases = (10, 10, 10, 8, 10)
-        mtime, uid, gid, perms, size = ((int(el, base) if el else None) for el, base in
-                                        zip((el.strip() for el in (mtime, uid, gid, perms, size)), bases))
         return cls(name, size, mtime, perms, uid, gid)
 
     def tobuffer(self):
@@ -157,12 +169,20 @@ class ArFile(object):
         else:
             raise ValueError("mode must be one of 'r' or 'w'")
 
+    def _name_lookup(self, key):
+        start = try_parse_int(key.lstrip(b'/'), 10)
+        if start is not None:
+            end = self._lookup.find(b'\n', start)
+            return self._lookup[start:end]
+        return key
+
     def _read_entries(self):
         if self._file.read(8) != b'!<arch>\n':
             raise ValueError("Invalid archive signature")
 
         self._entries = []
         self._name_map = {}
+        self._lookup = b''
         pos = 8
         while True:
             buffer = self._file.read(60)
@@ -171,12 +191,18 @@ class ArFile(object):
             elif len(buffer) == 60:
                 member = ArInfo.frombuffer(buffer)
                 member.offset = pos
-                self._name_map[member.name] = len(self._entries)
-                self._entries.append(member)
-                skip = member.size
-                if skip % 2 != 0:
+                if member.name == b'//':
+                    self._lookup = self._file.read(member.size)
+                    skip = 0
+                else:
+                    member.name = self._name_lookup(member.name)
+                    self._name_map[member.name] = len(self._entries)
+                    self._entries.append(member)
+                    skip = member.size
+                pos += 60 + member.size
+                if member.size % 2 != 0:
                     skip += 1
-                pos += 60 + skip
+                    pos += 1
                 self._file.seek(skip, 1)
                 if pos == self._file.tell():
                     continue
@@ -318,7 +344,7 @@ class ArFile(object):
                 path = os.path.join(utf8(path), member.name)
         return self._extract(member, path)
 
-    def extractfile(self, member):
+    def extractfile(self):
         self._check('r')
         raise NotImplementedError("extractfile() is not yet implemented")
 
@@ -354,6 +380,12 @@ class ArFile(object):
             self._file = None
             self._entries = None
             self._name_map = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
 
 def open(file, mode='r'):

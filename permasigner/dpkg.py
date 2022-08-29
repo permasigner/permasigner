@@ -83,11 +83,10 @@ class Deb:
         logger.log("Extracting deb file...\n", color=colors["yellow"])
         logger.debug(f"Extracting {self.src} with unix-ar", self.debug)
 
-        ar_file = unix_ar.open(self.src, 'r')
-        for member in ar_file.infolist():
-            if b"data.tar" in ar_file.getinfo(member).name:
-                tarball = ar_file.open(member)
-                tar_file = tarfile.open(fileobj=tarball)
-                tar_file.extractall(path=self.dest)
-                break
-        ar_file.close()
+        with unix_ar.open(self.src) as ar_file:
+            for member in ar_file.infolist():
+                if b"data.tar" in ar_file.getinfo(member).name:
+                    tarball = ar_file.open(member)
+                    with tarfile.open(fileobj=tarball) as tar_file:
+                        tar_file.extractall(path=self.dest)
+                        break
