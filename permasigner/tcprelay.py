@@ -350,10 +350,9 @@ class TCPServer(socketserver.TCPServer):
 
 
 class Relayer(object):
-    def __init__(self, rport, lport, args, host=None, socketpath=None):
+    def __init__(self, rport, lport, host=None, socketpath=None):
         self.rport = rport
         self.lport = lport
-        self.args = args
         if host is None:
             host = 'localhost'
         self.host = host
@@ -366,7 +365,6 @@ class Relayer(object):
         server = TCPServer((self.host, self.lport), TCPRelay)
         server.rport = self.rport
         server.socketpath = self.socketpath
-        server.args = self.args
         servers = [server]
 
         alive = True
