@@ -18,6 +18,8 @@ def main(argv=None, in_package=None) -> None:
                              help="the direct URL of the IPA to be signed")
     input_group.add_argument('-p', '--path', type=str,
                              help="the direct local path of the IPA to be signed")
+    input_group.add_argument('-V', '--version', action='store_true',
+                             help='show current version and exit')
 
     parser.add_argument('-d', '--debug', action='store_true',
                         help="shows some debug info, only useful for testing")
@@ -35,8 +37,6 @@ def main(argv=None, in_package=None) -> None:
                         help="specify new app author")
     parser.add_argument('-m', '--minver', type=str,
                         help="specify new minimum app version (14.0 recommended)")
-    parser.add_argument('-V', '--version', action='store_true',
-                        help='show current version and exit', )
     parser.add_argument('-l', '--ldidfork', type=str,
                         help="specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])")
     parser.add_argument('-t', '--tcprelay', type=str,

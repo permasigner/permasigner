@@ -8,9 +8,8 @@ import importlib
 from importlib import util
 from pathlib import PurePath, Path
 from typing import Union
-import pkg_resources
 
-from . import __version__
+from .__version__ import __version__
 
 
 def is_ios() -> bool:
@@ -161,23 +160,21 @@ def get_certificate_path(in_package: bool) -> Path:
 
 def get_version(in_package: bool) -> str:
     version = __version__
-
-    # Check if running from a package
-    # then, get version using pkg_resources
+    # Check if running module as a script
+    # then, return version from __version__
     if in_package:
-        version = pkg_resources.get_distribution("permasigner").version
+        return version
+    # Check if running from a git repository,
+    # then, construct version in the following format: version-branch-hash
+    if Path('.git').resolve().exists():
+        git = cmd_in_path("git")
+        if git:
+            version = f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
     else:
-        # Check if running from a git repository,
-        # then, construct version in the following format: version-branch-hash
-        if Path('.git').resolve().exists():
-            git = cmd_in_path("git")
-            if git:
-                version = f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
-        else:
-            # Check if running from a Docker container
-            # then, get version from pre-exported environment variable
-            if os.environ.get('IS_DOCKER_CONTAINER'):
-                version = os.environ.get('VERSION', False)
+        # Check if running from a Docker container
+        # then, get version from pre-exported environment variable
+        if os.environ.get('IS_DOCKER_CONTAINER'):
+            version = os.environ.get('VERSION', False)
 
     return version
 
