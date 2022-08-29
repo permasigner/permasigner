@@ -1,1 +1,1 @@
-from .permasigner import Permasigner
+from .main import Permasigner

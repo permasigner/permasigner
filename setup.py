@@ -1,4 +1,4 @@
-from pathlib import Path, PurePath
+from pathlib import Path
 from setuptools import setup, find_packages
 
 here = Path(__file__).resolve().parent
@@ -9,7 +9,7 @@ with open((here / "README.md"), encoding="utf-8") as f:
 with open((here / "permasigner" / "__version__.py"), encoding="utf-8") as f:
     version = f.read()
 
-version = version.split('=')[-1].strip().strip('"').strip("'")
+version = version.split('=')[-1].strip().strip('"')
 
 
 with open((here / "requirements.txt"), encoding="utf-8") as f:
@@ -33,7 +33,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'permasigner = permasigner.__main__:main',
+            'permasigner = permasigner.cli:main',
         ],
     },
     keywords='python, windows, macos, linux, docker, cli, open-source, ios, command-line-app, cli-app, hacktoberfest, procursus, permasign, permasigner',

@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
-from permasigner import __main__
+from permasigner import cli
 
-__main__.main(False)
+cli.main(False)
