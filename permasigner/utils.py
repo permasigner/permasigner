@@ -51,18 +51,18 @@ def make_executable(path: Path) -> None:
     file.chmod(mode)
 
 
-def cmd_in_path(cmd: str) -> Union[bool, str]:
+def cmd_in_path(cmd: str) -> Union[None, str]:
     """Check if command is in PATH"""
     path = shutil.which(cmd)
 
     if path is None:
-        return False
+        return None
 
     # Check if ldid is from procursus
     if cmd == "ldid":
         if "procursus" in subprocess.getoutput(path):
             return path
-        return False
+        return None
 
     return path
 
@@ -161,21 +161,16 @@ def get_certificate_path(in_package: bool) -> Path:
 
 def get_version(in_package: bool) -> str:
     version = __version__
-    # Check if running module as a script
-    # then, return version from __version__
-    if in_package:
-        return version
     # Check if running from a git repository,
     # then, construct version in the following format: version-branch-hash
     if Path('.git').resolve().exists():
         git = cmd_in_path("git")
-        if git:
+        if git is not None:
             version = f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
-    else:
-        # Check if running from a Docker container
-        # then, get version from pre-exported environment variable
-        if os.environ.get('IS_DOCKER_CONTAINER'):
-            version = os.environ.get('VERSION', False)
+    # Check if running module as a script
+    # then, return version from __version__
+    if in_package:
+        return version
 
     return version
 
