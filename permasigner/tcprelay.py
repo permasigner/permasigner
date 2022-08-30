@@ -25,7 +25,8 @@ import plistlib
 import socketserver
 from select import select
 
-from permasigner.ps_logger import Logger, Colors
+from . import logger
+from .logger import colors
 
 
 class MuxError(Exception):
@@ -321,28 +322,27 @@ class SocketRelay(object):
 
 class TCPRelay(socketserver.BaseRequestHandler):
     def handle(self):
-        logger = Logger(self.server.args)
-        logger.debug(f"Incoming connection to {self.server.server_address[1]}")
+        logger.log(f"Incoming connection to {self.server.server_address[1]}")
         mux = USBMux(self.server.socketpath)
-        logger.debug("Waiting for devices...")
+        logger.log("Waiting for devices...")
         if not mux.devices:
             mux.process(1.0)
         if not mux.devices:
-            logger.debug("No device found")
+            logger.log("No device found")
             self.request.close()
             return
         dev = mux.devices[0]
-        logger.debug(f"Connecting to device {str(dev)}")
+        logger.log(f"Connecting to device {str(dev)}")
         dsock = mux.connect(dev, self.server.rport)
         lsock = self.request
-        logger.debug("Connection established, relaying data")
+        logger.log("Connection established, relaying data")
         try:
             fwd = SocketRelay(dsock, lsock, 131072)
             fwd.handle()
         finally:
             dsock.close()
             lsock.close()
-        logger.debug("Connection closed")
+        logger.log("Connection closed")
 
 
 class TCPServer(socketserver.TCPServer):
@@ -350,24 +350,21 @@ class TCPServer(socketserver.TCPServer):
 
 
 class Relayer(object):
-    def __init__(self, rport, lport, args, host=None, socketpath=None):
+    def __init__(self, rport, lport, host=None, socketpath=None):
         self.rport = rport
         self.lport = lport
-        self.args = args
         if host is None:
             host = 'localhost'
         self.host = host
         if socketpath is None:
             socketpath = '/var/run/usbmuxd'
         self.socketpath = socketpath
-        self.logger = Logger(self.args)
 
     def relay(self):
-        self.logger.log(f"Creating listening port {self.lport} for device port {self.rport}", color=Colors.yellow)
+        logger.log(f"Creating listening port {self.lport} for device port {self.rport}", color=colors["yellow"])
         server = TCPServer((self.host, self.lport), TCPRelay)
         server.rport = self.rport
         server.socketpath = self.socketpath
-        server.args = self.args
         servers = [server]
 
         alive = True

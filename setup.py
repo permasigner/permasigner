@@ -1,25 +1,25 @@
-import os
+from pathlib import Path
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
+here = Path(__file__).resolve().parent
 
-with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
+with open((here / "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
-with open(os.path.join(here, "permasigner", "__version__.py"), encoding="utf-8") as f:
+with open((here / "permasigner" / "__version__.py"), encoding="utf-8") as f:
     version = f.read()
 
-version = version.split('=')[-1].strip().strip('"').strip("'")
+version = version.split('=')[-1].strip().strip('"')
 
 
-with open(os.path.join(here, "requirements.txt"), encoding="utf-8") as f:
+with open((here / "requirements.txt"), encoding="utf-8") as f:
     requires = f.readlines()
 
 
 setup(
     name='permasigner',
     version=version,
-    description=('Permanently signs IPAs on jailbroken iDevices (persists on stock).'),
+    description='Permanently signs IPAs on jailbroken iDevices (persists on stock).',
     license='BSD-3-Clause',
     url='https://github.com/itsnebulalol/permasigner',
     python_requires=">=3.7",
