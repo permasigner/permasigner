@@ -1,4 +1,5 @@
 import subprocess
+from subprocess import PIPE
 from argparse import Namespace
 from pathlib import Path
 from . import logger, utils
@@ -19,9 +20,9 @@ def install_on_ios(output_path: Path, args: Namespace) -> bool:
     logger.debug("Checking if user is in sudoers file", args.debug)
     process = subprocess.run('sudo -nv'.split(), capture_output=True)
 
-    # Exit status 0: user has sudo rights and NOPASSWD
-    # Password required prompt: user has sudo rights but password is required
-    if process.returncode == 0 or 'password' in process.stderr.decode():
+    # Exit status 0: user has sudo rights, no password is required
+    # Error starts with 'sudo:', has sudo rights, needs a password
+    if process.returncode == 0 or 'sudo:' in process.stderr.decode():
         return install_with_sudo_on_ios(output_path, args)
     # User does not have sudo rights
     # Install with su
@@ -35,13 +36,13 @@ def install_with_sudo_on_ios(output_path: Path, args: Namespace) -> bool:
     logger.debug(f"Running command: sudo dpkg -i {output_path}", args.debug)
 
     subprocess.run(
-        ["sudo", "dpkg", "-i", f"{output_path}"], capture_output=True)
+        ["sudo", "dpkg", "-i", f"{output_path}"], stdin=PIPE, capture_output=True)
 
     # This is needed on elucuratus bootstrap
     # Otherwise the package will end up in a half installed state
     logger.debug(f"Running command: sudo apt-get install -f", args.debug)
     subprocess.run(
-        ['sudo', 'apt-get', 'install', '-f'], capture_output=True)
+        ['sudo', 'apt-get', 'install', '-f'], stdin=PIPE, capture_output=True)
 
     return True
 
@@ -50,15 +51,15 @@ def install_with_su_on_ios(output_path: Path, args: Namespace) -> bool:
     # User is not in sudoers file therefore we invoke dpkg with su as root user
     logger.debug("User is not in sudoers, will use su instead", args.debug)
 
-    logger.debug(f"Running command: su root -c 'dpkg -i {output_path}", args.debug)
+    logger.debug(f"Running command: su root -c 'dpkg -i {output_path}'", args.debug)
     subprocess.run(
-        f"su root -c 'dpkg -i {output_path}'".split(), capture_output=True)
+        f"su root -c 'dpkg -i {output_path}'".split(), stdin=PIPE, capture_output=True)
 
     # This is needed on elucuratus bootstrap
     # Otherwise the package will end up in half installed state
     logger.debug(f"Running command: su root -c 'apt-get install -f'", args.debug)
     subprocess.run(
-        "su root -c 'apt-get install -f'".split(), capture_output=True)
+        "su root -c 'apt-get install -f'".split(), stdin=PIPE, capture_output=True)
 
     return True
 
@@ -85,7 +86,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
         socketpath = '/var/run/usbmuxd'
 
     # Start TCPRelay in a separate thread
-    relayer = tcprelay.Relayer(rport, lport, args, host, socketpath)
+    relayer = tcprelay.Relayer(rport, lport, host, socketpath)
     thread = Thread(target=relayer.relay, daemon=True)
     thread.start()
     time.sleep(1)
@@ -147,7 +148,6 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
 
             # Read output from stdout
             output = stdout.read().decode()
-
             logger.debug(output, args.debug)
 
             # Is needed on elucubratus
@@ -229,7 +229,6 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
 
                 # Block until we can read the output from stdout
                 output = stdout.read().decode()
-
                 logger.debug(output, args.debug)
 
                 # Needed on elucuratus

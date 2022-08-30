@@ -44,7 +44,7 @@ class Permasigner:
             logger.debug(f"Running from package, not cloned repo.", self.args.debug)
 
         # Check for dependencies
-        logger.debug("Checking for dependencies...", self.args.debug)
+        logger.log("Checking for dependencies...\n", color=colors["yellow"])
         self.ldid = utils.cmd_in_path('ldid')
         self.dpkg = utils.cmd_in_path('dpkg-deb')
 
@@ -205,10 +205,10 @@ class Permasigner:
                 # Check if extracted deb file contains an app bundle
                 # then, extract it to Payload directory
                 (self.tmp / "app/Payload").mkdir(parents=True)
-                for fname in Path(f"{self.tmp}/extractedDeb/Applications").iterdir():
+                for fname in (self.tmp / "extractedDeb/Applications").iterdir():
                     if fname.name.endswith(".app"):
-                        shutil.copytree(f"{self.tmp}/extractedDeb/Applications/{fname.name}",
-                                        f"{self.tmp}/app/Payload/{fname.name}")
+                        shutil.copytree(self.tmp / f"extractedDeb/Applications/{fname.name}",
+                                        self.tmp / f"app/Payload/{fname.name}")
                         break
             # Checks if given path is an ipa
             # then extracts it to tmp
