@@ -48,7 +48,7 @@ class Permasigner:
             logger.debug("ldid found!", self.args.debug)
         else:
             logger.debug("ldid not found in PATH, we will download it later if needed", self.args.debug)
-            
+
         self.dpkg = utils.cmd_in_path('dpkg-deb')
         if self.ldid:
             logger.debug("dpkg-deb found!", self.args.debug)
@@ -73,7 +73,7 @@ class Permasigner:
         # Create tmp in working directory
         with tempfile.TemporaryDirectory() as tmpfolder:
             self.tmp = Path(tmpfolder)
-            
+
             logger.log(f"Preparing IPA...", color=colors["yellow"])
 
             # Check if url arg was specified
@@ -81,7 +81,7 @@ class Permasigner:
             if self.args.url:
                 if not self.args.url.endswith(".ipa"):
                     logger.error("URL provided is not an IPA, make sure to provide a direct link.")
-                    
+
                 print(f"Downloading IPA from {self.args.url}...")
                 save_path = self.download_ipa()
                 print(f"Extracting IPA...")
