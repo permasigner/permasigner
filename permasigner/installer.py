@@ -1,6 +1,6 @@
 import subprocess
-from subprocess import PIPE
 from argparse import Namespace
+from subprocess import PIPE
 from pathlib import Path
 from . import logger, utils
 from .logger import colors
@@ -15,49 +15,49 @@ if not utils.is_ios():
     from . import tcprelay
 
 
-def install_on_ios(output_path: Path, args: Namespace) -> bool:
+def install_on_ios(output_path: Path, debug: bool) -> bool:
     # Check if user is in sudoers file by running sudo -nv
-    logger.debug("Checking if user is in sudoers file", args.debug)
+    logger.debug("Checking if user is in sudoers file", debug)
     process = subprocess.run('sudo -nv'.split(), capture_output=True)
 
     # Exit status 0: user has sudo rights, no password is required
     # Error starts with 'sudo:', has sudo rights, needs a password
     if process.returncode == 0 or 'sudo:' in process.stderr.decode():
-        return install_with_sudo_on_ios(output_path, args)
+        return install_with_sudo_on_ios(output_path, debug)
     # User does not have sudo rights
     # Install with su
     else:
-        return install_with_su_on_ios(output_path, args)
+        return install_with_su_on_ios(output_path, debug)
 
 
-def install_with_sudo_on_ios(output_path: Path, args: Namespace) -> bool:
+def install_with_sudo_on_ios(output_path: Path, debug: bool) -> bool:
     # User is in sudoers file therefore we invoke dpkg with sudo
-    logger.debug("User is in sudoers file", args.debug)
-    logger.debug(f"Running command: sudo dpkg -i {output_path}", args.debug)
+    logger.debug("User is in sudoers file", debug)
+    logger.debug(f"Running command: sudo dpkg -i {output_path}", debug)
 
     subprocess.run(
         ["sudo", "dpkg", "-i", f"{output_path}"], stdin=PIPE, capture_output=True)
 
     # This is needed on elucuratus bootstrap
     # Otherwise the package will end up in a half installed state
-    logger.debug(f"Running command: sudo apt-get install -f", args.debug)
+    logger.debug(f"Running command: sudo apt-get install -f", debug)
     subprocess.run(
         ['sudo', 'apt-get', 'install', '-f'], stdin=PIPE, capture_output=True)
 
     return True
 
 
-def install_with_su_on_ios(output_path: Path, args: Namespace) -> bool:
+def install_with_su_on_ios(output_path: Path, debug: bool) -> bool:
     # User is not in sudoers file therefore we invoke dpkg with su as root user
-    logger.debug("User is not in sudoers, will use su instead", args.debug)
+    logger.debug("User is not in sudoers, will use su instead", debug)
 
-    logger.debug(f"Running command: su root -c 'dpkg -i {output_path}'", args.debug)
+    logger.debug(f"Running command: su root -c 'dpkg -i {output_path}'", debug)
     subprocess.run(
         f"su root -c 'dpkg -i {output_path}'".split(), stdin=PIPE, capture_output=True)
 
     # This is needed on elucuratus bootstrap
     # Otherwise the package will end up in half installed state
-    logger.debug(f"Running command: su root -c 'apt-get install -f'", args.debug)
+    logger.debug(f"Running command: su root -c 'apt-get install -f'", debug)
     subprocess.run(
         "su root -c 'apt-get install -f'".split(), stdin=PIPE, capture_output=True)
 

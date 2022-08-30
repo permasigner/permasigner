@@ -5,6 +5,7 @@ import sys
 import platform
 import os
 import importlib
+from argparse import Namespace
 from importlib import util
 from pathlib import PurePath, Path
 from typing import Union
@@ -115,7 +116,7 @@ def find_application_bundle(tmp: Path) -> Union[Path, str]:
     return bundle
 
 
-def read_plist(path, args) -> dict:
+def read_plist(path: Path, args: Namespace) -> dict:
     # Read bundle information from Info.plist
     with open(path, 'rb') as f:
 
@@ -175,7 +176,7 @@ def get_version(in_package: bool) -> str:
     return version
 
 
-def get_output_directory(data_dir, in_package, output_arg: str) -> Path:
+def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> Path:
     # Check if output arg was specified
     # then, return it's value as a Path
     if output_arg:
