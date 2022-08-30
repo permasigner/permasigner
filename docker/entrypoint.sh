@@ -1,10 +1,13 @@
 #!/bin/sh
 
 ARGS=""
-export VERSION=$(cat githash)
 
 if [ ! -z "$WINDOWS" ]; then
     export HOST_IS_WINDOWS=true
+fi
+
+if [ ! -z "$IPA" ]; then
+    ARGS="$ARGS -p $IPA"
 fi
 
 if [ ! -z "$URL" ]; then
@@ -24,7 +27,7 @@ if [ ! -z "$BUNDLEID" ]; then
 fi
 
 if [ ! -z "$NAME" ]; then
-    ARGS="$ARGS -N $NAME"
+    ARGS="$ARGS -n $NAME"
 fi
 
 if [ ! -z "$MINVER" ]; then
@@ -43,6 +46,20 @@ if [ ! -z "$TCPRELAY" ]; then
     ARGS="$ARGS -t $TCPRELAY"
 fi
 
+if [ ! -z "$ENTITLEMENTS" ]; then
+    ARGS="$ARGS -e $ENTITLEMENTS"
+fi
+
+if [ ! -z "$NOLDIDCHECK" ]; then
+    ARGS="$ARGS -z"
+fi
+
+if [ ! -z "$VERSION" ]; then
+    ARGS="$ARGS -V"
+fi
+
+export PS_VERSION=$(cat .version)
+
 echo "Running Permasigner with args:$ARGS"
 echo ""
-python -u main.py $ARGS
+python3 -u main.py $ARGS

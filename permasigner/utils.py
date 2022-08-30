@@ -5,6 +5,7 @@ import sys
 import platform
 import os
 import importlib
+from argparse import Namespace
 from importlib import util
 from pathlib import PurePath, Path
 from typing import Union
@@ -52,18 +53,18 @@ def make_executable(path: Path) -> None:
     file.chmod(mode)
 
 
-def cmd_in_path(cmd: str) -> Union[bool, str]:
+def cmd_in_path(cmd: str) -> Union[None, str]:
     """Check if command is in PATH"""
     path = shutil.which(cmd)
 
     if path is None:
-        return False
+        return None
 
     # Check if ldid is from procursus
     if cmd == "ldid":
         if "procursus" in subprocess.getoutput(path):
             return path
-        return False
+        return None
 
     return path
 
@@ -116,7 +117,7 @@ def find_application_bundle(tmp: Path) -> Union[Path, str]:
     return bundle
 
 
-def read_plist(path, args) -> dict:
+def read_plist(path: Path, args: Namespace) -> dict:
     # Read bundle information from Info.plist
     with open(path, 'rb') as f:
 
@@ -160,28 +161,21 @@ def get_certificate_path(in_package: bool) -> Path:
         return Path.cwd() / "permasigner/data/certificate.p12"
 
 
-def get_version(in_package: bool) -> str:
+def get_version() -> str:
     version = __version__
-    # Check if running module as a script
-    # then, return version from __version__
-    if in_package:
-        return version
     # Check if running from a git repository,
     # then, construct version in the following format: version-branch-hash
     if Path('.git').resolve().exists():
         git = cmd_in_path("git")
-        if git:
-            version = f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+        if git is not None:
+            return f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+    elif os.environ.get("IS_DOCKER_CONTAINER", False):
+        return __version__ + '_' + os.environ.get("PS_VERSION")
     else:
-        # Check if running from a Docker container
-        # then, get version from pre-exported environment variable
-        if os.environ.get('IS_DOCKER_CONTAINER'):
-            version = os.environ.get('VERSION', False)
-
-    return version
+        return version
 
 
-def get_output_directory(data_dir, in_package, output_arg: str) -> Path:
+def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> Path:
     # Check if output arg was specified
     # then, return it's value as a Path
     if output_arg:

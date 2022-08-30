@@ -1,6 +1,5 @@
 import subprocess
 import tarfile
-from argparse import Namespace
 from pathlib import Path
 
 from . import logger
@@ -16,7 +15,7 @@ class Dpkg:
                  output_path: Path,
                  dpkg: bool,
                  in_package: bool,
-                 args: Namespace) -> None:
+                 args: bool) -> None:
         self.bundle = bundle
         self.tmpfolder = tmpfolder
         self.dpkg = dpkg
@@ -39,7 +38,7 @@ class Dpkg:
         builder = DPKGBuilder(self.output_path, self.bundle, dirs, control, scripts)
         return builder.build_package()
 
-    def package_with_dpkg(self, output_path: Path, tmp: Path, debug: Namespace) -> Path:
+    def package_with_dpkg(self, output_path: Path, tmp: Path, debug: bool) -> Path:
         # Construct output name from app name and app version
         # Then create a deb package with dpkg-deb
         name = self.bundle["name"].replace(' ', '')
@@ -66,7 +65,7 @@ class Dpkg:
 
 
 class Deb:
-    def __init__(self, src: Path, dest: Path, debug: Namespace) -> None:
+    def __init__(self, src: Path, dest: Path, debug: bool) -> None:
         self.src = src
         self.dest = dest
         self.debug = debug

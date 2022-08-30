@@ -10,6 +10,7 @@ def main(argv=None, in_package=None) -> None:
     in_package = False if in_package is None else in_package
 
     parser = argparse.ArgumentParser()
+
     input_group = parser.add_mutually_exclusive_group(required=True)
 
     input_group.add_argument('-f', '--folder', type=str,
@@ -18,8 +19,6 @@ def main(argv=None, in_package=None) -> None:
                              help="the direct URL of the IPA to be signed")
     input_group.add_argument('-p', '--path', type=str,
                              help="the direct local path of the IPA to be signed")
-    input_group.add_argument('-V', '--version', action='store_true',
-                             help='show current version and exit')
 
     parser.add_argument('-d', '--debug', action='store_true',
                         help="shows some debug info, only useful for testing")
@@ -45,11 +44,9 @@ def main(argv=None, in_package=None) -> None:
                         help="path to entitlements file")
     parser.add_argument('-z', '--no-ldid-check', action='store_true',
                         help="disable ldid hash checking")
+    parser.add_argument('-V', '--version', action='version', version=f'Permasigner v{utils.get_version()}',
+                        help='show current version and exit')
     args = parser.parse_args()
-
-    if args.version:
-        print(f"Permasigner v{utils.get_version(in_package)}")
-        exit(0)
 
     ps = permasigner.Permasigner(in_package, args)
     ps.main()

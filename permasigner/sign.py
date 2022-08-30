@@ -152,7 +152,7 @@ class Ldid:
 
 
 class Signer:
-    def __init__(self, cert: Path, bundle_path: Path, data_dir: Path, tmp: Path, args) -> None:
+    def __init__(self, cert: Path, bundle_path: Path, data_dir: Path, tmp: Path, args: Namespace) -> None:
         self.cert = cert
         self.bundle_path = bundle_path
         self.data_dir = data_dir
