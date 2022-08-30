@@ -145,6 +145,7 @@ class Ldid:
                                color=colors["yellow"])
                 else:
                     logger.error('Download url is not reachable, and no ldid found in path, exiting.')
+                    exit(1)
             # If hashes do not match but the content is not empty, save it to a file
             else:
                 logger.debug(f"Ldid hash failed to verify, saving newer version", self.args.debug)

@@ -81,6 +81,7 @@ class Permasigner:
             if self.args.url:
                 if not self.args.url.endswith(".ipa"):
                     logger.error("URL provided is not an IPA, make sure to provide a direct link.")
+                    exit(1)
 
                 print(f"Downloading IPA from {self.args.url}...")
                 save_path = self.download_ipa()
@@ -140,6 +141,7 @@ class Permasigner:
         # then, exit with an error
         else:
             logger.error("Unable to find Info.plist, can't read application data")
+            exit(1)
 
         # Create directories in tmp dir
         logger.log(f"Making deb directories...", color=colors["yellow"])
@@ -263,8 +265,10 @@ class Permasigner:
                     return save_path
             else:
                 logger.error(f"Provided URL is not reachable. Status code: {res.status_code}")
+                exit(1)
         except (NewConnectionError, ConnectionError, RequestException) as err:
             logger.error(f"Provided URL is not reachable. Error: {err}")
+            exit(1)
 
     def extract_ipa(self, src: Path) -> None:
         # Extracts ipa to folder in tmp

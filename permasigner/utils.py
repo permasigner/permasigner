@@ -111,8 +111,10 @@ def find_application_bundle(tmp: Path) -> Union[Path, str]:
 
         if bundle == '':
             logger.error("Did not find application bundle")
+            exit(1)
     else:
         logger.error(f"IPA/deb is not valid!")
+        exit(1)
 
     return bundle
 
