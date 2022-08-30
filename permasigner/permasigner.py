@@ -33,7 +33,7 @@ class Permasigner:
         self.outputs = []
 
     def main(self) -> None:
-        logger.log_header(f"Permasigner | Version {utils.get_version(self.in_package)}")
+        logger.log_header(f"Permasigner | Version {utils.get_version()}")
         logger.log_header("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
 
         print()
@@ -216,10 +216,12 @@ class Permasigner:
                 self.extract_ipa(path)
             # Exit win an error if path is neither an ipa nor a deb file
             else:
-                exit("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                exit(1)
         # Exit with an error if path does not exist
         else:
-            exit("That file does not exist! Make sure you're using a direct path to the IPA file.")
+            logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
+            exit(1)
 
     def sign_folder(self) -> array:
         # Itterates over each ipa in the specified folder

@@ -160,20 +160,18 @@ def get_certificate_path(in_package: bool) -> Path:
         return Path.cwd() / "permasigner/data/certificate.p12"
 
 
-def get_version(in_package: bool) -> str:
+def get_version() -> str:
     version = __version__
     # Check if running from a git repository,
     # then, construct version in the following format: version-branch-hash
     if Path('.git').resolve().exists():
         git = cmd_in_path("git")
         if git is not None:
-            version = f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
-    # Check if running module as a script
-    # then, return version from __version__
-    if in_package:
+            return f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
+    elif os.environ.get("IS_DOCKER_CONTAINER", False):
+        return __version__ + '_' + os.environ.get("PS_VERSION")
+    else:
         return version
-
-    return version
 
 
 def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> Path:
