@@ -61,7 +61,8 @@ class Dpkg:
                 self.tmpfolder / "deb/Applications",
                 self.tmpfolder / "deb/DEBIAN/control",
                 self.tmpfolder / "deb/DEBIAN/postinst",
-                self.tmpfolder / "deb/DEBIAN/prerm")
+                self.tmpfolder / "deb/DEBIAN/prerm"
+            )
 
 
 class Deb:
@@ -74,8 +75,7 @@ class Deb:
         # Extract deb contents with dpkg-deb -X
         logger.log("Extracting deb file...\n", color=colors["yellow"])
         logger.debug(f"Running command: dpkg-deb -X {self.src} {self.dest}", self.debug)
-        subprocess.run(
-            ["dpkg-deb", "-X", self.src, self.dest], stdout=subprocess.DEVNULL)
+        subprocess.run(["dpkg-deb", "-X", self.src, self.dest], stdout=subprocess.DEVNULL)
 
     def extract_with_ar(self) -> None:
         logger.log("Extracting deb file...\n", color=colors["yellow"])

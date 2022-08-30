@@ -42,8 +42,7 @@ def log(message, color=None):
 
 def debug(message, dbg):
     if dbg:
-        print(
-            colors["lightcyan"] + colors["bold"] + "[DEBUG] " + colors["reset"] + colors["lightcyan"] + f"{message}" + colors["reset"])
+        print(colors["lightcyan"] + colors["bold"] + "[DEBUG] " + colors["reset"] + colors["lightcyan"] + f"{message}" + colors["reset"])
 
 
 def error(message):

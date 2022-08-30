@@ -96,8 +96,7 @@ class BinaryProtocol(object):
         if resp == self.TYPE_RESULT:
             return {'Number': struct.unpack("I", payload)[0]}
         elif resp == self.TYPE_DEVICE_ADD:
-            devid, usbpid, serial, pad, location = struct.unpack(
-                "IH256sHI", payload)
+            devid, usbpid, serial, pad, location = struct.unpack("IH256sHI", payload)
             serial = serial.decode().split("\0")[0]
             return {'DeviceID': devid,
                     'Properties': {'LocationID': location, 'SerialNumber': serial, 'ProductID': usbpid}}
@@ -127,8 +126,7 @@ class BinaryProtocol(object):
         body = self.socket.recv(dlen - 4)
         version, resp, tag = struct.unpack("3I", body[:0xc])
         if version != self.VERSION:
-            raise MuxVersionError(
-                f"Version mismatch: expected {self.VERSION}, got {version}")
+            raise MuxVersionError(f"Version mismatch: expected {self.VERSION}, got {version}")
         payload = self._unpack(resp, body[0xc:])
         return resp, tag, payload
 
@@ -159,8 +157,7 @@ class PlistProtocol(BinaryProtocol):
             req = [self.TYPE_CONNECT, self.TYPE_LISTEN][req - 2]
         payload['MessageType'] = req
         payload['ProgName'] = 'tcprelay'
-        BinaryProtocol.sendpacket(
-            self, self.TYPE_PLIST, tag, plistlib.dumps(payload))
+        BinaryProtocol.sendpacket(self, self.TYPE_PLIST, tag, plistlib.dumps(payload))
 
     def getpacket(self):
         resp, tag, payload = BinaryProtocol.getpacket(self)
@@ -229,8 +226,7 @@ class MuxConnection(object):
 
     def process(self, timeout=None):
         if self.proto.connected:
-            raise MuxError(
-                "Socket is connected, cannot process listener events")
+            raise MuxError("Socket is connected, cannot process listener events")
         rlo, wlo, xlo = select([self.socket.sock], [], [
             self.socket.sock], timeout)
         if xlo:

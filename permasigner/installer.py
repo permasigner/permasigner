@@ -35,14 +35,12 @@ def install_with_sudo_on_ios(output_path: Path, debug: bool) -> bool:
     logger.debug("User is in sudoers file", debug)
     logger.debug(f"Running command: sudo dpkg -i {output_path}", debug)
 
-    subprocess.run(
-        ["sudo", "dpkg", "-i", f"{output_path}"], stdin=PIPE, capture_output=True)
+    subprocess.run(["sudo", "dpkg", "-i", f"{output_path}"], stdin=PIPE, capture_output=True)
 
     # This is needed on elucuratus bootstrap
     # Otherwise the package will end up in a half installed state
     logger.debug(f"Running command: sudo apt-get install -f", debug)
-    subprocess.run(
-        ['sudo', 'apt-get', 'install', '-f'], stdin=PIPE, capture_output=True)
+    subprocess.run(['sudo', 'apt-get', 'install', '-f'], stdin=PIPE, capture_output=True)
 
     return True
 
@@ -52,14 +50,12 @@ def install_with_su_on_ios(output_path: Path, debug: bool) -> bool:
     logger.debug("User is not in sudoers, will use su instead", debug)
 
     logger.debug(f"Running command: su root -c 'dpkg -i {output_path}'", debug)
-    subprocess.run(
-        f"su root -c 'dpkg -i {output_path}'".split(), stdin=PIPE, capture_output=True)
+    subprocess.run(f"su root -c 'dpkg -i {output_path}'".split(), stdin=PIPE, capture_output=True)
 
     # This is needed on elucuratus bootstrap
     # Otherwise the package will end up in half installed state
     logger.debug(f"Running command: su root -c 'apt-get install -f'", debug)
-    subprocess.run(
-        "su root -c 'apt-get install -f'".split(), stdin=PIPE, capture_output=True)
+    subprocess.run("su root -c 'apt-get install -f'".split(), stdin=PIPE, capture_output=True)
 
     return True
 
@@ -92,8 +88,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
     time.sleep(1)
 
     # Get user password to establish the SSH connection
-    password = getpass(
-        prompt="Please provide your user password (default = alpine): ")
+    password = getpass(prompt="Please provide your user password (default = alpine): ")
 
     # Default to 'alpine' on empty input
     if len(password.strip()) == 0:
@@ -134,8 +129,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
         if "password" in stderr.read().decode():
             command = f"sudo dpkg -i /var/mobile/Documents/{filename}"
             logger.debug(f"Running command: {command}", args.debug)
-            stdin, stdout, stderr = client.exec_command(
-                f"{command}", get_pty=True)
+            stdin, stdout, stderr = client.exec_command(f"{command}", get_pty=True)
 
             # Sleep to prevent echoing password
             time.sleep(0.2)
@@ -190,8 +184,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
         else:
             # Install with dpkg by invoking su as root user
             logger.debug(f"Running command: su root -c 'dpkg -i /var/mobile/Documents/{filename}", args.debug)
-            stdin, stdout, stderr = client.exec_command(
-                f"su root -c 'dpkg -i /var/mobile/Documents/{filename}", get_pty=True)
+            stdin, stdout, stderr = client.exec_command(f"su root -c 'dpkg -i /var/mobile/Documents/{filename}", get_pty=True)
 
             # Read output from the channel
             output = stdout.channel.recv(2048)
@@ -212,8 +205,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
 
                 # Needed on elucuratus
                 # to prevent half-installed state
-                stdin, stdout, stderr = client.exec_command(
-                    "su root -c 'apt-get install -f'", get_pty=True)
+                stdin, stdout, stderr = client.exec_command("su root -c 'apt-get install -f'", get_pty=True)
                 time.sleep(0.2)
 
                 # Write password to stdin

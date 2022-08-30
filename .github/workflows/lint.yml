@@ -16,6 +16,8 @@ on:
     branches:
       - "main"
 
+  workflow_dispatch:
+
 jobs:
   autopep8:
     runs-on: ubuntu-latest
@@ -25,7 +27,7 @@ jobs:
       - name: autopep8
         uses: peter-evans/autopep8@v1
         with:
-          args: --recursive --in-place .
+          args: --recursive --in-place --global-config ".pep8" .
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:

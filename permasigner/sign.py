@@ -197,8 +197,7 @@ class Signer:
     def sign_with_codesign(self) -> None:
         # Import the certificate
         logger.debug(f"Running command: security import {self.cert} -P password -A", self.args.debug)
-        subprocess.run(
-            ['security', 'import', self.cert, '-P', 'password', '-A'], stdout=subprocess.DEVNULL)
+        subprocess.run(['security', 'import', self.cert, '-P', 'password', '-A'], stdout=subprocess.DEVNULL)
 
         # Sign with codesign using imported certificate
         logger.debug(f"Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing "
