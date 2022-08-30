@@ -43,7 +43,7 @@ def main(argv=None, in_package=None) -> None:
                         help="optional args for tcprelay (ex: 22:2222:localhost:/var/run/usbmuxd)")
     parser.add_argument('-e', '--entitlements', type=str,
                         help="path to entitlements file")
-    parser.add_argument('-z', '--no-ldid-check', dest='nocheckldid', action='store_true',
+    parser.add_argument('-z', '--no-ldid-check', action='store_true',
                         help="disable ldid hash checking")
     args = parser.parse_args()
 

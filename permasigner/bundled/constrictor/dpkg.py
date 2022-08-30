@@ -84,7 +84,7 @@ class DPKGBuilder(object):
             app_name = self.bundle['name'].replace(' ', '')
             destination = dir_conf['destination']
             executable = dir_conf['executable']
-            executable_path = '.' + f"{destination}/{app_name}.app/{executable}"
+            executable_path = f'.{destination}/{app_name}.app/{executable}'
 
             if tar_info.name == executable_path:
                 tar_info.mode = TAR_DEFAULT_MODE
@@ -121,7 +121,7 @@ class DPKGBuilder(object):
                 if sys.platform == 'win32':
                     source_file_name = source_file_name.replace('\\', '/')
 
-                archive_path = '.' + dir_conf['destination'] + source_file_name
+                archive_path = f'.{dir_conf["destination"]}{source_file_name}'
 
                 self.add_directory_root_to_archive(data_tar_file, archive_path)
 
@@ -153,7 +153,7 @@ class DPKGBuilder(object):
         control_tar = self.open_tar_file(self.control_archive_path)
 
         for script_name, script_path in maintainer_scripts.items():
-            control_tar.add(script_path, arcname='./' + script_name, filter=self.filter_maintainer_script_tar_info)
+            control_tar.add(script_path, arcname=f'./{script_name}', filter=self.filter_maintainer_script_tar_info)
 
         control_tar.add(self.control, arcname='./control', filter=self.filter_control_tar_info)
 

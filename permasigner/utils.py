@@ -10,10 +10,11 @@ from pathlib import PurePath, Path
 from typing import Union
 
 from .__version__ import __version__
+from . import logger
 
 
 def is_ios() -> bool:
-    """ Determine if current OS is iOS """
+    """Determine if current OS is iOS """
     if not sys.platform == "darwin":
         return False
 
@@ -21,7 +22,7 @@ def is_ios() -> bool:
 
 
 def is_macos() -> bool:
-    """ Determine if current OS is macOS"""
+    """Determine if current OS is macOS"""
     if platform.machine().startswith("i"):
         return False
 
@@ -29,12 +30,12 @@ def is_macos() -> bool:
 
 
 def is_linux() -> bool:
-    """ Determine if current OS is Linux"""
+    """Determine if current OS is Linux"""
     return sys.platform == "linux"
 
 
 def is_windows() -> bool:
-    """ Determine if current OS is Windows"""
+    """Determine if current OS is Windows"""
     return sys.platform == "win32"
 
 
@@ -108,9 +109,9 @@ def find_application_bundle(tmp: Path) -> Union[Path, str]:
             break
 
         if bundle == '':
-            exit("Did not find application bundle")
+            logger.error("Did not find application bundle")
     else:
-        exit(f"IPA/deb is not valid!")
+        logger.error(f"IPA/deb is not valid!")
 
     return bundle
 

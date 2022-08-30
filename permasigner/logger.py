@@ -48,6 +48,7 @@ def debug(message, dbg):
 
 def error(message):
     print(colors["lightred"] + colors["bold"] + "[!] " + colors["reset"] + colors["lightred"] + f"{message}" + colors["reset"])
+    exit(1)
 
 
 def ask(message):
@@ -55,7 +56,7 @@ def ask(message):
 
 
 def log_header(message):
-    print(colors["bold"] + colors["bold"] + "[*] " + colors["reset"] + colors["bold"] + f"{message}" + colors["reset"])
+    print(colors["bold"] + f"{message}" + colors["reset"])
 
 
 def log_footer(message):

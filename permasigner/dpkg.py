@@ -25,7 +25,6 @@ class Dpkg:
         self.args = args
 
     def package_with_constrictor(self, source, control, postinst, prerm) -> Path:
-
         dirs = [{
             'source': source,
             'destination': '/Applications',

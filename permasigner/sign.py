@@ -144,7 +144,7 @@ class Ldid:
                     logger.log('Could not verify remote hash, falling back to ldid found in path',
                                color=colors["yellow"])
                 else:
-                    exit('Download url is not reachable, and no ldid found in path, exiting.')
+                    logger.error('Download url is not reachable, and no ldid found in path, exiting.')
             # If hashes do not match but the content is not empty, save it to a file
             else:
                 logger.debug(f"Ldid hash failed to verify, saving newer version", self.args.debug)

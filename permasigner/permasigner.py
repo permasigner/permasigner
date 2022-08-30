@@ -34,9 +34,7 @@ class Permasigner:
 
     def main(self) -> None:
         logger.log_header(f"Permasigner | Version {utils.get_version(self.in_package)}")
-        logger.log_header("Program created by Nebula | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
-
-        print()
+        print("Program created by Nebula and supernova | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze\n")
 
         # Output debug message if the script
         # is running from a package
@@ -44,9 +42,19 @@ class Permasigner:
             logger.debug(f"Running from package, not cloned repo.", self.args.debug)
 
         # Check for dependencies
-        logger.log("Checking for dependencies...\n", color=colors["yellow"])
+        logger.log("Checking for dependencies...", color=colors["yellow"])
         self.ldid = utils.cmd_in_path('ldid')
+        if self.ldid:
+            logger.debug("ldid found!", self.args.debug)
+        else:
+            logger.debug("ldid not found in PATH, we will download it later if needed", self.args.debug)
+            
         self.dpkg = utils.cmd_in_path('dpkg-deb')
+        if self.ldid:
+            logger.debug("dpkg-deb found!", self.args.debug)
+        else:
+            logger.debug("dpkg-deb not found in PATH, we will use constrictor instead", self.args.debug)
+        print()
 
         # Determine path to data directory
         # then, create dir if it doesn't exist
@@ -59,21 +67,24 @@ class Permasigner:
         self.output_dir.mkdir(exist_ok=True, parents=True)
 
         # Download ldid if it's not in PATH and no skip argument is passed
-        if not self.ldid and not self.args.nocheckldid:
+        if not self.ldid and not self.args.no_ldid_check:
             Ldid(self.data_dir, self.args).download()
 
         # Create tmp in working directory
         with tempfile.TemporaryDirectory() as tmpfolder:
             self.tmp = Path(tmpfolder)
+            
+            logger.log(f"Preparing IPA...", color=colors["yellow"])
 
             # Check if url arg was specified
             # then, download ipa from url and extract it to tmp dir
             if self.args.url:
                 if not self.args.url.endswith(".ipa"):
-                    exit("URL provided is not an IPA, make sure to provide a direct link.")
-                logger.log(f"Downloading IPA from {self.args.url} ...", color=colors["yellow"])
+                    logger.error("URL provided is not an IPA, make sure to provide a direct link.")
+                    
+                print(f"Downloading IPA from {self.args.url}...")
                 save_path = self.download_ipa()
-                logger.log(f"Extracting IPA...", color=colors["yellow"])
+                print(f"Extracting IPA...")
                 self.extract_ipa(save_path)
             # Check if path arg was specified
             # then, check if path is a deb or an ipa
@@ -94,7 +105,8 @@ class Permasigner:
                         self.is_installed = install_from_pc(out_dir, self.args)
 
             # Done, print end message
-            logger.log_footer(f"We are finished!", )
+            print()
+            logger.log_footer(f"We are finished!")
 
             if self.is_installed:
                 logger.log_footer("The application was installed to your device, no further steps are required!")
@@ -103,7 +115,7 @@ class Permasigner:
 
             logger.log_footer("The app will continue to work when rebooted to stock.")
             logger.log_footer("Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)")
-            logger.log_footer("https://patreon.com/nebulalol")
+            print(f"    {colors['green']}https://patreon.com/nebulalol")
 
             if self.args.folder:
                 final_outputs = ""
@@ -122,12 +134,12 @@ class Permasigner:
         bundle = {}
         plist_path = bundle_path / "Info.plist"
         if plist_path.exists():
-            logger.log(f"Reading plist...\n", color=colors["yellow"])
+            print(f"Reading plist...\n")
             bundle = utils.read_plist(plist_path, self.args)
         # If it doesn't exist
         # then, exit with an error
         else:
-            exit("Unable to find Info.plist, can't read application data")
+            logger.error("Unable to find Info.plist, can't read application data")
 
         # Create directories in tmp dir
         logger.log(f"Making deb directories...", color=colors["yellow"])
@@ -174,13 +186,11 @@ class Permasigner:
         else:
             print("Signing bundle with ldid...")
             signer.sign_with_ldid(self.ldid)
-
         print()
 
         # Package the deb file
-        logger.log(f"Packaging the deb file...\n", color=colors["yellow"])
+        logger.log(f"Packaging the deb file...", color=colors["yellow"])
         dpkg = Dpkg(bundle, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args)
-
         return dpkg.package()
 
     def check_path_arguments(self) -> None:
@@ -216,10 +226,10 @@ class Permasigner:
                 self.extract_ipa(path)
             # Exit win an error if path is neither an ipa nor a deb file
             else:
-                exit("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
+                logger.error("That file is not supported by Permasigner! Make sure you're using an IPA or deb.")
         # Exit with an error if path does not exist
         else:
-            exit("That file does not exist! Make sure you're using a direct path to the IPA file.")
+            logger.error("That file does not exist! Make sure you're using a direct path to the IPA file.")
 
     def sign_folder(self) -> array:
         # Itterates over each ipa in the specified folder
@@ -252,9 +262,9 @@ class Permasigner:
                     f.write(res.content)
                     return save_path
             else:
-                exit(f"Provided URL is not reachable. Status code: {res.status_code}")
+                logger.error(f"Provided URL is not reachable. Status code: {res.status_code}")
         except (NewConnectionError, ConnectionError, RequestException) as err:
-            exit(f"Provided URL is not reachable. Error: {err}")
+            logger.error(f"Provided URL is not reachable. Error: {err}")
 
     def extract_ipa(self, src: Path) -> None:
         # Extracts ipa to folder in tmp
