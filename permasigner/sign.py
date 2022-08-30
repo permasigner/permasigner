@@ -172,26 +172,26 @@ class Signer:
 
         # Sign the bundle with ldid
         subprocess.run([
-                        f"{ldid_cmd}",
-                        f"-S{self.tmp / 'entitlements.plist'}",
-                        "-M",
-                        f"-K{self.cert}",
-                        "-Upassword",
-                        f"{self.bundle_path}"],
-                       stdout=subprocess.DEVNULL)
+            f"{ldid_cmd}",
+            f"-S{self.tmp / 'entitlements.plist'}",
+            "-M",
+            f"-K{self.cert}",
+            "-Upassword",
+            f"{self.bundle_path}"],
+            stdout=subprocess.DEVNULL)
 
         # Check if entitlements arg was passed
         # then, resign and merge the entitlements
         if self.args.entitlements:
             logger.debug(f"Signing with extra entitlements located in {self.args.entitlements}", self.args.debug)
             subprocess.run([
-                            f'{ldid_cmd}',
-                            f'-S{self.args.entitlements}',
-                            '-M',
-                            f'-K{self.cert}',
-                            '-Upassword', f'{self.bundle_path}'
-                            ],
-                           stdout=subprocess.DEVNULL)
+                f'{ldid_cmd}',
+                f'-S{self.args.entitlements}',
+                '-M',
+                f'-K{self.cert}',
+                '-Upassword', f'{self.bundle_path}'
+            ],
+                stdout=subprocess.DEVNULL)
 
     def sign_with_codesign(self) -> None:
         # Import the certificate

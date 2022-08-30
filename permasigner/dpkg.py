@@ -29,7 +29,7 @@ class Dpkg:
         dirs = [{
             'source': source,
             'destination': '/Applications',
-            'executable':  self.bundle["executable"]
+            'executable': self.bundle["executable"]
         }]
 
         scripts = {
@@ -60,10 +60,10 @@ class Dpkg:
             return self.package_with_dpkg(self.output_path, self.tmpfolder, self.args.debug)
         else:
             return self.package_with_constrictor(
-                                            self.tmpfolder / "deb/Applications",
-                                            self.tmpfolder / "deb/DEBIAN/control",
-                                            self.tmpfolder / "deb/DEBIAN/postinst",
-                                            self.tmpfolder / "deb/DEBIAN/prerm")
+                self.tmpfolder / "deb/Applications",
+                self.tmpfolder / "deb/DEBIAN/control",
+                self.tmpfolder / "deb/DEBIAN/postinst",
+                self.tmpfolder / "deb/DEBIAN/prerm")
 
 
 class Deb:
