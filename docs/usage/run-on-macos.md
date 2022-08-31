@@ -18,7 +18,7 @@ description: Run Permasigner on macOS.
 
 * Open Terminal from the Utilities folder or spotlight.
    * If you use a third-party terminal, it'll most likely work too.
-* Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
+* Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
    * If this fails, install git with Xcode dev tools on macOS.
 * Install dpkg using [brew](https://brew.sh) with `brew install dpkg`
 * Run the script with `python -m permasigner` or `python3 -m permasigner`

@@ -112,7 +112,7 @@ class Ldid:
             ldid_fork = self.args.ldidfork
         # Otherwise, use nebula's fork
         else:
-            ldid_fork = "itsnebulalol"
+            ldid_fork = "permasigner"
 
         # Check for ldid's presence in data directory
         exists = self.exists_in_data_dir()

@@ -278,5 +278,3 @@ class Permasigner:
             with (self.tmp / "app") as path:
                 path.mkdir()
                 f.extractall(path)
-
-
