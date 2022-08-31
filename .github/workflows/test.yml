@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         # Run with all these versions of Python
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
       # Checkout the latest code from the repo
@@ -67,7 +67,8 @@ jobs:
         run: python main.py -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -d
 
       # Upload test artifact
-      - uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-linux-Python${{ matrix.python-version }}.deb
           path: output/**
@@ -81,7 +82,7 @@ jobs:
         os: [macos-12]
 
         # Run with all these versions of Python
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9"]
 
     steps:
       - name: Set up Procursus
@@ -117,7 +118,8 @@ jobs:
         run: python3 -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o ${GITHUB_WORKSPACE}/output/ -d
 
       # Upload test artifact
-      - uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-${{ matrix.os }}-Python${{ matrix.python-version }}.deb
           path: output/**
@@ -131,7 +133,7 @@ jobs:
         os: [windows-latest]
 
         # Run with all these versions of Python
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.8", "3.9", "3.10"]
         
     steps:
       # Checkout the latest code from the repo
@@ -159,7 +161,8 @@ jobs:
         run: python -m permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -o ${GITHUB_WORKSPACE}/output/ -d
 
       # Upload test artifact
-      - uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
           name: TaurineTest-${{ matrix.os }}-Python${{ matrix.python-version }}.deb
           path: \output\**

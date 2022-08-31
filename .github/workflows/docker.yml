@@ -1,20 +1,26 @@
 name: Build and publish Docker image
 
 on:
-  push:
-    paths-ignore:
-      - 'README.md'
-      - 'book.json'
-      - '.gitignore'
-      - '.pep8'
-      - 'Dockerfile.development'
-      - '.devcontainer/**'
-      - '.vscode/**'
-      - '.github/**'
-      - '!.github/workflows/docker.yml'
-      - 'docs/**'
-    branches:
-      - "main"
+  #push:
+  #  paths-ignore:
+  #    - 'README.md'
+  #    - 'book.json'
+  #    - '.gitignore'
+  #    - '.pep8'
+  #    - 'Dockerfile.development'
+  #    - '.devcontainer/**'
+  #    - '.vscode/**'
+  #    - '.github/**'
+  #    - '!.github/workflows/docker.yml'
+  #    - 'docs/**'
+  #  branches:
+  #    - "main"
+
+  workflow_run:
+    workflows: ["Test script"]
+    branches: [main]
+    types: 
+      - completed
 
 jobs:
   docker:
@@ -39,6 +45,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: itsnebulalol/permasigner:latest
