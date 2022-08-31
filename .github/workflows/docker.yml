@@ -15,6 +15,14 @@ on:
   #    - 'docs/**'
   #  branches:
   #    - "main"
+  push:
+    paths-ignore:
+      - "*"
+      - '!.github/workflows/docker.yml'
+    branches:
+      - "main"
+
+  workflow_dispatch:
 
   workflow_run:
     workflows: ["Test script"]
