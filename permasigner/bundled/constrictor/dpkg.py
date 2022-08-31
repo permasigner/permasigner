@@ -30,7 +30,6 @@ class DPKGBuilder(object):
         self.maintainer_scripts = scripts
         self.executables = executables
         self.seen_data_dirs = set()
-        self.seen_executables = set()
         self.working_dir = None
 
     @staticmethod
