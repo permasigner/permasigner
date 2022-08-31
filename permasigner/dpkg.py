@@ -3,7 +3,6 @@ import tarfile
 from pathlib import Path
 
 from . import logger
-from .logger import colors
 from .bundled.unix_ar import unix_ar
 from .bundled.constrictor.dpkg import DPKGBuilder
 
@@ -15,13 +14,13 @@ class Dpkg:
                  output_path: Path,
                  dpkg: bool,
                  in_package: bool,
-                 args: bool) -> None:
+                 debug: bool) -> None:
         self.bundle = bundle
         self.tmpfolder = tmpfolder
         self.dpkg = dpkg
         self.output_path = output_path
         self.in_package = in_package
-        self.args = args
+        self.debug = debug
 
     def package_with_constrictor(self, source, control, postinst, prerm) -> Path:
         dirs = [{
@@ -55,7 +54,7 @@ class Dpkg:
         # then, package with dpkg-deb
         # otherwise, package with constrictor
         if self.dpkg:
-            return self.package_with_dpkg(self.output_path, self.tmpfolder, self.args.debug)
+            return self.package_with_dpkg(self.output_path, self.tmpfolder, self.debug)
         else:
             return self.package_with_constrictor(
                 self.tmpfolder / "deb/Applications",
