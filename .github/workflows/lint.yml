@@ -19,16 +19,18 @@ on:
   workflow_dispatch:
 
 jobs:
-  autopep8:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: autopep8
+      - name: Lint with autopep8
         uses: peter-evans/autopep8@v1
         with:
           args: --recursive --in-place --global-config ".pep8" .
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Lint script with autopep8
