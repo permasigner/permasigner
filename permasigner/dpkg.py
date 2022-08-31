@@ -1,3 +1,4 @@
+import array
 import subprocess
 import tarfile
 from pathlib import Path
@@ -10,23 +11,31 @@ from .bundled.constrictor.dpkg import DPKGBuilder
 class Dpkg:
     def __init__(self,
                  bundle: dict,
+                 executables: set,
                  tmpfolder: Path,
                  output_path: Path,
                  dpkg: bool,
                  in_package: bool,
                  debug: bool) -> None:
         self.bundle = bundle
+        self.executables = executables
         self.tmpfolder = tmpfolder
         self.dpkg = dpkg
         self.output_path = output_path
         self.in_package = in_package
         self.debug = debug
 
-    def package_with_constrictor(self, source, control, postinst, prerm) -> Path:
+    @property
+    def absolute_output_path(self):
+        name = self.bundle['name'].replace(' ', '')
+        version = self.bundle['version']
+
+        return self.output_path / f"{name}_{version}.deb"
+
+    def package_with_constrictor(self, source, control, postinst, prerm) -> None:
         dirs = [{
             'source': source,
             'destination': '/Applications',
-            'executable': self.bundle["executable"]
         }]
 
         scripts = {
@@ -34,34 +43,31 @@ class Dpkg:
             'prerm': prerm
         }
 
-        builder = DPKGBuilder(self.output_path, self.bundle, dirs, control, scripts)
-        return builder.build_package()
+        builder = DPKGBuilder(self.absolute_output_path, self.executables, dirs, control, scripts)
+        builder.build_package()
 
-    def package_with_dpkg(self, output_path: Path, tmp: Path, debug: bool) -> Path:
-        # Construct output name from app name and app version
-        # Then create a deb package with dpkg-deb
-        name = self.bundle["name"].replace(' ', '')
-        version = self.bundle["version"]
-        output_path = output_path / f"{name}_{version}.deb"
-        dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {tmp}/deb {output_path}"
-        logger.debug(f"Running command: {dpkg_cmd}", debug)
+    def package_with_dpkg(self) -> None:
+        """ Package application with dpkg-deb"""
+
+        dpkg_cmd = f"dpkg-deb -Zxz --root-owner-group -b {self.tmpfolder}/deb {self.absolute_output_path}"
+        logger.debug(f"Running command: {dpkg_cmd}", self.debug)
         subprocess.run(dpkg_cmd.split(), stdout=subprocess.DEVNULL)
-
-        return output_path
 
     def package(self) -> Path:
         # If dpkg is in PATH
         # then, package with dpkg-deb
         # otherwise, package with constrictor
         if self.dpkg:
-            return self.package_with_dpkg(self.output_path, self.tmpfolder, self.debug)
+            self.package_with_dpkg()
         else:
-            return self.package_with_constrictor(
+            self.package_with_constrictor(
                 self.tmpfolder / "deb/Applications",
                 self.tmpfolder / "deb/DEBIAN/control",
                 self.tmpfolder / "deb/DEBIAN/postinst",
                 self.tmpfolder / "deb/DEBIAN/prerm"
             )
+
+        return self.absolute_output_path
 
 
 class Deb:

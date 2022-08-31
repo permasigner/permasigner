@@ -53,6 +53,25 @@ def make_executable(path: Path) -> None:
     file.chmod(mode)
 
 
+def set_plugin_permissions(payload: Path, debug: bool) -> set:
+
+    plugins = set()
+
+    for folder in Path(payload / "PlugIns").glob("*.appex"):
+        plist_path = folder / "Info.plist"
+        if plist_path.exists():
+            with open(plist_path, 'rb') as plist:
+                info = plistlib.load(plist)
+            executable = info["CFBundleExecutable"]
+            logger.debug(f"Settings chmod +x on {folder / executable}", debug)
+            make_executable(folder / executable)
+
+            if is_windows():
+                plugins.add(f"./{payload.parent.name}/{payload.name}/{folder.parent.name}/{folder.name}/{executable}")
+
+    return plugins
+
+
 def cmd_in_path(cmd: str) -> Union[None, str]:
     """Check if command is in PATH"""
     path = shutil.which(cmd)

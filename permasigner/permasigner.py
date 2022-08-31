@@ -168,6 +168,11 @@ class Permasigner:
         print("Changing app executable permissions...")
         utils.make_executable(full_app_path / bundle["executable"])
 
+        executables = utils.set_plugin_permissions(full_app_path, self.args.debug)
+
+        if utils.is_windows():
+            executables.add(f'./{full_app_path.parent.name}/{full_app_path.name}/{bundle["executable"]}')
+
         # Get path to certificate file
         cert = utils.get_certificate_path(self.in_package)
 
@@ -183,7 +188,7 @@ class Permasigner:
 
         # Package the deb file
         logger.log("Packaging the deb file...", color=colors["yellow"])
-        dpkg = Dpkg(bundle, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args.debug)
+        dpkg = Dpkg(bundle, executables, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args.debug)
         return dpkg.package()
 
     def check_path_arguments(self) -> None:
