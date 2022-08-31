@@ -15,7 +15,7 @@ description: Run Permasigner on Windows using WSL or Docker.
 ## Run from Source
 
 * Open a Powershell window from the start menu
-* Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
+* Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
     * If this fails, install git for Windows from [here](https://git-scm.com/download/win).
 
 {% hint style="info" %}

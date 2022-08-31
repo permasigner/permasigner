@@ -27,7 +27,7 @@ options:
                         specify new minimum app version (14.0 recommended)
   -v, --version         show current version and exit
   -l LDIDFORK, --ldidfork LDIDFORK
-                        specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])
+                        specify a fork of ldid (eg. ProcursusTeam, permasigner [default])
   -e ENTITLEMENTS, --entitlements ENTITLEMENTS
                         path to entitlements file
 ```
@@ -44,6 +44,6 @@ URL       the direct URL of the IPA to be signed
 BUNDLEID  specify new bundle id
 NAME      specify new app name
 MINVER    specify new minimum app version (14.0 recommended)
-LDIDFORK  specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])
+LDIDFORK  specify a fork of ldid (eg. ProcursusTeam, permasigner [default])
 FOLDER    sign multiple IPAs from a direct path to a folder ("ipas" recommended)
 ```

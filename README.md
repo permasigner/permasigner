@@ -6,20 +6,20 @@
   <a href="#">
     <img src="https://img.shields.io/badge/made%20with-love-E760A4.svg" alt="Made with love">
   </a>
-  <a href="https://github.com/itsnebulalol/permasigner/blob/main/LICENSE" target="_blank">
-    <img src="https://img.shields.io/github/license/itsnebulalol/permasigner.svg" alt="License">
+  <a href="https://github.com/permasigner/permasigner/blob/main/LICENSE" target="_blank">
+    <img src="https://img.shields.io/github/license/permasigner/permasigner.svg" alt="License">
   </a>
-  <a href="https://github.com/itsnebulalol/permasigner/graphs/contributors" target="_blank">
-    <img src="https://img.shields.io/github/contributors/itsnebulalol/permasigner.svg" alt="Contributors">
+  <a href="https://github.com/permasigner/permasigner/graphs/contributors" target="_blank">
+    <img src="https://img.shields.io/github/contributors/permasigner/permasigner.svg" alt="Contributors">
   </a>
-  <a href="https://github.com/itsnebulalol/permasigner/commits/main" target="_blank">
-    <img src="https://img.shields.io/github/commit-activity/w/itsnebulalol/permasigner.svg" alt="Commits">
+  <a href="https://github.com/permasigner/permasigner/commits/main" target="_blank">
+    <img src="https://img.shields.io/github/commit-activity/w/permasigner/permasigner.svg" alt="Commits">
   </a>
   <a href="https://dsc.gg/permasigner" target="_blank">
     <img src="https://img.shields.io/discord/1001905994458206229?label=discord" alt="Discord">
   </a>
-  <a href="https://github.com/itsnebulalol/permasigner/actions" target="_blank">
-    <img src="https://img.shields.io/github/workflow/status/itsnebulalol/permasigner/Test%20script/main.svg" alt="Test status">
+  <a href="https://github.com/permasigner/permasigner/actions" target="_blank">
+    <img src="https://img.shields.io/github/workflow/status/permasigner/permasigner/Test%20script/main.svg" alt="Test status">
   </a>
 </p>
 
@@ -58,7 +58,7 @@ Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei
 
 # In Progress
 
-View the [GitHub Projects board](https://github.com/users/itsnebulalol/projects/2/views/1)!
+View the [GitHub Projects board](https://github.com/users/permasigner/projects/2/views/1)!
 
 # Credits
 
@@ -71,7 +71,7 @@ View the [GitHub Projects board](https://github.com/users/itsnebulalol/projects/
 
 Plus, big thanks to all of the contributors that made this project possible.
 
-<a href="https://github.com/itsnebulalol/permasigner/graphs/contributors"><img src="https://contributors-img.web.app/image?repo=itsnebulalol/permasigner" /></a>
+<a href="https://github.com/permasigner/permasigner/graphs/contributors"><img src="https://contributors-img.web.app/image?repo=permasigner/permasigner" /></a>
 
 # Other Stuff
 

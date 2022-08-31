@@ -13,7 +13,7 @@ We highly recommend using macOS or Linux to develop, but Windows will work too v
 To make any changes, you need to make a fork of the Permasigner repo.
 
 * Sign up for GitHub if you haven't already, you'll need it to contribute
-* Go to [this link](https://github.com/itsnebulalol/permasigner/fork), and create the fork
+* Go to [this link](https://github.com/permasigner/permasigner/fork), and create the fork
 * We recommend enabling Actions to test and lint your code, so click the Actions tab, and click the "I know what I'm doing" button
 
 Congrats! You now have your own copy of Permasigner! Now, you can clone it to your local machine.

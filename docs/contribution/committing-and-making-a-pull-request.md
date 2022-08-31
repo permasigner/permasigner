@@ -17,7 +17,7 @@ If you want to test the package, you can run `make build`, and it'll create a `w
 After you're finished implementing your changes, you'll want to request them to be added to the main repository.
 
 * Make sure all your changes are pushed, as shown above
-* Navigate to [this URL](https://github.com/itsnebulalol/permasigner/compare) to open a new pull request
+* Navigate to [this URL](https://github.com/permasigner/permasigner/compare) to open a new pull request
   * Keep base as main (which is Permasigner's main branch), and set compare as your fork's main branch (or the branch you were working in)
 * Follow the template and create your pull request
   * It'll be reviewed as soon as possible

@@ -37,7 +37,7 @@ def main(argv=None, in_package=None) -> None:
     parser.add_argument('-m', '--minver', type=str,
                         help="specify new minimum app version (14.0 recommended)")
     parser.add_argument('-l', '--ldidfork', type=str,
-                        help="specify a fork of ldid (eg. ProcursusTeam, itsnebulalol [default])")
+                        help="specify a fork of ldid (eg. ProcursusTeam, permasigner [default])")
     parser.add_argument('-t', '--tcprelay', type=str,
                         help="optional args for tcprelay (ex: 22:2222:localhost:/var/run/usbmuxd)")
     parser.add_argument('-e', '--entitlements', type=str,

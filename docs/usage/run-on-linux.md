@@ -17,7 +17,7 @@ description: Run Permasigner on Debian based Linux distros.
 
 * Open a terminal using Ctrl + Shift + T on most Linux distros
 * Install bzip2 and binutils using your package manager of choice; ex. `sudo apt install bzip2 binutils`
-* Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
+* Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
    * If this fails, install git with your package manager of choice; ex. `sudo apt install git`.
 * Run the script with `python -m permasigner` or `python3 -m permasigner`
    * If this fails, install python3 with your package manager of choice; ex. `sudo apt install python3`.

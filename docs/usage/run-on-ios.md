@@ -33,7 +33,7 @@ This will only work on Procursus jailbreaks for now.
 ## Run from Source
 
 * Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
-* Clone this repository with `git clone https://github.com/itsnebulalol/permasigner && cd permasigner`
+* Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
    * If this fails, install git with `su root -c apt install git`.
 * Run the script with `python3 -m permasigner`
    * If this fails, install python3 with `su root -c apt install python3` and pip with `python3 -m ensurepip`.

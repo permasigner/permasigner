@@ -21,7 +21,7 @@ setup(
     version=version,
     description='Permanently signs IPAs on jailbroken iDevices (persists on stock).',
     license='BSD-3-Clause',
-    url='https://github.com/itsnebulalol/permasigner',
+    url='https://github.com/permasigner/permasigner',
     python_requires=">=3.7",
     packages=find_packages(),
     long_description=readme,
