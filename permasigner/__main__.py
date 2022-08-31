@@ -44,7 +44,7 @@ def main(argv=None, in_package=None) -> None:
                         help="path to entitlements file")
     parser.add_argument('-z', '--no-ldid-check', action='store_true',
                         help="disable ldid hash checking")
-    parser.add_argument('-V', '--version', action='version', version=f'Permasigner v{utils.get_version()}',
+    parser.add_argument('-v', '--version', action='version', version=f'Permasigner v{utils.get_version()}',
                         help='show current version and exit')
     args = parser.parse_args()
 
