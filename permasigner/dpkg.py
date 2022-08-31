@@ -73,12 +73,13 @@ class Deb:
 
     def extract_with_dpkg(self) -> None:
         # Extract deb contents with dpkg-deb -X
-        logger.log("Extracting deb file...\n", color=colors["yellow"])
+        logger.log("Extracting deb file...", color=colors["yellow"])
         logger.debug(f"Running command: dpkg-deb -X {self.src} {self.dest}", self.debug)
         subprocess.run(["dpkg-deb", "-X", self.src, self.dest], stdout=subprocess.DEVNULL)
 
     def extract_with_ar(self) -> None:
-        logger.log("Extracting deb file...\n", color=colors["yellow"])
+        """ Opens deb archive and extracts content of data.tar.* """
+        logger.log("Extracting deb file...", color=colors["yellow"])
         logger.debug(f"Extracting {self.src} with unix-ar", self.debug)
 
         with unix_ar.open(self.src) as ar_file:

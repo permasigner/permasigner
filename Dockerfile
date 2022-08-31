@@ -30,7 +30,3 @@ COPY --from=git /version /app/.version
 ENV IS_DOCKER_CONTAINER Yes
 
 CMD [ "/app/docker/entrypoint.sh" ]
-
-
-
-
