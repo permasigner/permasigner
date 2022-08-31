@@ -33,8 +33,8 @@ class Permasigner:
         self.outputs = []
 
     def main(self) -> None:
-        logger.log_header(f"Permasigner | Version {utils.get_version()}")
-        print("Program created by Nebula and supernova | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze\n")
+        logger.log(f"Permasigner | Version {utils.get_version()}")
+        print("Program created by Nebula and supernova | Original scripts created by zhuowei | CoreTrust bypass by Linus Henze")
 
         # Output debug message if the script
         # is running from a package
@@ -54,7 +54,6 @@ class Permasigner:
             logger.debug("dpkg-deb found!", self.args.debug)
         else:
             logger.debug("dpkg-deb not found in PATH, we will use constrictor instead", self.args.debug)
-        print()
 
         # Determine path to data directory
         # then, create dir if it doesn't exist
@@ -73,8 +72,6 @@ class Permasigner:
         # Create tmp in working directory
         with tempfile.TemporaryDirectory() as tmpfolder:
             self.tmp = Path(tmpfolder)
-
-            logger.log(f"Preparing IPA...", color=colors["yellow"])
 
             # Check if url arg was specified
             # then, download ipa from url and extract it to tmp dir
@@ -105,26 +102,26 @@ class Permasigner:
                     else:
                         self.is_installed = install_from_pc(out_dir, self.args)
 
-            # Done, print end message
             print()
-            logger.log_footer(f"We are finished!")
+            # Done, print end message
+            logger.info(f"We are finished!")
 
             if self.is_installed:
-                logger.log_footer("The application was installed to your device, no further steps are required!")
+                logger.info("The application was installed to your device, no further steps are required!")
             else:
-                logger.log_footer("Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
+                logger.info("Copy the newly created deb from the output folder to your jailbroken iDevice and install it!")
 
-            logger.log_footer("The app will continue to work when rebooted to stock.")
-            logger.log_footer("Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)")
+            logger.info("The app will continue to work when rebooted to stock.")
+            logger.info("Also, this is free and open source software! Feel free to donate to my Patreon if you enjoy :)")
             print(f"    {colors['green']}https://patreon.com/nebulalol")
 
             if self.args.folder:
                 final_outputs = ""
                 for output in self.outputs:
                     final_outputs += f'{output}\n'
-                logger.log_footer(f"Output files:\n{final_outputs}")
+                logger.info(f"Output files:\n{final_outputs}")
             else:
-                logger.log_footer(f"Output file: {out_dir}")
+                logger.info(f"Output file: {out_dir}")
 
     def permasign(self) -> Path:
         # Search for application bundle in Payload directory
@@ -135,7 +132,7 @@ class Permasigner:
         bundle = {}
         plist_path = bundle_path / "Info.plist"
         if plist_path.exists():
-            print(f"Reading plist...\n")
+            print(f"Reading plist...")
             bundle = utils.read_plist(plist_path, self.args)
         # If it doesn't exist
         # then, exit with an error
@@ -169,29 +166,23 @@ class Permasigner:
         copytree(bundle_path, full_app_path)
 
         # Set chmod 755 on application executable
-        print("Changing app executable permissions...\n")
+        print("Changing app executable permissions...")
         utils.make_executable(full_app_path / bundle["executable"])
         # Get path to certificate file
         cert = utils.get_certificate_path(self.in_package)
-
-        # Sign the app
-        logger.log(f"Signing the application...", color=colors["yellow"])
 
         # Check if codesign arg was specified
         # then, check if the script runs on macOS
         # then, sign with codesign
         signer = Signer(cert, full_app_path, self.data_dir, self.tmp, self.args)
         if self.args.codesign and utils.is_macos():
-            print("Signing bundle with codesign...")
             signer.sign_with_codesign()
         # In other cases sign with ldid
         else:
-            print("Signing bundle with ldid...")
             signer.sign_with_ldid(self.ldid)
-        print()
 
         # Package the deb file
-        logger.log(f"Packaging the deb file...", color=colors["yellow"])
+        logger.log("Packaging the deb file...", color=colors["yellow"])
         dpkg = Dpkg(bundle, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args)
         return dpkg.package()
 
@@ -203,7 +194,7 @@ class Permasigner:
         if path.exists():
             # Checks if given path is a deb file
             if path.suffix == ".deb":
-                logger.debug(f"Extracting deb package from {path} to {self.tmp / 'extractedDeb'}", self.args.debug)
+                logger.log("Extracting deb package", color=colors["yellow"])
                 deb = Deb(path, self.tmp / "extractedDeb", self.args.debug)
                 # Extracts with dpkg-deb
                 # if it's available in PATH
@@ -244,7 +235,7 @@ class Permasigner:
                 elif path.is_file():
                     path.unlink()
 
-            logger.log(f"Extracting ipa to temporary directory\n", color=colors["yellow"])
+            logger.log(f"Extracting ipa to temporary directory", color=colors["yellow"])
             self.extract_ipa(ipa)
 
             output = self.permasign()
@@ -271,7 +262,10 @@ class Permasigner:
             exit(1)
 
     def extract_ipa(self, src: Path) -> None:
-        # Extracts ipa to folder in tmp
+        """ Extract IPA archive to a given PATH"""
+
+        logger.log("Extracting IPA", color=colors["yellow"])
+
         with zipfile.ZipFile(src, 'r') as f:
             with (self.tmp / "app") as path:
                 path.mkdir()

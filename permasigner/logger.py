@@ -35,9 +35,9 @@ colors = {
 
 def log(message, color=None):
     if color is None:
-        print(f"[*] {message}")
+        print(colors["bold"] + f"{message}" + colors["reset"])
     else:
-        print(color + colors["bold"] + "[*] " + colors["reset"] + color + f"{message}" + colors["reset"])
+        print("\n" + color + colors["bold"] + "[*] " + colors["reset"] + color + f"{message}" + colors["reset"])
 
 
 def debug(message, dbg):
@@ -53,9 +53,5 @@ def ask(message):
     return input(colors["orange"] + colors["bold"] + "[?] " + colors["reset"] + colors["orange"] + f"{message}" + colors["reset"])
 
 
-def log_header(message):
-    print(colors["bold"] + f"{message}" + colors["reset"])
-
-
-def log_footer(message):
+def info(message):
     print(colors["green"] + colors["bold"] + "[*] " + colors["reset"] + colors["green"] + f"{message}" + colors["reset"])

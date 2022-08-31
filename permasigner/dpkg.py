@@ -73,15 +73,12 @@ class Deb:
 
     def extract_with_dpkg(self) -> None:
         # Extract deb contents with dpkg-deb -X
-        logger.log("Extracting deb file...", color=colors["yellow"])
-        logger.debug(f"Running command: dpkg-deb -X {self.src} {self.dest}", self.debug)
+        logger.debug(f"Extracting deb package from {self.src} to {self.dest} with dpkg-deb", self.debug)
         subprocess.run(["dpkg-deb", "-X", self.src, self.dest], stdout=subprocess.DEVNULL)
 
     def extract_with_ar(self) -> None:
         """ Opens deb archive and extracts content of data.tar.* """
-        logger.log("Extracting deb file...", color=colors["yellow"])
-        logger.debug(f"Extracting {self.src} with unix-ar", self.debug)
-
+        logger.debug(f"Extracting deb package from {self.src} to {self.dest} with unix-ar", self.debug)
         with unix_ar.open(self.src) as ar_file:
             for member in ar_file.infolist():
                 if b"data.tar" in ar_file.getinfo(member).name:

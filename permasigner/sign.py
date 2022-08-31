@@ -161,17 +161,18 @@ class Signer:
         self.args = args
 
     def sign_with_ldid(self, ldid: str) -> None:
-        # Determine path to ldid
+        """ Determine path to ldid and use it to sign the bundle """
+
         if ldid:
             ldid_cmd = ldid
         else:
             ldid_cmd = self.data_dir / "ldid"
 
+        logger.log("Signing bundle with ldid...", color=colors["yellow"])
         logger.debug(
             f"Running command: {ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword '{self.bundle_path}'",
             self.args.debug)
 
-        # Sign the bundle with ldid
         subprocess.run([
             f"{ldid_cmd}",
             f"-S{self.tmp / 'entitlements.plist'}",
@@ -195,11 +196,12 @@ class Signer:
                 stdout=subprocess.DEVNULL)
 
     def sign_with_codesign(self) -> None:
-        # Import the certificate
+        """ Imports the certificate and deep signs bundle with codesign"""
+        logger.log("Importing certificate...", color=colors["yellow"])
         logger.debug(f"Running command: security import {self.cert} -P password -A", self.args.debug)
         subprocess.run(['security', 'import', self.cert, '-P', 'password', '-A'], stdout=subprocess.DEVNULL)
 
-        # Sign with codesign using imported certificate
+        logger.log(f"Signing bundle with codesign...", color=colors["yellow"])
         logger.debug(f"Running command: codesign -s 'We Do A Little Trolling iPhone OS Application Signing "
                      f"--force --deep --preserve-metadata=entitlements {self.bundle_path}", self.args.debug)
         subprocess.run(['codesign', '-s', 'We Do A Little Trolling iPhone OS Application Signing',
