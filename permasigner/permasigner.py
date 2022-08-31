@@ -80,9 +80,8 @@ class Permasigner:
                     logger.error("URL provided is not an IPA, make sure to provide a direct link.")
                     exit(1)
 
-                print(f"Downloading IPA from {self.args.url}...")
+                logger.log(f"Downloading IPA...", color=colors["yellow"])
                 save_path = self.download_ipa()
-                print(f"Extracting IPA...")
                 self.extract_ipa(save_path)
             # Check if path arg was specified
             # then, check if path is a deb or an ipa
@@ -247,6 +246,9 @@ class Permasigner:
         # Attempt to download ipa from specified url
         # then write content to file on 200 OK
         # otherwise, exit with an error
+
+        logger.debug(f"Downloading IPA from {self.args.url}", self.args.debug)
+
         try:
             res = requests.get(self.args.url, stream=True)
             if res.status_code == 200:
