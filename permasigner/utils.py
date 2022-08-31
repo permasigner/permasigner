@@ -73,9 +73,9 @@ def get_data_directory() -> Path:
     """ Get path to data directory"""
 
     # Get the value of PERMASIGNER_HOME variable and if it's exported use it as data directory
-    ps_home = Path(os.environ.get("PERMASIGNER_HOME"))
+    ps_home = os.environ.get("PERMASIGNER_HOME")
     if ps_home:
-        return ps_home
+        return Path(ps_home)
 
     # Get path to user's $HOME
     home = Path.home()
