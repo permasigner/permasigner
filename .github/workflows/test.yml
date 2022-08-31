@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         # Run with all these versions of Python
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
       # Checkout the latest code from the repo
@@ -82,7 +82,7 @@ jobs:
         os: [macos-12]
 
         # Run with all these versions of Python
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9"]
 
     steps:
       - name: Set up Procursus
@@ -133,7 +133,7 @@ jobs:
         os: [windows-latest]
 
         # Run with all these versions of Python
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: ["3.8", "3.9", "3.10"]
         
     steps:
       # Checkout the latest code from the repo
