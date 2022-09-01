@@ -1,5 +1,5 @@
 ---
-description: Run Permasigner on Windows using WSL or Docker.
+description: Run Permasigner on Windows natively, with WSL, or with Docker.
 ---
 
 ## Run from Package (Recommended)
@@ -7,6 +7,15 @@ description: Run Permasigner on Windows using WSL or Docker.
 * Open a Powershell window from the start menu
 * Install the package with `python -m pip install permasigner`
     * If this fails, install the latest Python 3 version from [here](https://python.org).
+
+{% hint style="info" %}
+If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
+
+When running the script, you will notice the a `one of the arguments is required` error. You'll need to append the IPA to sign as an argument, like `-u https://example.com/app.ipa`, or `-p /Users/nebula/Downloads/app.ipa`, for example.
+
+You may also pass the `-i` argument to install the created deb on your connected device file automagically :)
+{% endhint %}
+
 * Run the script with `python -m permasigner`
 * Install the newly created deb file on your iDevice
     * You can use something like Dropbox or Mega; advanced users can use `openssh-sftp-server` from Procursus.
@@ -20,6 +29,10 @@ description: Run Permasigner on Windows using WSL or Docker.
 
 {% hint style="info" %}
 If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
+
+When running the script, you will notice the a `one of the arguments is required` error. You'll need to append the IPA to sign as an argument, like `-u https://example.com/app.ipa`, or `-p /Users/nebula/Downloads/app.ipa`, for example.
+
+You may also pass the `-i` argument to install the created deb on your connected device file automagically :)
 {% endhint %}
 
 * Run the script with `python -m permasigner`

@@ -31,4 +31,3 @@ description: Run Permasigner in the official Docker container.
     * The script can do that for you, you will be asked to input the user password for ssh access.
     * Airdropping the file is probably the easiest, but you can use something like Dropbox or Mega. Advanced users can use openssh-sftp-server from Procursus.
 * Reboot to stock, the app will still work!
-

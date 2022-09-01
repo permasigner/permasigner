@@ -8,27 +8,38 @@ description: Run Permasigner on macOS.
    * If you use a third-party terminal, it'll most likely work too.
 * Install dpkg using [brew](https://brew.sh) with `brew install dpkg`
 * Install all requirements with `pip install permasigner` or `pip3 install permasigner`
-   * If this fails, install python3 using brew with `brew install python3`.
+    * If this fails, install python3 using brew with `brew install python3`.
+
+{% hint style="info" %}
+If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
+
+When running the script, you will notice the a `one of the arguments is required` error. You'll need to append the IPA to sign as an argument, like `-u https://example.com/app.ipa`, or `-p /Users/nebula/Downloads/app.ipa`, for example.
+
+You may also pass the `-i` argument to install the created deb on your connected device file automagically :)
+{% endhint %}
+
 * Run the script with `python -m permasigner` or `python3 -m permasigner`
 * Install the newly created deb file on your iDevice
-   * Airdropping the file is probably the easiest.
+    * Airdropping the file is probably the easiest.
 * Reboot to stock, the app will still work!
 
 ## Run from Source
 
 * Open Terminal from the Utilities folder or spotlight.
-   * If you use a third-party terminal, it'll most likely work too.
+    * If you use a third-party terminal, it'll most likely work too.
 * Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
-   * If this fails, install git with Xcode dev tools on macOS.
+    * If this fails, install git with Xcode dev tools on macOS.
 * Install dpkg using [brew](https://brew.sh) with `brew install dpkg`
-* Run the script with `python -m permasigner` or `python3 -m permasigner`
-   * If this fails, install python3 using brew with `brew install python3`.
 
 {% hint style="info" %}
 If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.
+
+When running the script, you will notice the a `one of the arguments is required` error. You'll need to append the IPA to sign as an argument, like `-u https://example.com/app.ipa`, or `-p /Users/nebula/Downloads/app.ipa`, for example.
+
+You may also pass the `-i` argument to install the created deb on your connected device file automagically :)
 {% endhint %}
 
 * Run the script with `python main.py` or `python3 main.py`
 * Install the newly created deb file on your iDevice
-   * Airdropping the file is probably the easiest.
+    * Airdropping the file is probably the easiest.
 * Reboot to stock, the app will still work!
