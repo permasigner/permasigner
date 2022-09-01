@@ -35,7 +35,6 @@ options:
                         path to entitlements file
   -z, --no-ldid-check   disable ldid hash checking
   -v, --version         show current version and exit
-  -P, --skip-package    skip packaging to a deb, output a .app instead
 ```
 
 ## Docker Options
@@ -56,5 +55,4 @@ TCPRELAY       optional args for tcprelay (ex: 22:2222:localhost:/var/run/usbmux
 ENTITLEMENTS   path to entitlements file
 NO_LDID_CHECK  disable ldid hash checking
 VERSION        show current version and exit
-SKIP_PACKAGE   skip packaging to a deb, output a .app instead
 ```

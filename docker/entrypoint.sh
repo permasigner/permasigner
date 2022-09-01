@@ -58,10 +58,6 @@ if [ ! -z "$VERSION" ]; then
     ARGS="$ARGS -v"
 fi
 
-if [ ! -z "$SKIP_PACKAGE" ]; then
-    ARGS="$ARGS -P"
-fi
-
 export PS_VERSION=$(cat .version)
 
 echo "Running Permasigner with args:$ARGS"
