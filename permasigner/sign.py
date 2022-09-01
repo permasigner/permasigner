@@ -176,7 +176,7 @@ class Signer:
         code, output = subprocess.getstatusoutput(f"{ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword {self.bundle_path}")
 
         if code != 0:
-            logger.error(output)
+            logger.error(f'Failed to sign the bundle: {output}')
             exit(1)
 
         # Check if entitlements arg was passed

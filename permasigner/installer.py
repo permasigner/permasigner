@@ -184,7 +184,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
         else:
             # Install with dpkg by invoking su as root user
             logger.debug(f"Running command: su root -c 'dpkg -i /var/mobile/Documents/{filename}", args.debug)
-            stdin, stdout, stderr = client.exec_command(f"su root -c 'dpkg -i /var/mobile/Documents/{filename}", get_pty=True)
+            stdin, stdout, stderr = client.exec_command(f"su root -c 'dpkg -i /var/mobile/Documents/{filename}'", get_pty=True)
 
             # Read output from the channel
             output = stdout.channel.recv(2048)
@@ -226,7 +226,7 @@ def install_from_pc(path: Path, args: Namespace) -> bool:
                 # Needed on elucuratus
                 # to prevent half-installed state
                 logger.debug(f"Running command: sudo apt-get install -f", args.debug)
-                stdin, stdout, stderr = client.exec_command('sudo apt-get install -f')[1]
+                stdin, stdout, stderr = client.exec_command('sudo apt-get install -f')
 
                 # Block until we can read the output from stdout
                 output = stdout.read().decode()
