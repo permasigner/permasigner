@@ -46,6 +46,8 @@ def main(argv=None, in_package=None) -> None:
                         help="disable ldid hash checking")
     parser.add_argument('-v', '--version', action='version', version=f'Permasigner v{utils.get_version()}',
                         help='show current version and exit')
+    parser.add_argument('-P', '--skip-package', action='store_true',
+                        help="skip packaging to a deb, output a .app instead")
     args = parser.parse_args()
 
     ps = permasigner.Permasigner(in_package, args)

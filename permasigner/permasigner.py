@@ -49,11 +49,12 @@ class Permasigner:
         else:
             logger.debug("ldid not found in PATH, we will download it later if needed", self.args.debug)
 
-        self.dpkg = utils.cmd_in_path('dpkg-deb')
-        if self.dpkg:
-            logger.debug("dpkg-deb found!", self.args.debug)
-        else:
-            logger.debug("dpkg-deb not found in PATH, we will use constrictor instead", self.args.debug)
+        if not self.args.skip_package:
+            self.dpkg = utils.cmd_in_path('dpkg-deb')
+            if self.dpkg:
+                logger.debug("dpkg-deb found!", self.args.debug)
+            else:
+                logger.debug("dpkg-deb not found in PATH, we will use constrictor instead", self.args.debug)
 
         # Determine path to data directory
         # then, create dir if it doesn't exist
@@ -95,7 +96,7 @@ class Permasigner:
             if not self.args.folder:
                 out_dir = self.permasign()
 
-                if self.args.install:
+                if self.args.install and not self.args.skip_package:
                     if utils.is_ios():
                         self.is_installed = install_on_ios(out_dir, self.args)
                     else:
@@ -144,17 +145,18 @@ class Permasigner:
         (self.tmp / 'deb/Applications').mkdir(parents=True)
         (self.tmp / 'deb/DEBIAN').mkdir(parents=True)
 
-        # Copy control file and scripts into DEBIAN directory
-        print("Copying control file and maintainer scripts...")
         copier = Copier(bundle, self.in_package)
-        copier.copy_postinst(self.tmp / "deb/DEBIAN/postinst")
-        copier.copy_control(self.tmp / "deb/DEBIAN/control")
-        copier.copy_prerm(self.tmp / "deb/DEBIAN/prerm")
+        if not self.args.skip_package:
+            # Copy control file and scripts into DEBIAN directory
+            print("Copying control file and maintainer scripts...")
+            copier.copy_postinst(self.tmp / "deb/DEBIAN/postinst")
+            copier.copy_control(self.tmp / "deb/DEBIAN/control")
+            copier.copy_prerm(self.tmp / "deb/DEBIAN/prerm")
 
-        # Set chmod 755 on prerm and postinst scripts
-        print("Changing deb file scripts permissions...")
-        utils.make_executable(self.tmp / "deb/DEBIAN/prerm")
-        utils.make_executable(self.tmp / "deb/DEBIAN/postinst")
+            # Set chmod 755 on prerm and postinst scripts
+            print("Changing deb file scripts permissions...")
+            utils.make_executable(self.tmp / "deb/DEBIAN/prerm")
+            utils.make_executable(self.tmp / "deb/DEBIAN/postinst")
 
         # Copy entitlements to temporary directory
         copier.copy_entitlements(self.tmp / "entitlements.plist")
@@ -187,9 +189,13 @@ class Permasigner:
             signer.sign_with_ldid(self.ldid)
 
         # Package the deb file
-        logger.log("Packaging the deb file...", color=colors["yellow"])
-        dpkg = Dpkg(bundle, executables, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args.debug)
-        return dpkg.package()
+        if self.args.skip_package:
+            copytree(full_app_path, self.output_dir / f"{bundle_path.name}")
+            return self.output_dir / f"{bundle_path.name}"
+        else:
+            logger.log("Packaging the deb file...", color=colors["yellow"])
+            dpkg = Dpkg(bundle, executables, self.tmp, self.output_dir, self.dpkg, self.in_package, self.args.debug)
+            return dpkg.package()
 
     def check_path_arguments(self) -> None:
         path = self.args.path.strip('"').strip("'").strip()
