@@ -35,7 +35,7 @@ colors = {
 
 def log(message, color=None):
     if color is None:
-        print(colors["bold"] + f"{message}" + colors["reset"])
+        print(f"{message}")
     else:
         print("\n" + color + colors["bold"] + "[*] " + colors["reset"] + color + f"{message}" + colors["reset"])
 

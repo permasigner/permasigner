@@ -23,15 +23,15 @@ class DPKGBuilder(object):
     Finds files to use, builds tar archive and then archives into ar format. Builds + includes debian control files.
     """
 
-    def __init__(self, output_directory, bundle, data_dirs, control, scripts):
+    def __init__(self, output_directory, executables, data_dirs, control, scripts):
         self.output_directory = Path(output_directory).expanduser()
-        self.bundle = bundle
         self.data_dirs = data_dirs or []
         self.control = control
         self.maintainer_scripts = scripts
+        self.executables = executables
         self.seen_data_dirs = set()
+        self.seen_executables = set()
         self.working_dir = None
-        self.executable_path = ''
 
     @staticmethod
     def path_matches_glob_list(glob_list, path):
@@ -79,31 +79,17 @@ class DPKGBuilder(object):
 
             self.seen_data_dirs.add(directory)
 
-    def filter_tar_info(self, tar_info, dir_conf):
-        if self.executable_path == '':
-            app_name = self.bundle['name'].replace(' ', '')
-            destination = dir_conf['destination']
-            executable = dir_conf['executable']
-            executable_path = f'.{destination}/{app_name}.app/{executable}'
-
-            if tar_info.name == executable_path:
-                tar_info.mode = TAR_DEFAULT_MODE
-                tar_info.uname = 'root'
-                tar_info.gname = 'wheel'
-                self.executable_path = executable_path
+    def filter_tar_info(self, tar_info):
+        if tar_info.name in self.executables:
+            tar_info.mode = TAR_DEFAULT_MODE
+            tar_info.uname = 'root'
+            tar_info.gname = 'wheel'
 
         return tar_info
 
     @property
     def data_archive_path(self):
         return self.working_dir / 'data.tar.xz'
-
-    @property
-    def default_output_name(self):
-        name = self.bundle['name'].replace(' ', '')
-        version = self.bundle['version']
-
-        return f"{name}_{version}.deb"
 
     @staticmethod
     def open_tar_file(path):
@@ -126,7 +112,7 @@ class DPKGBuilder(object):
                 self.add_directory_root_to_archive(data_tar_file, archive_path)
 
                 data_tar_file.add(source_file_path, arcname=archive_path, recursive=False,
-                                  filter=lambda ti: self.filter_tar_info(ti, dir_conf))
+                                  filter=lambda ti: self.filter_tar_info(ti))
 
         data_tar_file.close()
 
@@ -160,12 +146,10 @@ class DPKGBuilder(object):
         control_tar.close()
 
     def assemble_deb_archive(self, control_archive_path, data_archive_path):
-        if not self.output_directory.exists():
-            self.output_directory.mkdir()
+        if not self.output_directory.parent.exists():
+            self.output_directory.parent.mkdir()
 
-        pkg_path = self.output_directory / f"{self.default_output_name}"
-
-        with open(pkg_path, 'wb') as ar_fp:
+        with open(self.output_directory, 'wb') as ar_fp:
             ar_writer = ARWriter(ar_fp)
 
             ar_writer.archive_text("debian-binary", f"{DEBIAN_BINARY_VERSION}\n", int(time.time()), 0, 0,
@@ -173,12 +157,9 @@ class DPKGBuilder(object):
             ar_writer.archive_file(control_archive_path, int(time.time()), 0, 0, AR_DEFAULT_MODE)
             ar_writer.archive_file(data_archive_path, int(time.time()), 0, 0, AR_DEFAULT_MODE)
 
-        return pkg_path
-
     def build_package(self):
         with tempfile.TemporaryDirectory() as tmpfolder:
             self.working_dir = Path(tmpfolder)
             self.build_data_archive()
             self.build_control_archive(self.maintainer_scripts)
-
-            return self.assemble_deb_archive(self.control_archive_path, self.data_archive_path)
+            self.assemble_deb_archive(self.control_archive_path, self.data_archive_path)
