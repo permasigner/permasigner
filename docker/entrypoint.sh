@@ -50,12 +50,16 @@ if [ ! -z "$ENTITLEMENTS" ]; then
     ARGS="$ARGS -e $ENTITLEMENTS"
 fi
 
-if [ ! -z "$NOLDIDCHECK" ]; then
+if [ ! -z "$NO_LDID_CHECK" ]; then
     ARGS="$ARGS -z"
 fi
 
 if [ ! -z "$VERSION" ]; then
-    ARGS="$ARGS -V"
+    ARGS="$ARGS -v"
+fi
+
+if [ ! -z "$SKIP_PACKAGE" ]; then
+    ARGS="$ARGS -P"
 fi
 
 export PS_VERSION=$(cat .version)

@@ -7,29 +7,35 @@ description: Flags you can pass through to change options.
 ## Command Arguments
 
 ```
-usage: main.py [-h] [-d] [-c] [-u URL] [-p PATH] [-i] [-n] [-o OUTPUT] [-b BUNDLEID] [-N NAME] [-m MINVER] [-v] [-l LDIDFORK]
-               [-f FOLDER] [-e ENTITLEMENTS]
+usage: [-h] (-f FOLDER | -u URL | -p PATH) [-d] [-c] [-i] [-o OUTPUT] [-b BUNDLEID] [-n NAME] [-a AUTHOR] [-m MINVER] [-l LDIDFORK] [-t TCPRELAY] [-e ENTITLEMENTS] [-z] [-v] [-P]
 
 options:
-  -h, --help            show help message and exit
-  -d, --debug           shows some debug info, only useful for testing
-  -c, --codesign        uses codesign instead of ldid
+  -h, --help            show this help message and exit
+  -f FOLDER, --folder FOLDER
+                        sign multiple IPAs from a direct path to a folder
   -u URL, --url URL     the direct URL of the IPA to be signed
   -p PATH, --path PATH  the direct local path of the IPA to be signed
+  -d, --debug           shows some debug info, only useful for testing
+  -c, --codesign        uses codesign instead of ldid
   -i, --install         installs the application to your device
-  -n, --noinstall       skips the install prompt
   -o OUTPUT, --output OUTPUT
-                        specify output file
+                        specify output path
   -b BUNDLEID, --bundleid BUNDLEID
                         specify new bundle id
-  -N NAME, --name NAME  specify new app name
+  -n NAME, --name NAME  specify new app name
+  -a AUTHOR, --author AUTHOR
+                        specify new app author
   -m MINVER, --minver MINVER
                         specify new minimum app version (14.0 recommended)
-  -v, --version         show current version and exit
   -l LDIDFORK, --ldidfork LDIDFORK
                         specify a fork of ldid (eg. ProcursusTeam, permasigner [default])
+  -t TCPRELAY, --tcprelay TCPRELAY
+                        optional args for tcprelay (ex: 22:2222:localhost:/var/run/usbmuxd)
   -e ENTITLEMENTS, --entitlements ENTITLEMENTS
                         path to entitlements file
+  -z, --no-ldid-check   disable ldid hash checking
+  -v, --version         show current version and exit
+  -P, --skip-package    skip packaging to a deb, output a .app instead
 ```
 
 ## Docker Options
@@ -39,11 +45,16 @@ Use `-e ARGUMENTNAME="VALUE"` for strings, use `-e ARGUMENTNAME=1` to enable a f
 ### Currently supported arguments
 
 ```
-DEBUG     shows some debug info, only useful for testing
-URL       the direct URL of the IPA to be signed
-BUNDLEID  specify new bundle id
-NAME      specify new app name
-MINVER    specify new minimum app version (14.0 recommended)
-LDIDFORK  specify a fork of ldid (eg. ProcursusTeam, permasigner [default])
-FOLDER    sign multiple IPAs from a direct path to a folder ("ipas" recommended)
+DEBUG          shows some debug info, only useful for testing
+URL            the direct URL of the IPA to be signed
+BUNDLEID       specify new bundle id
+NAME           specify new app name
+MINVER         specify new minimum app version (14.0 recommended)
+LDIDFORK       specify a fork of ldid (eg. ProcursusTeam, permasigner [default])
+FOLDER         sign multiple IPAs from a direct path to a folder ("ipas" recommended)
+TCPRELAY       optional args for tcprelay (ex: 22:2222:localhost:/var/run/usbmuxd)
+ENTITLEMENTS   path to entitlements file
+NO_LDID_CHECK  disable ldid hash checking
+VERSION        show current version and exit
+SKIP_PACKAGE   skip packaging to a deb, output a .app instead
 ```
