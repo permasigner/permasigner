@@ -48,7 +48,7 @@ class Permasigner:
             logger.debug("ldid found!", self.args.debug)
         else:
             logger.debug("ldid not found in PATH, we will download it later if needed", self.args.debug)
-    
+
         self.dpkg = utils.cmd_in_path('dpkg-deb')
         if self.dpkg:
             logger.debug("dpkg-deb found!", self.args.debug)
