@@ -173,7 +173,11 @@ class Signer:
             f"Running command: {ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword '{self.bundle_path}'",
             self.args.debug)
 
-        subprocess.getstatusoutput(f"{ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword {self.bundle_path}")
+        code, output = subprocess.getstatusoutput(f"{ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword {self.bundle_path}")
+
+        if code != 0:
+            logger.error(output)
+            exit(1)
 
         # Check if entitlements arg was passed
         # then, resign and merge the entitlements
