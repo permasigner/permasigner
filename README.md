@@ -73,6 +73,10 @@ Plus, big thanks to all of the contributors that made this project possible.
 
 <a href="https://github.com/permasigner/permasigner/graphs/contributors"><img src="https://contributors-img.web.app/image?repo=permasigner/permasigner" /></a>
 
+# License
+
+Permasigner is licensed under the BSD-3-Clause license, and can be found [here](https://github.com/permasigner/permasigner/blob/main/LICENSE).
+
 # Other Stuff
 
 -   [Reddit Post](https://www.reddit.com/r/jailbreak/comments/vqnazh/free_release_permasigner_generate_a_permasigned)
