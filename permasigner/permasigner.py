@@ -44,13 +44,13 @@ class Permasigner:
         # Check for dependencies
         logger.log("Checking for dependencies...", color=colors["yellow"])
         self.ldid = utils.cmd_in_path('ldid')
-        if self.ldid is not None:
+        if self.ldid:
             logger.debug("ldid found!", self.args.debug)
         else:
             logger.debug("ldid not found in PATH, we will download it later if needed", self.args.debug)
 
         self.dpkg = utils.cmd_in_path('dpkg-deb')
-        if self.ldid:
+        if self.dpkg:
             logger.debug("dpkg-deb found!", self.args.debug)
         else:
             logger.debug("dpkg-deb not found in PATH, we will use constrictor instead", self.args.debug)
