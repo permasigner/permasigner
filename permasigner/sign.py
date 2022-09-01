@@ -161,7 +161,7 @@ class Signer:
         self.args = args
 
     def sign_with_ldid(self, ldid: str) -> None:
-        """ Determine path to ldid and use it to sign the bundle """
+        """ Sign the bundle with ldid """
 
         if ldid:
             ldid_cmd = ldid
@@ -173,14 +173,7 @@ class Signer:
             f"Running command: {ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword '{self.bundle_path}'",
             self.args.debug)
 
-        subprocess.run([
-            f"{ldid_cmd}",
-            f"-S{self.tmp / 'entitlements.plist'}",
-            "-M",
-            f"-K{self.cert}",
-            "-Upassword",
-            f"{self.bundle_path}"],
-            stdout=subprocess.DEVNULL)
+        subprocess.getstatusoutput(f"{ldid_cmd} -S{self.tmp / 'entitlements.plist'} -M -K{self.cert} -Upassword {self.bundle_path}")
 
         # Check if entitlements arg was passed
         # then, resign and merge the entitlements
