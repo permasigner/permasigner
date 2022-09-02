@@ -201,13 +201,14 @@ def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> P
     # then, return it's value as a Path
     if output_arg:
         return Path(output_arg)
+    # Check if running in a git repository
+    # or a tarball then, return path in current dir
+    elif not in_package or Path('.git').exists():
+        return Path.cwd() / "output"
     # Check if running from a package
     # then, return path to output dir in data dir
     elif in_package:
         return data_dir / "output"
-    # Return path to output dir in cwd
-    else:
-        return Path.cwd() / "output"
 
 
 def resource_path(package: str, resource: str):
