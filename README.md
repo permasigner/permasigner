@@ -35,16 +35,13 @@ In iOS 14.0-14.8.1, there is a bug where CoreTrust will allow any root certifica
 
 This script makes a deb file for you based on an IPA. Tested only with Taurine, but should work with many others.
 
-Based on the [resign_taurine branch of CoreTrustDemo](https://github.com/zhuowei/CoreTrustDemo/tree/resign_taurine), please note that certificates are not copyrightable.
-
 # Prerequsites
 
 1. A computer or jailbroken iDevice with Procursus
-    - Mac OS X 10.5.0 (?) or later required.
-    - (Basically) any Linux distro is supported.
-    - A jailbroken iDevice using the Procursus bootstrap is supported.
+    - You can run permasigner on Mac OS X 10.5.0 or later, a Linux machine, a jailbroken iDevice, a Windows PC, or even just a web browser.
 2. Jailbroken "target" iDevice on 14.0-14.8.1
     - The device needs to be jailbroken at first to place the app in the /Applications folder. After installing it'll continue working on stock.
+        - On 15.0-15.1.1, you can use [TrollStore](https://github.com/opa334/TrollStore) to permasign apps jailed.
 
 # Tutorials
 
