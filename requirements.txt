@@ -4,7 +4,7 @@ urllib3==1.26.12
 pycodestyle==2.9.1
 idna==3.3
 charset-normalizer==2.1.1
-certifi==2022.6.15
+certifi==2022.6.15.1
 autopep8==1.7.0
 
 # Packages only required for desktop
