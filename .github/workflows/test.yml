@@ -86,6 +86,9 @@ jobs:
 
       - name: Display Python version
         run: python3 -c "import sys; print(sys.version)"
+       
+      - name: Export path
+        run: echo "/Users/runner/.local/bin:$PATH" >> $GITHUB_PATH
 
       - name: Install poetry and dependencies
         run: |
@@ -124,7 +127,8 @@ jobs:
       - name: Install poetry and dependencies
         shell: pwsh
         run: |
-          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | POETRY_VERSION=1.2.0 python -
+          Set-Variable -Name "POETRY_VERSION" -Value "1.2.0"
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
           poetry install --without dev
 
       - name: Run script

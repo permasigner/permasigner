@@ -2,17 +2,8 @@ import subprocess
 from argparse import Namespace
 from subprocess import PIPE
 from pathlib import Path
-from . import logger, utils
+from . import logger
 from .logger import colors
-
-if not utils.is_ios():
-    import time
-    from getpass import getpass
-    from threading import Thread
-    from paramiko.client import AutoAddPolicy, SSHClient
-    from paramiko.ssh_exception import AuthenticationException, SSHException
-    from scp import SCPClient
-    from . import tcprelay
 
 
 def install_on_ios(output_path: Path, debug: bool) -> bool:
@@ -61,6 +52,21 @@ def install_with_su_on_ios(output_path: Path, debug: bool) -> bool:
 
 
 def install_from_pc(path: Path, args: Namespace) -> bool:
+
+    try:
+        from paramiko.client import AutoAddPolicy, SSHClient
+        from paramiko.ssh_exception import AuthenticationException, SSHException
+        from scp import SCPClient
+        import time
+        from getpass import getpass
+        from threading import Thread
+        from . import tcprelay
+    except ModuleNotFoundError:
+        logger.error('Installer dependencies are missing. Install them with:')
+        logger.error("pip install 'permasigner[installer]' if using pip")
+        logger.error("poetry install --all-extras if using poetry")
+        exit(1)
+
     # Set tcprelay arguments based on whether the flag was passed or not
     if args.tcprelay:
         split = args.tcprelay.split(':')
