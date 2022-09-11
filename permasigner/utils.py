@@ -1,6 +1,6 @@
 import plistlib
 import shutil
-import subprocess
+import subprocess as sp
 import sys
 import platform
 import os
@@ -10,7 +10,8 @@ from importlib import util
 from pathlib import PurePath, Path
 from typing import Union
 
-from .__version__ import __version__
+import pkg_resources
+
 from . import logger
 
 
@@ -81,7 +82,7 @@ def cmd_in_path(cmd: str) -> Union[None, str]:
 
     # Check if ldid is from procursus
     if cmd == "ldid":
-        if "procursus" in subprocess.getoutput(path):
+        if "procursus" in sp.getoutput(path):
             return path
         return None
 
@@ -183,17 +184,12 @@ def get_certificate_path(in_package: bool) -> Path:
 
 
 def get_version() -> str:
-    version = __version__
     # Check if running from a git repository,
     # then, construct version in the following format: version-branch-hash
-    if Path('.git').resolve().exists():
-        git = cmd_in_path("git")
-        if git is not None:
-            return f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
-    elif os.environ.get("IS_DOCKER_CONTAINER", False):
-        return __version__ + '_' + os.environ.get("PS_VERSION")
+    if Path('.git').exists():
+        return f"{sp.getoutput('git describe --tags --abbrev=0')}_{sp.getoutput('git rev-parse --abbrev-ref HEAD')}_{sp.getoutput('git rev-parse --short HEAD')}"
     else:
-        return version
+        return pkg_resources.get_distribution(__package__).version
 
 
 def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> Path:
