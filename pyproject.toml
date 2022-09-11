@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "permasigner"
+version = "1.1.3"
+description = "Permanently signs IPAs on jailbroken iDevices (persists on stock)."
+authors = ["Nebula <me@itsnebula.net>"]
+license = "BSD-3-Clause"
+readme = "README.md"
+repository = "https://github.com/permasigner/permasigner"
+documentation = "https://permasigner.itsnebula.net/"
+keywords = ["python", "windows", "macos", "linux", "docker", "cli", "open-source", "ios", "command-line-app", "cli-app", "hacktoberfest", "procursus", "permasign", "permasigner"]
+classifiers = [
+    "Natural Language :: English",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+importlib-metadata = { version = "^1.0", python = "<3.8" }
+requests = "2.28.1"
+toml = "0.10.2"
+urllib3 = "1.26.12"
+pycodestyle = "2.9.1"
+idna = "3.3"
+charset-normalizer = "2.1.1"
+certifi = "2022.6.15.1"
+
+scp = { version = "0.14.4", optional = true }
+six = { version = "1.16.0", optional = true }
+bcrypt = { version = "4.0.0", optional = true }
+cffi = { version = "1.15.1", optional = true }
+cryptography = { version = "38.0.1", optional = true }
+paramiko = { version = "2.11.0", optional = true }
+pycparser = { version = "2.21", optional = true }
+pynacl = { version = "1.5.0", optional = true }
+
+[tool.poetry.group.dev.dependencies]
+autopep8 = "1.7.0"
+
+[tool.poetry.extras]
+installer = ["scp", "six", "bcrypt", "cffi", "cryptography", "paramiko", "pycparser", "pynacl"]
+
+[tool.poetry.scripts]
+permasigner = 'permasigner.__main__:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
