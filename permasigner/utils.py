@@ -5,12 +5,11 @@ import sys
 import platform
 import os
 import importlib
-from argparse import Namespace
-from importlib import util
-from pathlib import PurePath, Path
-from typing import Union
-
 import pkg_resources
+from argparse import Namespace
+from importlib import resources
+from pathlib import Path
+from typing import Union
 
 from . import logger
 
@@ -89,7 +88,7 @@ def cmd_in_path(cmd: str) -> Union[None, str]:
     return path
 
 
-def get_data_directory() -> Path:
+def get_storage_dir() -> Path:
     """ Get path to data directory"""
 
     # Get the value of PERMASIGNER_HOME variable and if it's exported use it as data directory
@@ -178,7 +177,8 @@ def get_certificate_path(in_package: bool) -> Path:
     # then, get path to certificate resource
     # otherwise, get path of a ceritificate in working dir
     if in_package:
-        return resource_path(__name__, "data/certificate.p12")
+        data_dir = importlib.resources.path(__package__, 'data')
+        return Path(data_dir) / "certificate.p12"
     else:
         return Path.cwd() / "permasigner/data/certificate.p12"
 
@@ -205,21 +205,3 @@ def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> P
     # then, return path to output dir in data dir
     elif in_package:
         return data_dir / "output"
-
-
-def resource_path(package: str, resource: str):
-    # Get path to resource in the package
-    spec = importlib.util.find_spec(package)
-    if spec is None:
-        return None
-    loader = spec.loader
-    if loader is None or not hasattr(loader, 'get_data'):
-        return None
-    mod = (sys.modules.get(package) or
-           importlib._bootstrap._load(spec))
-    if mod is None or not hasattr(mod, '__file__'):
-        return None
-
-    parts = resource.split('/')
-    parts.insert(0, PurePath(mod.__file__).parent)
-    return PurePath(*parts)
