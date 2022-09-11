@@ -1,20 +1,6 @@
 name: Build and publish Docker image
 
 on:
-  #push:
-  #  paths-ignore:
-  #    - 'README.md'
-  #    - 'book.json'
-  #    - '.gitignore'
-  #    - '.pep8'
-  #    - 'Dockerfile.development'
-  #    - '.devcontainer/**'
-  #    - '.vscode/**'
-  #    - '.github/**'
-  #    - '!.github/workflows/docker.yml'
-  #    - 'docs/**'
-  #  branches:
-  #    - "main"
   push:
     paths-ignore:
       - "*"

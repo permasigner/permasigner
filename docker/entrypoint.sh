@@ -58,8 +58,6 @@ if [ ! -z "$VERSION" ]; then
     ARGS="$ARGS -v"
 fi
 
-export PS_VERSION=$(cat .version)
-
 echo "Running Permasigner with args:$ARGS"
 echo ""
-python3 -u main.py $ARGS
+poetry run permasigner $ARGS
