@@ -67,7 +67,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install -n --without dev,root
+        run: poetry install --no-interaction --without dev --no-root
 
       - name: Run script
         run: poetry run permasigner -u https://github.com/Odyssey-Team/Taurine/releases/download/1.1.6/Taurine-1.1.6.ipa -d
@@ -75,6 +75,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: TaurineTest-linux-Python${{ matrix.python-version }}.deb
+          name: Taurine-1.1.6-${{ matrix.os }}-p${{ matrix.python-version }}.deb
           path: output/**
 
