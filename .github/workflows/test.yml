@@ -18,6 +18,8 @@ on:
       - 'poetry.lock'
     branches:
       - "main"
+
+  workflow_dispatch:
       
 jobs:
   run:
