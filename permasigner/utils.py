@@ -177,8 +177,8 @@ def get_certificate_path(in_package: bool) -> Path:
     # then, get path to certificate resource
     # otherwise, get path of a ceritificate in working dir
     if in_package:
-        data_dir = importlib.resources.path(__package__, 'data')
-        return Path(data_dir) / "certificate.p12"
+        with importlib.resources.path(__package__, 'data') as p:
+            return Path(p) / "certificate.p12"
     else:
         return Path.cwd() / "permasigner/data/certificate.p12"
 
