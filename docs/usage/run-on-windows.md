@@ -5,7 +5,7 @@ description: Run Permasigner on Windows natively, with WSL, or with Docker.
 ## Run from Package (Recommended)
 
 * Open a Powershell window from the start menu
-* Install the package with `python -m pip install permasigner`
+* Install the package with `python -m pip install -U permasigner`
     * If this fails, install the latest Python 3 version from [here](https://python.org).
 
 {% hint style="info" %}
@@ -24,8 +24,7 @@ You may also pass the `-i` argument to install the created deb on your connected
 ## Run from Source
 
 * Open a Powershell window from the start menu
-* Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
-    * If this fails, install git for Windows from [here](https://git-scm.com/download/win).
+* Install permasigner with `pip install -U git+https://github.com/permasigner/permasigner`
 
 {% hint style="info" %}
 If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.

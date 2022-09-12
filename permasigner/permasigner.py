@@ -57,7 +57,7 @@ class Permasigner:
 
         # Determine path to data directory
         # then, create dir if it doesn't exist
-        self.data_dir = utils.get_data_directory()
+        self.data_dir = utils.get_storage_dir()
         Path(self.data_dir).mkdir(exist_ok=True, parents=True)
 
         # Determine path to output directory

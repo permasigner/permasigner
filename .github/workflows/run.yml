@@ -10,31 +10,38 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the latest code from the repo
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Setup which version of Python to use
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      # Install dependencies
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+          
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          
       - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --without dev --no-root
 
-      # Run script
       - name: Run script
-        run: python3 main.py -u ${{ github.event.inputs.ipa }} -d
+        run: poetry run permasigner -u ${{ github.event.inputs.ipa }} -d
 
-      # Upload test artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: App.deb
-          path: output/*
+          path: output/**

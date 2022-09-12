@@ -1,16 +1,16 @@
 import plistlib
 import shutil
-import subprocess
+import subprocess as sp
 import sys
 import platform
 import os
 import importlib
+import pkg_resources
 from argparse import Namespace
-from importlib import util
-from pathlib import PurePath, Path
+from importlib import resources
+from pathlib import Path
 from typing import Union
 
-from .__version__ import __version__
 from . import logger
 
 
@@ -81,14 +81,14 @@ def cmd_in_path(cmd: str) -> Union[None, str]:
 
     # Check if ldid is from procursus
     if cmd == "ldid":
-        if "procursus" in subprocess.getoutput(path):
+        if "procursus" in sp.getoutput(path):
             return path
         return None
 
     return path
 
 
-def get_data_directory() -> Path:
+def get_storage_dir() -> Path:
     """ Get path to data directory"""
 
     # Get the value of PERMASIGNER_HOME variable and if it's exported use it as data directory
@@ -177,23 +177,18 @@ def get_certificate_path(in_package: bool) -> Path:
     # then, get path to certificate resource
     # otherwise, get path of a ceritificate in working dir
     if in_package:
-        return resource_path(__name__, "data/certificate.p12")
+        return get_resources_dir(__package__) / "certificate.p12"
     else:
         return Path.cwd() / "permasigner/data/certificate.p12"
 
 
 def get_version() -> str:
-    version = __version__
     # Check if running from a git repository,
     # then, construct version in the following format: version-branch-hash
-    if Path('.git').resolve().exists():
-        git = cmd_in_path("git")
-        if git is not None:
-            return f"{version}_{subprocess.check_output([f'{git}', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()}_{subprocess.check_output([f'{git}', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()}"
-    elif os.environ.get("IS_DOCKER_CONTAINER", False):
-        return __version__ + '_' + os.environ.get("PS_VERSION")
+    if Path('.git').exists():
+        return f"{sp.getoutput('git rev-parse --abbrev-ref HEAD')}_{sp.getoutput('git rev-parse --short HEAD')}"
     else:
-        return version
+        return pkg_resources.get_distribution(__package__).version
 
 
 def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> Path:
@@ -211,19 +206,11 @@ def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> P
         return data_dir / "output"
 
 
-def resource_path(package: str, resource: str):
-    # Get path to resource in the package
-    spec = importlib.util.find_spec(package)
-    if spec is None:
-        return None
-    loader = spec.loader
-    if loader is None or not hasattr(loader, 'get_data'):
-        return None
-    mod = (sys.modules.get(package) or
-           importlib._bootstrap._load(spec))
-    if mod is None or not hasattr(mod, '__file__'):
-        return None
+def get_resources_dir(package: str) -> Path:
+    if sys.version_info < (3, 9):
+        with importlib.resources.path(package, '__init__.py') as r:
+            res = r.parent
+    else:
+        res = importlib.resources.files(package)
 
-    parts = resource.split('/')
-    parts.insert(0, PurePath(mod.__file__).parent)
-    return PurePath(*parts)
+    return res / "data"
