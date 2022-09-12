@@ -47,6 +47,7 @@ COPY poetry.lock pyproject.toml ./
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
 RUN poetry install --all-extras --without dev
 
+### 2ND STAGE BUILD ###
 
 FROM base as main
 

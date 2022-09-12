@@ -7,7 +7,7 @@ description: Run Permasigner on macOS.
 * Open Terminal from the Utilities folder or spotlight.
    * If you use a third-party terminal, it'll most likely work too.
 * Install dpkg using [brew](https://brew.sh) with `brew install dpkg`
-* Install all requirements with `pip install permasigner` or `pip3 install permasigner`
+* Install all requirements with `pip install -U permasigner` or `pip3 install -U permasigner`
     * If this fails, install python3 using brew with `brew install python3`.
 
 {% hint style="info" %}
@@ -27,8 +27,7 @@ You may also pass the `-i` argument to install the created deb on your connected
 
 * Open Terminal from the Utilities folder or spotlight.
     * If you use a third-party terminal, it'll most likely work too.
-* Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
-    * If this fails, install git with Xcode dev tools on macOS.
+* Install permasigner with `pip install -U git+https://github.com/permasigner/permasigner`
 * Install dpkg using [brew](https://brew.sh) with `brew install dpkg`
 
 {% hint style="info" %}

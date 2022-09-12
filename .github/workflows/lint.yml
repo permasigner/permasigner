@@ -6,8 +6,7 @@ on:
       - '.github/workflows/lint.yml'
       - 'main.py'
       - 'permasigner/**'
-    branches:
-      - "main"
+    branches: [main]
 
   workflow_dispatch:
 

@@ -9,7 +9,7 @@ If asked, the default root password is `alpine`.
 ## Run from Package
 
 * Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
-* Install permasigner with `python3 -m pip install permasigner`
+* Install permasigner with `python3 -m pip install -U permasigner`
     * If this fails, install python3 with `su root -c apt install python3` and install pip with `python3 -m ensurepip`.
 
 {% hint style="info" %}
@@ -42,8 +42,7 @@ This will only work on Procursus jailbreaks for now.
 ## Run from Source
 
 * Install NewTerm 2 from [Chariz](https://repo.chariz.com) using your favorite package manager
-* Clone this repository with `git clone https://github.com/permasigner/permasigner && cd permasigner`
-    * If this fails, install git with `su root -c apt install git`.
+* Install permasigner with `pip install -U git+https://github.com/permasigner/permasigner`
 
 {% hint style="info" %}
 If you have extra entitlements, append the `-e` flag when running the script. If you don't know what this means, you can ignore this.

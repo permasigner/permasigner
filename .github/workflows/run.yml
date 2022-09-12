@@ -10,13 +10,10 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the latest code from the repo
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Setup which version of Python to use
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:

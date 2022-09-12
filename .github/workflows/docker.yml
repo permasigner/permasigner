@@ -4,8 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/docker.yml'
-    branches:
-      - "main"
+    branches: [main]
 
   workflow_run:
     workflows: ["Test script"]
