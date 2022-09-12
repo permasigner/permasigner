@@ -186,7 +186,7 @@ def get_version() -> str:
     # Check if running from a git repository,
     # then, construct version in the following format: version-branch-hash
     if Path('.git').exists():
-        return f"{sp.getoutput('git describe --tags --abbrev=0')}_{sp.getoutput('git rev-parse --abbrev-ref HEAD')}_{sp.getoutput('git rev-parse --short HEAD')}"
+        return f"{sp.getoutput('git rev-parse --abbrev-ref HEAD')}_{sp.getoutput('git rev-parse --short HEAD')}"
     else:
         return pkg_resources.get_distribution(__package__).version
 
