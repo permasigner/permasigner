@@ -209,7 +209,8 @@ def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> P
 
 def get_resources_dir(package: str) -> Path:
     if sys.version_info < (3, 9):
-        res = importlib.resources.path(package, '__init__.py')
+        with importlib.resources.path(package, '__init__.py') as r:
+            res = r
     else:
         res = importlib.resources.files(package)
 
