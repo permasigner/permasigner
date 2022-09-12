@@ -2,13 +2,10 @@ name: Build and publish Docker image
 
 on:
   push:
-    paths-ignore:
-      - "*"
-      - '!.github/workflows/docker.yml'
+    paths:
+      - '.github/workflows/docker.yml'
     branches:
       - "main"
-
-  workflow_dispatch:
 
   workflow_run:
     workflows: ["Test script"]
