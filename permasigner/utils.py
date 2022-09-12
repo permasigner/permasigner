@@ -209,9 +209,10 @@ def get_output_directory(data_dir: Path, in_package: bool, output_arg: str) -> P
 
 def get_resources_dir(package: str) -> Path:
     if sys.version_info < (3, 9):
+        print('python version is less than 3.9')
         with importlib.resources.path(package, '__init__.py') as r:
-            res = r
+            res = r.parent
     else:
         res = importlib.resources.files(package)
 
-    return Path(res) / "data"
+    return res / "data"
