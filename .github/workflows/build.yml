@@ -47,7 +47,8 @@ jobs:
           POETRY_HTTP_BASIC_TEST_USERNAME: __token__
           POETRY_HTTP_BASIC_TEST_PASSWORD: ${{ secrets.PYPI_TEST_TOKEN }}
         run: |
-          poetry publish --repository https://test.pypi.org
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+          poetry publish -r testpypi
           
       - name: Upload artifact
         uses: actions/upload-artifact@v3
