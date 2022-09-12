@@ -43,12 +43,9 @@ jobs:
         run: poetry build
 
       - name: Publish to PyPi
-        env:
-          POETRY_HTTP_BASIC_TEST_USERNAME: __token__
-          POETRY_HTTP_BASIC_TEST_PASSWORD: ${{ secrets.PYPI_TEST_TOKEN }}
         run: |
           poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish -r testpypi
+          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_TOKEN }}
           
       - name: Upload artifact
         uses: actions/upload-artifact@v3
