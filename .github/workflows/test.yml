@@ -2,34 +2,20 @@ name: Test script
 
 on:
   push:
-    paths-ignore:
-      - 'README.md'
-      - 'book.json'
-      - '.gitignore'
-      - '.pep8'
-      - 'Dockerfile'
-      - 'Dockerfile.*'
-      - '.devcontainer/**'
-      - '.vscode/**'
-      - '.github/**'
-      - '!.github/workflows/test.yml'
-      - 'docs/**'
+    paths:
+      - '.github/workflows/test.yml'
+      - 'permasigner/**'
+      - 'main.py'
+      - 'poetry.lock'
     branches:
       - "main"
       - "poetry"
   pull_request:
-    paths-ignore:
-      - 'README.md'
-      - 'book.json'
-      - '.gitignore'
-      - '.pep8'
-      - 'Dockerfile'
-      - 'Dockerfile.*'
-      - '.devcontainer/**'
-      - '.vscode/**'
-      - '.github/**'
-      - '!.github/workflows/test.yml'
-      - 'docs/**'
+    paths:
+      - '.github/workflows/test.yml'
+      - 'permasigner/**'
+      - 'main.py'
+      - 'poetry.lock'
     branches:
       - "main"
       
@@ -39,7 +25,9 @@ jobs:
       matrix:
         os: [ "ubuntu-latest", "macos-latest", "windows-latest" ]
         python-version: [ "3.7", "3.8", "3.9", "3.10" ]
-    
+    defaults:
+      run:
+        shell: bash
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repo
@@ -77,4 +65,3 @@ jobs:
         with:
           name: Taurine-1.1.6-${{ matrix.os }}-p${{ matrix.python-version }}.deb
           path: output/**
-
