@@ -43,9 +43,9 @@ jobs:
         run: poetry build
 
       - name: Publish to PyPi
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_TOKEN }}
+          poetry publish -u __token__ -p ${{ secrets.PYPI_TEST_TOKEN }}
           
       - name: Upload artifact
         uses: actions/upload-artifact@v3
