@@ -24,7 +24,6 @@ pycodestyle = "2.9.1"
 idna = "3.4"
 charset-normalizer = "2.1.1"
 certifi = "2022.6.15.2"
-autopep8 = "1.7.0"
 
 scp = { version = "0.14.4", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
 six = { version = "1.16.0", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
@@ -34,6 +33,9 @@ cryptography = { version = "38.0.1", markers = "sys_platform == 'linux' or sys_p
 paramiko = { version = "2.11.0", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
 pycparser = { version = "2.21", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
 pynacl = { version = "1.5.0", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
+
+[tool.poetry.dev-dependencies]
+autopep8 = "1.7.0"
 
 [tool.poetry.scripts]
 permasigner = 'permasigner.__main__:main'
