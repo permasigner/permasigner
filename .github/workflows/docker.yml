@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/docker.yml'
+      - 'Dockerfile'
     branches: [main]
 
   workflow_run:
