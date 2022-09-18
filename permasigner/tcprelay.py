@@ -170,7 +170,7 @@ class PlistProtocol(BinaryProtocol):
 class MuxConnection(object):
     def __init__(self, socketpath, protoclass):
         self.socketpath = socketpath
-        if os.environ.get("HOST_IS_WINDOWS", False):
+        if "WSL" in os.uname().release:
             family = socket.AF_INET
             address = ('host.docker.internal', 27015)
         elif os.name == 'nt':
