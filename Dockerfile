@@ -39,7 +39,7 @@ COPY LICENSE README.md main.py .
 COPY pyproject.toml poetry.lock .
 
 # Build the permasigner
-RUN poetry build
+RUN poetry build --format wheel
 RUN python -m venv env
 RUN pip install dist/*.whl
 
