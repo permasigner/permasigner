@@ -23,7 +23,7 @@ urllib3 = "1.26.12"
 pycodestyle = "2.9.1"
 idna = "3.4"
 charset-normalizer = "2.1.1"
-certifi = "2022.9.14"
+certifi = "2022.9.24"
 
 scp = { version = "0.14.4", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
 six = { version = "1.16.0", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
