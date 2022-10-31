@@ -35,7 +35,7 @@ pycparser = { version = "2.21", markers = "sys_platform == 'linux' or sys_platfo
 pynacl = { version = "1.5.0", markers = "sys_platform == 'linux' or sys_platform == 'win32' or 'freebsd' in sys_platform or (sys_platform == 'darwin' and platform_machine == 'x86_64') or (sys_platform == 'darwin' and platform_machine == 'arm64')" }
 
 [tool.poetry.dev-dependencies]
-autopep8 = "1.7.0"
+autopep8 = "2.0.0"
 
 [tool.poetry.scripts]
 permasigner = 'permasigner.__main__:main'
