@@ -35,8 +35,8 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 # copy project requirement files here to ensure they will be cached.
 WORKDIR $PYSETUP_PATH
 COPY permasigner ./permasigner
-COPY LICENSE README.md main.py .
-COPY pyproject.toml poetry.lock .
+COPY LICENSE README.md main.py ./
+COPY pyproject.toml poetry.lock ./
 
 # Build the permasigner
 RUN poetry build --format wheel
