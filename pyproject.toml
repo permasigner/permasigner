@@ -16,7 +16,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-importlib-metadata = { version = ">=1,<6", python = "<3.8" }
+importlib-metadata = { version = ">=1,<7", python = "<3.8" }
 requests = "2.28.1"
 toml = "0.10.2"
 urllib3 = "1.26.12"
