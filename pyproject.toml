@@ -20,7 +20,7 @@ importlib-metadata = { version = ">=1,<6", python = "<3.8" }
 requests = "2.28.1"
 toml = "0.10.2"
 urllib3 = "1.26.12"
-pycodestyle = "2.9.1"
+pycodestyle = "2.10.0"
 idna = "3.4"
 charset-normalizer = "2.1.1"
 certifi = "2022.9.24"
